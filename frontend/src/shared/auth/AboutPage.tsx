@@ -93,7 +93,7 @@ export default function AboutPage() {
       }}>
         <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer' }}
           onClick={() => navigate('/')}>
-          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
+          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}></span>
         </div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => navigate('/jobs')}
@@ -157,7 +157,7 @@ export default function AboutPage() {
             color: W, marginBottom: 32,
           }}>
             About<br />
-            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>Honey Group.</span>
+            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>Campari.</span>
           </h1>
           <p style={{ fontSize: 16, color: W55, lineHeight: 1.85, maxWidth: 620, fontFamily: FD, marginBottom: 48 }}>
             South Africa's premier promoter management platform. We connect brands with verified, reliable promoters across 12 cities — powered by GPS technology, smart payroll, and real-time operations.
@@ -304,7 +304,7 @@ export default function AboutPage() {
               <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>SA Promoters.</span>
             </h2>
             <p style={{ fontSize: 15, color: W55, lineHeight: 1.9, fontFamily: FD, marginBottom: 20 }}>
-              We built Honey Group to fix a broken industry. Promoters were underpaid, under-protected, and invisible. Brands had no reliable way to verify who showed up, or whether anyone showed up at all.
+              We built Campari to fix a broken industry. Promoters were underpaid, under-protected, and invisible. Brands had no reliable way to verify who showed up, or whether anyone showed up at all.
             </p>
             <p style={{ fontSize: 15, color: W55, lineHeight: 1.9, fontFamily: FD }}>
               Today we run the only platform in South Africa that combines geo-verified attendance, smart payroll, and full POPIA-compliant document management — giving promoters the protection they deserve, and brands the accountability they need.

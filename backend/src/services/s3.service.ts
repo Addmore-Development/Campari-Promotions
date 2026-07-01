@@ -55,4 +55,4 @@ export const deleteFromS3 = async (key: string): Promise<void> => {
 
 
 export const mockS3Url = (folder: string, filename: string): string =>
-  `https://mock-s3.honeygroup.co.za/${folder}/${filename}`;
+  `https://mock-s3.campari.co.za/${folder}/${filename}`;

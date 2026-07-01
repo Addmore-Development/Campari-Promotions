@@ -1,4 +1,4 @@
-# Honey Group Promotions Platform
+# Campari Promotions Platform
 
 A full-stack promoter management platform built for the South African market. Connects businesses with verified brand promoters for activations, sampling campaigns, events, and field marketing.
 
@@ -69,7 +69,7 @@ A full-stack promoter management platform built for the South African market. Co
 ## Project Structure
 
 ```
-honey-group/
+campari/
 ├── frontend/                  ← React + Vite app
 │   ├── src/
 │   │   ├── admin/             ← Admin dashboard pages
@@ -123,7 +123,7 @@ honey-group/
 ### Step 1 — Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/honey-group.git
+git clone https://github.com/YOUR_USERNAME/campari-promotions.git
 cd honey-group
 ```
 
@@ -137,7 +137,7 @@ npm install
 Create a `.env` file in the `backend` folder:
 
 ```env
-DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/honeygroup"
+DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/campari"
 JWT_SECRET="your-local-dev-secret-at-least-32-chars"
 JWT_EXPIRES_IN="7d"
 PORT=5000
@@ -267,7 +267,7 @@ npx prisma migrate deploy
 2. Click **New +** in the top right
 3. Select **PostgreSQL**
 4. Fill in:
-   - **Name:** `honey-group-db`
+   - **Name:** `campari-db`
    - **Region:** Frankfurt (EU) — closest to South Africa
    - **Plan:** Free
 5. Click **Create Database**
@@ -750,4 +750,4 @@ Or just open the URL in your browser.
 
 ---
 
-*Honey Group Promotions Platform — Built for South Africa 🇿🇦*
+*Campari Promotions Platform — Built for South Africa 🇿🇦*

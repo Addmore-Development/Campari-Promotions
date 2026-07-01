@@ -401,7 +401,7 @@ export const ViewAcceptJobs: React.FC = () => {
 
             <div style={{ background:'rgba(212,136,10,0.04)', border:`1px solid ${BB}`, padding:'14px 18px', marginBottom:28, borderRadius:3 }}>
               <p style={{ fontFamily:FB, fontSize:12, color:WM, lineHeight:1.8, margin:0 }}>
-                Your interest has been registered. The <span style={{ color:GL, fontWeight:600 }}>business client</span> and <span style={{ color:GL, fontWeight:600 }}>Honey Group admin</span> have been notified. You'll receive a confirmation once you're allocated to this shift.
+                Your interest has been registered. The <span style={{ color:GL, fontWeight:600 }}>business client</span> and <span style={{ color:GL, fontWeight:600 }}>Campari admin</span> have been notified. You'll receive a confirmation once you're allocated to this shift.
               </p>
             </div>
 

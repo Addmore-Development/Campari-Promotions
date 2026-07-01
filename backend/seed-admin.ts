@@ -8,12 +8,12 @@ async function main() {
   const hashed = await bcrypt.hash(password, 12);
 
   // Delete existing admin first to avoid hash mismatch
-  await prisma.user.deleteMany({ where: { email: 'admin@honeygroup.co.za' } });
+  await prisma.user.deleteMany({ where: { email: 'admin@campari.co.za' } });
 
   const user = await prisma.user.create({
     data: {
       fullName:         'Administrator',
-      email:            'admin@honeygroup.co.za',
+      email:            'admin@campari.co.za',
       password:         hashed,
       role:             'ADMIN',
       status:           'approved',

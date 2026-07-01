@@ -667,7 +667,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>HONEY</span><span style={{ color: WHITE }}> GROUP</span>
+            <span style={{ color: GOLD }}>CAMPARI</span><span style={{ color: WHITE }}></span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 16px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>Create Account</p>
@@ -837,7 +837,7 @@ export default function RegisterPage() {
 
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  By creating an account you agree to Honey Group's Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
+                  By creating an account you agree to Campari's Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
                 </p>
               </div>
             </div>
@@ -957,7 +957,7 @@ export default function RegisterPage() {
               <Field label="Confirm Password" type="password" placeholder="••••••••" value={bizConfirmPw} onChange={setBizConfirmPw} focused={focused === 'bizConfirmPw'} onFocus={() => setFocused('bizConfirmPw')} onBlur={() => setFocused(null)} error={errors.bizConfirmPw} />
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Honey Group administrators.
+                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Campari administrators.
                 </p>
               </div>
             </div>

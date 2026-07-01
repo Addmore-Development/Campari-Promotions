@@ -41,7 +41,7 @@ app.get("/health", (_req, res) => {
 app.use((_req, res) => res.status(404).json({ error: "Route not found" }));
 
 app.listen(PORT, async () => {
-  console.log(`Honey Group Backend running on http://localhost:${PORT}`);
+  console.log(`Campari Backend running on http://localhost:${PORT}`);
   try {
     await prisma.$connect();
     console.log("PostgreSQL connected");

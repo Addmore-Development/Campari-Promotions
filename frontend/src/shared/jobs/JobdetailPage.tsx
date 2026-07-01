@@ -142,7 +142,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
           {!scrolled&&<div style={{ background:'rgba(232,168,32,0.06)', border:`1px solid rgba(232,168,32,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -192,7 +192,7 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
                 {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(196,151,58,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
               </div>
               {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Honey Group Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
+              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
               {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
               <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
               <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
@@ -400,7 +400,7 @@ export default function JobDetailPage() {
           onMouseEnter={e=>e.currentTarget.style.color=W} onMouseLeave={e=>e.currentTarget.style.color=WM}>
           ← Jobs
         </button>
-        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>HONEY</span><span style={{ color:W }}> GROUP</span></div>
+        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>CAMPARI</span><span style={{ color:W }}></span></div>
         {session
           ? <span style={{ fontSize:11, color:WM, fontFamily:FB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:100 }}>{session.name}</span>
           : <button onClick={()=>navigate('/login')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:3 }}>Log In</button>

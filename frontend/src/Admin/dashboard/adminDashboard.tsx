@@ -571,7 +571,7 @@ function downloadExcel(rows: string[][], filename: string) {
 function buildTablePDF(title: string, headers: string[], rows: (string|number)[][]): string {
   const ths = headers.map(h=>`<th>${h}</th>`).join('')
   const trs = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-  return `<h1 style="font-family:Georgia;color:#b36b00;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">Honey Group · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
+  return `<h1 style="font-family:Georgia;color:#b36b00;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">Campari · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
 }
 
 function ReportsTab({ regs }: { regs:any[] }) {
@@ -632,7 +632,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
       btns:[
         {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.csv`);flash('✓ Campaign CSV downloaded')}},
         {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.xls`);flash('✓ Campaign Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#b36b00">Campaign Report — Honey Group</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honey-group-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
+        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#b36b00">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honey-group-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
       ]
     },
     {
@@ -763,7 +763,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
 // ─── SETTINGS TAB// ─── SETTINGS TAB ─────────────────────────────────────────────────────────────
 function SettingsTab() {
   const [saved,    setSaved   ]=useState(false)
-  const [platName, setPlatName]=useState('Honey Group Promotions')
+  const [platName, setPlatName]=useState('Campari Promotions')
   const [email,    setEmail   ]=useState('admin@honeygroup.co.za')
   const [otp,      setOtp     ]=useState("Africa's Talking")
   const [payment,  setPayment ]=useState('Paystack')

@@ -97,8 +97,8 @@ export const PromoterLayout: React.FC<{ children: ReactNode }> = ({ children }) 
         <div style={{ padding:collapsed?'24px 0':'24px 20px', borderBottom:`1px solid ${BB}`, display:'flex', alignItems:'center', justifyContent:collapsed?'center':'space-between' }}>
           {!collapsed && (
             <div style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}>
-              <span style={{ color:GL }}>HONEY</span>
-              <span style={{ color:W }}> GROUP</span>
+              <span style={{ color:GL }}>CAMPARI</span>
+              <span style={{ color:W }}></span>
             </div>
           )}
           <button onClick={()=>setCollapsed(c=>!c)} style={{ background:'none', border:'none', cursor:'pointer', color:WD, fontSize:12, padding:4, transition:'color 0.2s' }}

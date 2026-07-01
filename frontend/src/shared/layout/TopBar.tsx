@@ -17,7 +17,7 @@ interface TopBarProps {
   title?: string;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ title = 'Honey Group Promotions' }) => {
+export const TopBar: React.FC<TopBarProps> = ({ title = 'Campari Promotions' }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
