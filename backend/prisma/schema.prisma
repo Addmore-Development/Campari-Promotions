@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  fullName         String
+  role             Role      @default(PROMOTER)
+  phone            String?
+  city             String?
+  province         String?
+  streetNumber     String?
+  streetName       String?
+  suburb           String?
+  postalCode       String?
+  status           String    @default("pending_review")
+  rejectionReason  String?
+  reliabilityScore Float     @default(0)
+  onboardingStatus String    @default("pending_review")
+  consentPopia     Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  idNumber         String?
+  dateOfBirth      DateTime?
+  gender           String?
+  address          String?
+  cipcDocUrl       String?
+  taxPinUrl        String?
+  bizBankProofUrl  String?
+  vatNumber        String?
+  industry         String?
+  website          String?
+  contactName      String?
+  height           Int?
+  clothingSize     String?
+  shoeSize         String?
+  bankName         String?
+  accountNumber    String?
+  branchCode       String?
+  headshotUrl      String?
+  fullBodyPhotoUrl String?
+  profilePhotoUrl  String?
+  cvUrl            String?
+  createdJobs  Job[]         @relation("JobCreator")
+  shifts       Shift[]       @relation("PromoterShifts")
+  payments     Payment[]     @relation("PromoterPayments")
+  applications Application[] @relation("PromoterApplications")
+  @@map("users")
+  sentMessages     ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
+
+}
+
+model Client {
+  id             String   @id @default(uuid())
+  name           String
+  contact        String
+  email          String   @unique
+  phone          String
+  city           String
+  industry       String
+  status         String   @default("new")
+  budget         String?
+  registeredDate DateTime @default(now())
+  categorySpecs  Json?
+  regulations    Json[]
+  @@map("clients")
+}
+
+model Job {
+  id                 String    @id @default(uuid())
+  title              String
+  client             String
+  clientId           String?
+  termsAndConditions String?
+  brand              String
+  venue              String
+  // ── SA address fields ─────────────────────────────────────────────────
+  streetNumber       String?
+  streetName         String?
+  suburb             String?
+  city               String?
+  postalCode         String?
+  // ─────────────────────────────────────────────────────────────────────
+  address            String
+  lat                Float
+  lng                Float
+  date               DateTime
+  startTime          String
+  endTime            String
+  hourlyRate         Int
+  totalSlots         Int
+  filledSlots        Int       @default(0)
+  status             JobStatus @default(OPEN)
+  filters            Json
+  createdAt          DateTime  @default(now())
+  createdBy          String
+  createdByUser User          @relation("JobCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  shifts        Shift[]       @relation("JobShifts")
+  applications  Application[] @relation("JobApplications")
+  @@map("jobs")
+}
+
+model Shift {
+  id               String      @id @default(uuid())
+  jobId            String
+  promoterId       String
+  status           ShiftStatus @default(SCHEDULED)
+  checkInTime      DateTime?
+  checkOutTime     DateTime?
+  // ── Geo coordinates ───────────────────────────────────────────────────
+  checkInLat        Float?
+  checkInLng        Float?
+  checkOutLat       Float?
+  checkOutLng       Float?
+  // ── Selfie URLs ───────────────────────────────────────────────────────
+  checkInSelfieUrl  String?
+  checkOutSelfieUrl String?
+  selfieInUrl       String?
+  selfieOutUrl      String?
+  // ── Hours & payment ───────────────────────────────────────────────────
+  totalHours        Float?
+  hoursWorked       Float?
+  paymentStatus     String?
+  // ── Live location ─────────────────────────────────────────────────────
+  liveLat           Float?
+  liveLng           Float?
+  liveUpdatedAt     DateTime?
+  // ── Issue reporting ───────────────────────────────────────────────────
+  issueReport       String?
+  issues            Json[]
+  // ── Other ─────────────────────────────────────────────────────────────
+  supervisorRating  Int?
+  createdAt         DateTime   @default(now())
+  job      Job      @relation("JobShifts", fields: [jobId], references: [id], onDelete: Cascade)
+  promoter User     @relation("PromoterShifts", fields: [promoterId], references: [id], onDelete: Cascade)
+  payment  Payment? @relation("ShiftPayment")
+  @@map("shifts")
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  shiftId     String        @unique
+  promoterId  String
+  grossAmount Int
+  deductions  Int           @default(0)
+  netAmount   Int
+  status      PaymentStatus @default(PENDING)
+  reference   String?
+  paidAt      DateTime?
+  approvedBy  String?
+  shift    Shift @relation("ShiftPayment", fields: [shiftId], references: [id], onDelete: Cascade)
+  promoter User  @relation("PromoterPayments", fields: [promoterId], references: [id], onDelete: Restrict)
+  @@map("payments")
+}
+
+model Application {
+  id         String            @id @default(uuid())
+  jobId      String
+  promoterId String
+  status     ApplicationStatus @default(STANDBY)
+  appliedAt  DateTime          @default(now())
+  notified   Boolean           @default(false)
+  job      Job  @relation("JobApplications", fields: [jobId], references: [id], onDelete: Cascade)
+  promoter User @relation("PromoterApplications", fields: [promoterId], references: [id], onDelete: Cascade)
+  @@unique([jobId, promoterId])
+  @@map("applications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+  @@map("audit_logs")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  text       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages",     fields: [senderId],   references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+
+enum Role {
+  PROMOTER
+  BUSINESS
+  ADMIN
+}
+
+enum JobStatus {
+  OPEN
+  FILLED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ShiftStatus {
+  SCHEDULED
+  CHECKED_IN
+  CHECKED_OUT
+  COMPLETED
+  PENDING_APPROVAL
+  APPROVED
+  NO_SHOW
+}
+
+enum ApplicationStatus {
+  STANDBY
+  ALLOCATED
+  DECLINED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  PAID
+  FAILED
+}

@@ -1,0 +1,14 @@
+import { Router } from "express";
+import { getDashboardStats, getPendingRegistrations, approveUser, updateReliabilityScore, getAllClients, createClient, updateClient, getAuditLogs } from "../controllers/admin.controller";
+import { protect, adminOnly } from "../middleware/auth";
+const router = Router();
+router.use(protect, adminOnly);
+router.get("/dashboard", getDashboardStats);
+router.get("/registrations", getPendingRegistrations);
+router.put("/users/:id/approve", approveUser);
+router.put("/users/:id/reliability", updateReliabilityScore);
+router.get("/clients", getAllClients);
+router.post("/clients", createClient);
+router.put("/clients/:id", updateClient);
+router.get("/audit-logs", getAuditLogs);
+export default router;
