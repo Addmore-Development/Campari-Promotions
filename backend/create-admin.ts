@@ -4,13 +4,16 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashed = await bcrypt.hash('Admin@CA2026!', 12);
+  const email = process.env.ADMIN_EMAIL || 'admin@campari.co.za';
+  const password = process.env.ADMIN_PASSWORD || 'Admin@CA2026!';
+  const hashed = await bcrypt.hash(password, 12);
+
   await prisma.user.upsert({
-    where: { email: 'admin@campari.co.za' },
+    where: { email },
     update: { password: hashed, role: 'ADMIN', status: 'approved', onboardingStatus: 'approved' },
     create: {
       fullName: 'Administrator',
-      email: 'admin@campari.co.za',
+      email,
       password: hashed,
       role: 'ADMIN',
       status: 'approved',
@@ -18,7 +21,7 @@ async function main() {
       consentPopia: true,
     },
   });
-  console.log('Admin created successfully');
+  console.log('Admin created successfully:', email);
   await prisma.$disconnect();
 }
 
