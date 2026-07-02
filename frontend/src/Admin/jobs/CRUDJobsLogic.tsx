@@ -2,24 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '../AdminLayout';
 import { injectAdminMobileStyles } from '../adminMobileStyles';
 
-const G    = '#D4880A';
-const GL   = '#E8A820';
-const G2   = '#8B5A1A';
-const G3   = '#6B3F10';
-const B    = '#0C0A07';
-const BC   = '#141008';
-const D2   = '#1A1508';
-const D3   = '#221C0C';
-const BB   = 'rgba(212,136,10,0.14)';
-const W    = '#FAF3E8';
-const WM   = 'rgba(250,243,232,0.65)';
-const WD   = 'rgba(250,243,232,0.28)';
+const G    = '#8F8A7C';
+const GL   = '#C9BFA6';
+const G2   = '#8A8474';
+const G3   = '#443F36';
+const B    = '#050504';
+const BC   = '#080807';
+const D2   = '#0D0D0A';
+const D3   = '#14140E';
+const BB   = 'rgba(170,160,135,0.14)';
+const W    = '#F8F8F8';
+const WM   = 'rgba(248,248,248,0.65)';
+const WD   = 'rgba(248,248,248,0.28)';
 const FD   = "'Playfair Display', Georgia, serif";
 const FB   = "'DM Sans', system-ui, sans-serif";
 const TEAL  = '#4AABB8';
 const CORAL = '#C4614A';
 const GREEN = '#4ade80';
-const AMBER = '#E8A820';
+const AMBER = '#C9BFA6';
 
 const BACKEND = import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -58,7 +58,7 @@ const STATUS_OPTS = ['OPEN', 'FILLED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
 const CATEGORY_OPTS = ['Brand Activation','Promotions','Events','Retail','Corporate','Exhibitions','Other'];
 
 const inp: React.CSSProperties = {
-  width: '100%', background: 'rgba(250,243,232,0.05)',
+  width: '100%', background: 'rgba(248,248,248,0.05)',
   border: `1px solid ${BB}`, padding: '10px 14px',
   color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' as any,
 };
@@ -200,10 +200,10 @@ function JobViewModal({ job, onClose, onEdit, onDelete, displayAddress, statusCo
               return (
                 <div key={shift.id} style={{ marginBottom:8,border:`1px solid ${isExp?GL:BB}`,borderRadius:3,overflow:'hidden' }}>
                   <div onClick={()=>setSelectedShift(isExp?null:shift)}
-                    style={{ padding:'10px 12px',background:isExp?'rgba(232,168,32,0.06)':D2,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap' }}>
+                    style={{ padding:'10px 12px',background:isExp?'rgba(201,191,166,0.06)':D2,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap' }}>
                     <div style={{ display:'flex',alignItems:'center',gap:8 }}>
                       <div style={{ width:32,height:32,borderRadius:'50%',overflow:'hidden',border:`2px solid ${sc2}`,flexShrink:0 }}>
-                        <div style={{ width:'100%',height:'100%',background:'rgba(232,168,32,0.1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:GL,fontFamily:FD }}>{(shift.promoter?.fullName||'?').charAt(0)}</div>
+                        <div style={{ width:'100%',height:'100%',background:'rgba(201,191,166,0.1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:GL,fontFamily:FD }}>{(shift.promoter?.fullName||'?').charAt(0)}</div>
                       </div>
                       <div>
                         <div style={{ fontSize:12,fontWeight:700,color:W,fontFamily:FD }}>{shift.promoter?.fullName||'Unknown'}</div>
@@ -216,7 +216,7 @@ function JobViewModal({ job, onClose, onEdit, onDelete, displayAddress, statusCo
                     </div>
                   </div>
                   {isExp&&(
-                    <div style={{ padding:'12px 14px',background:'rgba(20,16,5,0.6)',borderTop:`1px solid ${BB}` }}>
+                    <div style={{ padding:'12px 14px',background:'rgba(9,9,7,0.6)',borderTop:`1px solid ${BB}` }}>
                       <div className="hg-shift-stats" style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:10 }}>
                         {[
                           {label:'Check-in',value:shift.checkInTime?new Date(shift.checkInTime).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'—'},
@@ -224,7 +224,7 @@ function JobViewModal({ job, onClose, onEdit, onDelete, displayAddress, statusCo
                           {label:'Hours',value:shift.totalHours!=null?shift.totalHours.toFixed(2)+'h':'—'},
                           {label:'Earnings',value:shift.totalHours&&job.hourlyRate?`R${(shift.totalHours*job.hourlyRate).toFixed(2)}`:'—',accent:GL},
                         ].map(r=>(
-                          <div key={r.label} style={{ background:'rgba(212,136,10,0.05)',border:`1px solid ${BB}`,padding:'8px 10px',borderRadius:3 }}>
+                          <div key={r.label} style={{ background:'rgba(170,160,135,0.05)',border:`1px solid ${BB}`,padding:'8px 10px',borderRadius:3 }}>
                             <div style={{ fontSize:8,color:WD,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:2 }}>{r.label}</div>
                             <div style={{ fontSize:12,fontWeight:700,color:(r as any).accent||W,fontFamily:FD }}>{r.value}</div>
                           </div>
@@ -263,7 +263,7 @@ function JobViewModal({ job, onClose, onEdit, onDelete, displayAddress, statusCo
                   const isSel=selected.has(p.id); const isAlloc=allocatedIds.has(p.id);
                   return (
                     <div key={p.id} onClick={()=>togglePromoter(p.id)}
-                      style={{ padding:'10px',background:isSel?'rgba(232,168,32,0.08)':D2,border:`2px solid ${isSel?GL:BB}`,borderRadius:3,cursor:'pointer',position:'relative' }}>
+                      style={{ padding:'10px',background:isSel?'rgba(201,191,166,0.08)':D2,border:`2px solid ${isSel?GL:BB}`,borderRadius:3,cursor:'pointer',position:'relative' }}>
                       <div style={{ position:'absolute',top:6,right:6,width:16,height:16,borderRadius:'50%',background:isSel?GL:'transparent',border:`2px solid ${isSel?GL:BB}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:B,fontWeight:800 }}>{isSel&&'✓'}</div>
                       <div style={{ fontSize:12,fontWeight:700,color:W,fontFamily:FD,marginBottom:2,paddingRight:20 }}>{p.fullName}</div>
                       <div style={{ fontSize:10,color:WD }}>{p.city||'—'}</div>
@@ -321,7 +321,7 @@ const JobsPageContent: React.FC = () => {
         tags: [j.filters?.gender, j.filters?.category].filter(Boolean),
         filters: j.filters, termsAndConditions: j.termsAndConditions,
         approvedAt: j.updatedAt || j.createdAt || new Date().toISOString(),
-        accentLine: '#E8A820', gradient: 'transparent', companyInitial: (j.client||'?').charAt(0),
+        accentLine: '#C9BFA6', gradient: 'transparent', companyInitial: (j.client||'?').charAt(0),
       }));
       localStorage.setItem('hg_admin_jobs', JSON.stringify(mapped));
       // Fire both keys so all listeners are notified
@@ -492,7 +492,7 @@ const JobsPageContent: React.FC = () => {
         <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>
           {['all','OPEN','FILLED','IN_PROGRESS','COMPLETED','CANCELLED'].map(s=>(
             <button key={s} onClick={()=>setStatusF(s)}
-              style={{ padding:'6px 10px',border:`1px solid ${statusF===s?GL:BB}`,background:statusF===s?'rgba(232,168,32,0.12)':'transparent',color:statusF===s?GL:WM,fontFamily:FB,fontSize:9,cursor:'pointer',borderRadius:2,whiteSpace:'nowrap' }}>
+              style={{ padding:'6px 10px',border:`1px solid ${statusF===s?GL:BB}`,background:statusF===s?'rgba(201,191,166,0.12)':'transparent',color:statusF===s?GL:WM,fontFamily:FB,fontSize:9,cursor:'pointer',borderRadius:2,whiteSpace:'nowrap' }}>
               {s==='all'?'All':s.replace('_',' ')}
             </button>
           ))}
@@ -615,14 +615,14 @@ const JobsPageContent: React.FC = () => {
                 </div>
 
                 {/* ── Location block — Address OR GPS Coordinates ── */}
-                <div style={{ background:'rgba(212,136,10,0.04)',border:`1px solid ${BB}`,borderRadius:3,padding:'14px 12px' }}>
+                <div style={{ background:'rgba(170,160,135,0.04)',border:`1px solid ${BB}`,borderRadius:3,padding:'14px 12px' }}>
                   <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12 }}>
                     <div style={{ fontSize:9,letterSpacing:'0.22em',textTransform:'uppercase',color:GL,fontWeight:700 }}>📍 Venue Location</div>
                     {/* Mode toggle */}
                     <div style={{ display:'flex',gap:0,border:`1px solid ${BB}`,borderRadius:3,overflow:'hidden' }}>
                       {(['address','coords'] as const).map(mode=>(
                         <button key={mode} type="button" onClick={()=>F('locationMode',mode)}
-                          style={{ padding:'5px 14px',background:form.locationMode===mode?`rgba(232,168,32,0.18)`:'transparent',border:'none',color:form.locationMode===mode?GL:WM,fontFamily:FB,fontSize:10,fontWeight:form.locationMode===mode?700:400,cursor:'pointer',letterSpacing:'0.06em',transition:'all 0.18s' }}>
+                          style={{ padding:'5px 14px',background:form.locationMode===mode?`rgba(201,191,166,0.18)`:'transparent',border:'none',color:form.locationMode===mode?GL:WM,fontFamily:FB,fontSize:10,fontWeight:form.locationMode===mode?700:400,cursor:'pointer',letterSpacing:'0.06em',transition:'all 0.18s' }}>
                           {mode==='address'?'🏠 Address':'📡 GPS Coords'}
                         </button>
                       ))}
@@ -661,8 +661,8 @@ const JobsPageContent: React.FC = () => {
                             onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
                         </div>
                       </div>
-                      {buildAddress(form)&&<div style={{ marginTop:8,fontSize:11,color:WM,background:'rgba(212,136,10,0.06)',padding:'6px 10px',borderRadius:2 }}>📌 <strong style={{ color:GL }}>{buildAddress(form)}</strong></div>}
-                      <div style={{ marginTop:10,padding:'8px 10px',background:'rgba(232,168,32,0.04)',border:`1px solid ${BB}`,borderRadius:2 }}>
+                      {buildAddress(form)&&<div style={{ marginTop:8,fontSize:11,color:WM,background:'rgba(170,160,135,0.06)',padding:'6px 10px',borderRadius:2 }}>📌 <strong style={{ color:GL }}>{buildAddress(form)}</strong></div>}
+                      <div style={{ marginTop:10,padding:'8px 10px',background:'rgba(201,191,166,0.04)',border:`1px solid ${BB}`,borderRadius:2 }}>
                         <p style={{ fontSize:11,color:WM,lineHeight:1.6 }}>
                           💡 <strong style={{ color:GL }}>Tip:</strong> If the check-in location is inaccurate, switch to <strong style={{ color:GL }}>GPS Coords</strong> mode and paste the exact coordinates from Google Maps for a precise pin.
                         </p>
@@ -713,7 +713,7 @@ const JobsPageContent: React.FC = () => {
                       })()}
 
                       {/* How-to guide */}
-                      <div style={{ marginTop:10,padding:'10px 12px',background:'rgba(212,136,10,0.04)',border:`1px solid ${BB}`,borderRadius:3 }}>
+                      <div style={{ marginTop:10,padding:'10px 12px',background:'rgba(170,160,135,0.04)',border:`1px solid ${BB}`,borderRadius:3 }}>
                         <div style={{ fontSize:9,color:GL,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:6 }}>How to get exact coordinates</div>
                         <ol style={{ margin:0,paddingLeft:16 }}>
                           {[
@@ -727,7 +727,7 @@ const JobsPageContent: React.FC = () => {
                           ))}
                         </ol>
                         <a href="https://maps.google.com" target="_blank" rel="noreferrer"
-                          style={{ display:'inline-block',marginTop:8,padding:'6px 12px',background:`rgba(232,168,32,0.12)`,border:`1px solid ${BB}`,color:GL,fontSize:10,fontWeight:700,textDecoration:'none',borderRadius:2,letterSpacing:'0.06em' }}>
+                          style={{ display:'inline-block',marginTop:8,padding:'6px 12px',background:`rgba(201,191,166,0.12)`,border:`1px solid ${BB}`,color:GL,fontSize:10,fontWeight:700,textDecoration:'none',borderRadius:2,letterSpacing:'0.06em' }}>
                           🗺 Open Google Maps →
                         </a>
                       </div>

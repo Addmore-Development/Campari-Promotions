@@ -1,32 +1,32 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const BLK2  = '#100C05'
-const BLK3  = '#181206'
-const GL    = '#E8A820'
-const GD    = '#C07818'
-const GD2   = '#8B5A1A'
-const BB    = 'rgba(212,136,10,0.16)'
-const BB2   = 'rgba(212,136,10,0.08)'
-const W     = '#FAF3E8'
-const W4    = 'rgba(250,243,232,0.40)'
-const W2    = 'rgba(250,243,232,0.20)'
+const BLK2  = '#070706'
+const BLK3  = '#0A0A08'
+const GL    = '#C9BFA6'
+const GD    = '#7A756A'
+const GD2   = '#8A8474'
+const BB    = 'rgba(170,160,135,0.16)'
+const BB2   = 'rgba(170,160,135,0.08)'
+const W     = '#F8F8F8'
+const W4    = 'rgba(248,248,248,0.40)'
+const W2    = 'rgba(248,248,248,0.20)'
 const FD    = "'Playfair Display', Georgia, serif"
 const FB    = "'DM Sans', system-ui, sans-serif"
 const GREEN = '#4ade80'
-const AMBER = '#E8A820'
+const AMBER = '#C9BFA6'
 const CORAL = '#C4614A'
 
-const GL_08   = 'rgba(232,168,32,0.08)'
-const GL_015  = 'rgba(232,168,32,0.15)'
-const GL_03   = 'rgba(232,168,32,0.3)'
-const GL_012  = 'rgba(232,168,32,0.12)'
-const GL_04   = 'rgba(232,168,32,0.4)'
-const GL_006  = 'rgba(232,168,32,0.06)'
-const GL_028  = 'rgba(232,168,32,0.28)'
-const GL_03b  = '1px solid rgba(232,168,32,0.3)'
+const GL_08   = 'rgba(201,191,166,0.08)'
+const GL_015  = 'rgba(201,191,166,0.15)'
+const GL_03   = 'rgba(201,191,166,0.3)'
+const GL_012  = 'rgba(201,191,166,0.12)'
+const GL_04   = 'rgba(201,191,166,0.4)'
+const GL_006  = 'rgba(201,191,166,0.06)'
+const GL_028  = 'rgba(201,191,166,0.28)'
+const GL_03b  = '1px solid rgba(201,191,166,0.3)'
 const GREEN_008 = 'rgba(74,222,128,0.08)'
 const GREEN_025 = 'rgba(74,222,128,0.25)'
-const BB_1px  = '1px solid rgba(212,136,10,0.16)'
+const BB_1px  = '1px solid rgba(170,160,135,0.16)'
 
 const PIN_EMOJI = '\uD83D\uDCCD'
 const MAP_EMOJI = '\uD83D\uDDFA'
@@ -193,7 +193,7 @@ function LiveMap({ promoters, selectedPromo, onSelectPromo }: {
           <div style="font-family:${FD};padding:6px;min-width:180px;">
             ${selfieHtml}
             <strong style="color:${GL};font-size:13px;">${p.promoterName || 'Unknown'}</strong><br/>
-            <span style="font-size:11px;color:#FAF3E8;">${p.jobTitle || 'On shift'}</span><br/>
+            <span style="font-size:11px;color:#F8F8F8;">${p.jobTitle || 'On shift'}</span><br/>
             <span style="font-size:10px;color:${GD};">${PIN_EMOJI} ${p.venue || p.jobAddress || '—'}</span><br/>
             <span style="font-size:10px;color:${GREEN};font-weight:700;">Earned: ${earned}</span>
           </div>
@@ -217,7 +217,7 @@ function LiveMap({ promoters, selectedPromo, onSelectPromo }: {
           // Line from venue to promoter
           const line = L.default.polyline(
             [[p.jobLat, p.jobLng], [p.lat, p.lng]],
-            { color: isSel ? GL : 'rgba(232,168,32,0.3)', weight: isSel ? 2 : 1, dashArray: '4 4' }
+            { color: isSel ? GL : 'rgba(201,191,166,0.3)', weight: isSel ? 2 : 1, dashArray: '4 4' }
           ).addTo(mapInstance)
           newMarkers.push(line)
         }
@@ -244,9 +244,9 @@ function LiveMap({ promoters, selectedPromo, onSelectPromo }: {
 
   return (
     <div style={{ marginBottom: 24, borderRadius: 4, overflow: 'hidden', border: `1px solid ${BB}` }}>
-      <div ref={mapRef} style={{ height: '420px', width: '100%', background: '#1a1a1a' }} />
+      <div ref={mapRef} style={{ height: '420px', width: '100%', background: '#12120D' }} />
       <style>{`
-        .leaflet-container { background: #1a1a1a !important; }
+        .leaflet-container { background: #12120D !important; }
         .leaflet-tile { filter: brightness(0.75) contrast(1.15) !important; }
         .leaflet-control-attribution { background: rgba(0,0,0,0.7)!important; color:${W4}!important; font-size:9px!important; }
         .leaflet-control-attribution a { color:${GL}!important; }

@@ -180,17 +180,17 @@ export function injectAdminMobileStyles() {
   .hg-table-cards tbody tr {
     display: block;
     margin-bottom: 10px;
-    border: 1px solid rgba(212,136,10,0.16) !important;
+    border: 1px solid rgba(170,160,135,0.16) !important;
     border-radius: 3px;
     padding: 14px 14px 10px;
-    background: #151209;
+    background: #0A0A08;
   }
   .hg-table-cards tbody tr td {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 6px 0 !important;
-    border-bottom: 1px solid rgba(212,136,10,0.08) !important;
+    border-bottom: 1px solid rgba(170,160,135,0.08) !important;
     font-size: 12px;
   }
   .hg-table-cards tbody tr td:last-child {
@@ -203,7 +203,7 @@ export function injectAdminMobileStyles() {
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(192,178,158,0.55);
+    color: rgba(196,187,163,0.55);
     font-family: 'Playfair Display', Georgia, serif;
     flex-shrink: 0;
     margin-right: 12px;

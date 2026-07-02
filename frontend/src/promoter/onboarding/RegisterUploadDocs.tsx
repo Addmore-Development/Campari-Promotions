@@ -8,7 +8,7 @@ export const RegisterUploadDocs: React.FC = () => {
   const navigate = useNavigate();
   useEffect(() => { navigate('/register', { replace: true }); }, [navigate]);
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0A0A0A', color:'#666', fontSize:'14px' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#050504', color:'#666', fontSize:'14px' }}>
       Redirecting to registration…
     </div>
   );

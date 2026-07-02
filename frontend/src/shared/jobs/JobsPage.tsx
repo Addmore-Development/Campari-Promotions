@@ -4,19 +4,19 @@ import { getAllJobsWithAdminJobs, getActiveJobs } from './jobsData';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
-const B   = '#080808'
-const BC  = '#161616'
-const BC2 = '#111111'
-const BB  = 'rgba(212,136,10,0.16)'
-const GL  = '#E8A820'
-const G   = '#C4973A'
-const G2  = '#AB8D3F'
-const G3  = '#D4880A'
-const G4  = '#8B5A1A'
-const G5  = '#6B3F10'
-const W   = '#CEC5B2'
-const WM  = 'rgba(200,188,168,0.88)'
-const WD  = 'rgba(168,152,130,0.55)'
+const B   = '#030302'
+const BC  = '#0F0F0C'
+const BC2 = '#0A0A08'
+const BB  = 'rgba(170,160,135,0.16)'
+const GL  = '#C9BFA6'
+const G   = '#9C9484'
+const G2  = '#928A76'
+const G3  = '#8F8A7C'
+const G4  = '#8A8474'
+const G5  = '#443F36'
+const W   = '#F0F0F0'
+const WM  = 'rgba(222,222,222,0.88)'
+const WD  = 'rgba(189,189,189,0.55)'
 const FD  = "'Playfair Display', Georgia, serif"
 const FB  = "'DM Sans', system-ui, sans-serif"
 const ACCENT_PALETTE = [GL,G3,G2,G,G4,GL,G3,G2,G,G4,GL,G3,G2,G,G4,GL,G3,G2,G,G4,GL,G3,G2,G]
@@ -31,10 +31,10 @@ function injectStyles() {
   el.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #080808; }
+    body { background: #030302; }
     ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #C4973A; }
-    select option { background: #161616; color: #CEC5B2; }
+    ::-webkit-scrollbar-thumb { background: #9C9484; }
+    select option { background: #0F0F0C; color: #F0F0F0; }
     textarea { box-sizing: border-box; }
 
     /* ── Desktop: standard card grid ── */
@@ -88,9 +88,9 @@ function injectStyles() {
 
 function StatusBadge({ status }: { status:string }) {
   const map: Record<string,{color:string;bg:string}> = {
-    'open':        {color:GL, bg:'rgba(232,168,32,0.12)'},
-    'filling fast':{color:G3, bg:'rgba(212,136,10,0.12)'},
-    'closed':      {color:G4, bg:'rgba(139,90,26,0.18)'},
+    'open':        {color:GL, bg:'rgba(201,191,166,0.12)'},
+    'filling fast':{color:G3, bg:'rgba(170,160,135,0.12)'},
+    'closed':      {color:G4, bg:'rgba(112,106,90,0.18)'},
   }
   const s=map[status]||map['open']
   return <span style={{ fontSize:8, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:s.color, background:s.bg, padding:'2px 8px', borderRadius:2 }}>{status}</span>
@@ -111,7 +111,7 @@ function JobCardFull({ job, onView, onApply, appliedIds, session, canApply }: an
         <div style={{ position:'relative', padding:'20px 20px 16px' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
             <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-              <div style={{ width:34, height:34, borderRadius:'50%', background:`rgba(196,151,58,0.16)`, border:`1px solid rgba(196,151,58,0.35)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:accent, flexShrink:0, fontFamily:FD }}>{job.companyInitial||job.company?.charAt(0)||'?'}</div>
+              <div style={{ width:34, height:34, borderRadius:'50%', background:`rgba(189,189,189,0.16)`, border:`1px solid rgba(189,189,189,0.35)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:accent, flexShrink:0, fontFamily:FD }}>{job.companyInitial||job.company?.charAt(0)||'?'}</div>
               <div><div style={{ fontSize:11, color:accent, fontWeight:600 }}>{job.company}</div><div style={{ fontSize:8, color:WD, marginTop:1, letterSpacing:'0.15em', textTransform:'uppercase' }}>{job.type}</div></div>
             </div>
             <div style={{ textAlign:'right', flexShrink:0 }}><div style={{ fontFamily:FD, fontSize:18, fontWeight:700, color:G, lineHeight:1 }}>{job.pay}</div><div style={{ fontSize:10, color:WM, marginTop:2 }}>{job.payPer}</div></div>
@@ -121,11 +121,11 @@ function JobCardFull({ job, onView, onApply, appliedIds, session, canApply }: an
             {[{icon:'◎',text:job.location},{icon:'◈',text:job.date},{icon:'◉',text:`${job.duration} · ${job.slots} slots`}].map((m,i)=><div key={i} style={{ display:'flex', alignItems:'center', gap:6 }}><span style={{ fontSize:9, color:G, flexShrink:0 }}>{m.icon}</span><span style={{ fontSize:11, color:WM }}>{m.text}</span></div>)}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginBottom:12 }}>
-            {(job.tags||[]).slice(0,3).map((tag:string,i:number)=><span key={i} style={{ fontSize:8, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:WD, background:'rgba(206,197,178,0.05)', border:`1px solid ${BB}`, padding:'2px 7px', borderRadius:2 }}>{tag}</span>)}
+            {(job.tags||[]).slice(0,3).map((tag:string,i:number)=><span key={i} style={{ fontSize:8, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:WD, background:'rgba(236,236,236,0.05)', border:`1px solid ${BB}`, padding:'2px 7px', borderRadius:2 }}>{tag}</span>)}
           </div>
           <div style={{ marginBottom:12 }}>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}><span style={{ fontSize:9, color:WD, letterSpacing:'0.1em' }}>SLOTS FILLED</span><span style={{ fontSize:9, fontWeight:700, color:almostFull?G3:G }}>{job.slotsLeft} left</span></div>
-            <div style={{ height:2, background:'rgba(206,197,178,0.08)', borderRadius:2, overflow:'hidden' }}><div style={{ height:'100%', width:`${pct}%`, background:`linear-gradient(90deg,${G5},${accent})`, borderRadius:2 }} /></div>
+            <div style={{ height:2, background:'rgba(236,236,236,0.08)', borderRadius:2, overflow:'hidden' }}><div style={{ height:'100%', width:`${pct}%`, background:`linear-gradient(90deg,${G5},${accent})`, borderRadius:2 }} /></div>
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             <StatusBadge status={job.status} />
@@ -159,7 +159,7 @@ function JobCardCompact({ job, onView, onApply, appliedIds, canApply }: any) {
       <div style={{ padding:'12px 10px 10px' }}>
         {/* Company initial + name */}
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-          <div style={{ width:26, height:26, borderRadius:'50%', background:`rgba(196,151,58,0.16)`, border:`1px solid rgba(196,151,58,0.30)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:accent, flexShrink:0, fontFamily:FD }}>{job.companyInitial||job.company?.charAt(0)||'?'}</div>
+          <div style={{ width:26, height:26, borderRadius:'50%', background:`rgba(189,189,189,0.16)`, border:`1px solid rgba(189,189,189,0.30)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:accent, flexShrink:0, fontFamily:FD }}>{job.companyInitial||job.company?.charAt(0)||'?'}</div>
           <div style={{ fontSize:10, color:accent, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{job.company}</div>
         </div>
 
@@ -188,7 +188,7 @@ function JobCardCompact({ job, onView, onApply, appliedIds, canApply }: any) {
             <span style={{ fontSize:8, color:WD, letterSpacing:'0.08em', textTransform:'uppercase' }}>Slots</span>
             <span style={{ fontSize:8, fontWeight:700, color:almostFull?G3:G }}>{job.slotsLeft} left</span>
           </div>
-          <div style={{ height:2, background:'rgba(206,197,178,0.08)', borderRadius:2, overflow:'hidden' }}>
+          <div style={{ height:2, background:'rgba(236,236,236,0.08)', borderRadius:2, overflow:'hidden' }}>
             <div style={{ height:'100%', width:`${Math.round(((job.slots-job.slotsLeft)/job.slots)*100)}%`, background:`linear-gradient(90deg,${G5},${accent})`, borderRadius:2 }} />
           </div>
         </div>
@@ -229,8 +229,8 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         </div>
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
-          {!scrolled&&<div style={{ background:'rgba(232,168,32,0.06)', border:`1px solid rgba(232,168,32,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promoter Terms & Conditions apply.'}</div>
+          {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -238,7 +238,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
             <span style={{ fontSize:12, color:WM, lineHeight:1.6, fontFamily:FB }}>I have read and understand the Terms & Conditions. I accept this engagement as an independent contractor.</span>
           </label>
           <div style={{ display:'flex', gap:10 }}>
-            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(206,197,178,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
+            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(236,236,236,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
             <button onClick={onClose} style={{ padding:'13px 18px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:2 }}>Cancel</button>
           </div>
         </div>
@@ -269,7 +269,7 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
               <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:G, marginBottom:4, fontFamily:FB }}>Demo Payment Gateway</div>
               <h2 style={{ fontFamily:FD, fontSize:18, color:W, marginBottom:4 }}>Confirm Application</h2>
               <div style={{ fontSize:12, color:WM, fontFamily:FB }}>{job.title} — {job.company}</div>
-              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(232,168,32,0.08)', border:`1px solid rgba(232,168,32,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
+              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(201,191,166,0.08)', border:`1px solid rgba(201,191,166,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
                 <span style={{ fontSize:11, color:WM, fontFamily:FB }}>Application Fee (Demo)</span>
                 <span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 25.00</span>
               </div>
@@ -277,11 +277,11 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
             </div>
             <div style={{ padding:'16px 24px 22px' }}>
               <div style={{ display:'flex', gap:6, marginBottom:16 }}>
-                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(196,151,58,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
+                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(189,189,189,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
               </div>
               {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
-              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
+              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Honey Group Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
+              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
               <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
               <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
             </div>
@@ -330,7 +330,7 @@ export default function JobsPage() {
         duration:j.startTime&&j.endTime?`${j.startTime}–${j.endTime}`:'',
         tags:[j.filters?.gender,j.filters?.category].filter(Boolean),
         accentLine:ACCENT[idx%ACCENT.length],
-        gradient:'linear-gradient(135deg,rgba(232,168,32,0.10) 0%,rgba(196,151,58,0.04) 100%)',
+        gradient:'linear-gradient(135deg,rgba(201,191,166,0.10) 0%,rgba(189,189,189,0.04) 100%)',
         status:(j.status||'OPEN').toLowerCase(),
         terms:j.termsAndConditions||'',
         filters:j.filters,
@@ -419,10 +419,10 @@ export default function JobsPage() {
       {toast&&<div style={{ position:'fixed', bottom:24, left:'50%', transform:'translateX(-50%)', background:G, color:B, padding:'12px 24px', fontFamily:FB, fontSize:12, fontWeight:700, letterSpacing:'0.1em', zIndex:2000, whiteSpace:'nowrap', borderRadius:3, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>{toast}</div>}
 
       {/* Nav */}
-      <nav className="jobs-nav" style={{ position:'sticky', top:0, zIndex:100, background:'rgba(8,8,8,0.97)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'14px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+      <nav className="jobs-nav" style={{ position:'sticky', top:0, zIndex:100, background:'rgba(4,4,3,0.97)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'14px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <button onClick={()=>navigate('/')} style={{ background:'none', border:'none', cursor:'pointer', color:WM, fontFamily:FB, fontSize:13, display:'flex', alignItems:'center', gap:6 }}
           onMouseEnter={e=>e.currentTarget.style.color=W} onMouseLeave={e=>e.currentTarget.style.color=WM}>← Home</button>
-        <div className="jobs-nav-title" style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}><span style={{ color:G }}>CAMPARI</span><span style={{ color:W }}></span></div>
+        <div className="jobs-nav-title" style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}><span style={{ color:G }}>HONEY</span><span style={{ color:W }}> GROUP</span></div>
         <div style={{ display:'flex', gap:8 }}>
           {session
             ? <button onClick={()=>navigate(session.role==='promoter'?'/promoter/dashboard':'/')} style={{ padding:'8px 16px', background:G, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>Dashboard</button>
@@ -454,7 +454,7 @@ export default function JobsPage() {
             <select value={cityFilter} onChange={e=>setCityFilter(e.target.value)} style={{ ...sel, minWidth:120 }}>{CITIES.map(c=><option key={c}>{c}</option>)}</select>
             <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ ...sel, minWidth:140 }}>{SORT_OPTS.map(s=><option key={s}>{s}</option>)}</select>
             {(typeFilter!=='All Types'||cityFilter!=='All Cities'||searchQ)&&
-              <button onClick={()=>{setTypeFilter('All Types');setCityFilter('All Cities');setSearchQ('')}} style={{ padding:'10px 14px', background:'transparent', border:`1px solid rgba(212,136,10,0.35)`, color:G3, fontFamily:FB, fontSize:10, fontWeight:600, cursor:'pointer', letterSpacing:'0.1em', textTransform:'uppercase', borderRadius:2, whiteSpace:'nowrap' }}>✕ Clear</button>}
+              <button onClick={()=>{setTypeFilter('All Types');setCityFilter('All Cities');setSearchQ('')}} style={{ padding:'10px 14px', background:'transparent', border:`1px solid rgba(170,160,135,0.35)`, color:G3, fontFamily:FB, fontSize:10, fontWeight:600, cursor:'pointer', letterSpacing:'0.1em', textTransform:'uppercase', borderRadius:2, whiteSpace:'nowrap' }}>✕ Clear</button>}
           </div>
         </div>
       </div>

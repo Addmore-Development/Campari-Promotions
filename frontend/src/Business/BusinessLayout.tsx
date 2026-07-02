@@ -3,23 +3,23 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { FloatingChat } from '../Admin/ChatSystem'
 
 // ─── Strict Gold & Black Palette ──────────────────────────────────────────────
-const BLK   = '#050402'
-const BLK1  = '#0A0804'
-const BLK2  = '#100C05'
-const BLK3  = '#181206'
-const BLK4  = '#201808'
-const GOLD  = '#D4880A'
-const GL    = '#E8A820'
-const GL2   = '#F0C050'
-const GD    = '#C07818'
-const GD2   = '#8B5A1A'
-const GD3   = '#6B3F10'
-const BB    = 'rgba(212,136,10,0.16)'
-const BB2   = 'rgba(212,136,10,0.08)'
-const W     = '#FAF3E8'
-const W7    = 'rgba(250,243,232,0.70)'
-const W4    = 'rgba(250,243,232,0.40)'
-const W2    = 'rgba(250,243,232,0.20)'
+const BLK   = '#020201'
+const BLK1  = '#030302'
+const BLK2  = '#070706'
+const BLK3  = '#0A0A08'
+const BLK4  = '#191919'
+const GOLD  = '#8F8A7C'
+const GL    = '#C9BFA6'
+const GL2   = '#D8D8D8'
+const GD    = '#7A756A'
+const GD2   = '#8A8474'
+const GD3   = '#443F36'
+const BB    = 'rgba(170,160,135,0.16)'
+const BB2   = 'rgba(170,160,135,0.08)'
+const W     = '#F8F8F8'
+const W7    = 'rgba(248,248,248,0.70)'
+const W4    = 'rgba(248,248,248,0.40)'
+const W2    = 'rgba(248,248,248,0.20)'
 const FD    = "'Playfair Display', Georgia, serif"
 const FB    = "'DM Sans', system-ui, sans-serif"
 
@@ -35,11 +35,11 @@ function Section({ label, children }: { label: string; children: { label: string
   if (rows.length === 0) return null
   return (
     <div style={{ marginBottom: 24 }}>
-      <div style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: '#E8A820', fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, marginBottom: 14 }}>{label}</div>
+      <div style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: '#C9BFA6', fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, marginBottom: 14 }}>{label}</div>
       {rows.map(r => (
-        <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '11px 0', borderBottom: '1px solid rgba(212,136,10,0.16)' }}>
-          <span style={{ fontSize: 12, color: 'rgba(250,243,232,0.40)', fontFamily: "'DM Sans', system-ui, sans-serif", flexShrink: 0, marginRight: 16 }}>{r.label}</span>
-          <span style={{ fontSize: 12, color: '#FAF3E8', fontWeight: 600, fontFamily: "'DM Sans', system-ui, sans-serif", textAlign: 'right' }}>{r.value}</span>
+        <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '11px 0', borderBottom: '1px solid rgba(170,160,135,0.16)' }}>
+          <span style={{ fontSize: 12, color: 'rgba(248,248,248,0.40)', fontFamily: "'DM Sans', system-ui, sans-serif", flexShrink: 0, marginRight: 16 }}>{r.label}</span>
+          <span style={{ fontSize: 12, color: '#F8F8F8', fontWeight: 600, fontFamily: "'DM Sans', system-ui, sans-serif", textAlign: 'right' }}>{r.value}</span>
         </div>
       ))}
     </div>
@@ -176,7 +176,7 @@ export default function BusinessLayout() {
         @keyframes biz-fade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         .biz-page { animation: biz-fade 0.4s ease both; }
         select option { background: ${BLK2}; color: ${W}; }
-        input::placeholder { color: rgba(212,136,10,0.25); }
+        input::placeholder { color: rgba(170,160,135,0.25); }
       `}</style>
 
       {/* SIDEBAR */}
@@ -185,8 +185,8 @@ export default function BusinessLayout() {
         <div style={{ padding:collapsed?'24px 0':'24px 20px', borderBottom:`1px solid ${BB}`, display:'flex', alignItems:'center', justifyContent:collapsed?'center':'space-between' }}>
           {!collapsed && (
             <div style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}>
-              <span style={{ color:GL }}>Campari</span>
-              <span style={{ color:W }}></span>
+              <span style={{ color:GL }}>HONEY</span>
+              <span style={{ color:W }}> GROUP</span>
             </div>
           )}
           <button onClick={() => setCollapsed(c => !c)} style={{ background:'none', border:'none', cursor:'pointer', color:W4, fontSize:12, padding:4, transition:'color 0.2s' }}
@@ -244,21 +244,21 @@ export default function BusinessLayout() {
       {profileOpen && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.90)', backdropFilter:'blur(14px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
           onClick={e=>e.target===e.currentTarget&&setProfileOpen(false)}>
-          <div style={{ background:'#0A0804', border:'1px solid rgba(212,136,10,0.16)', width:'100%', maxWidth:580, maxHeight:'92vh', overflowY:'auto', position:'relative', borderRadius:4 }}>
+          <div style={{ background:'#030302', border:'1px solid rgba(170,160,135,0.16)', width:'100%', maxWidth:580, maxHeight:'92vh', overflowY:'auto', position:'relative', borderRadius:4 }}>
             <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
             <button onClick={()=>setProfileOpen(false)} style={{ position:'absolute', top:14, right:18, background:'none', border:'none', cursor:'pointer', color:W4, fontSize:18 }}>✕</button>
             <div style={{ padding:'32px 32px 32px' }}>
               <div style={{ fontSize:9, letterSpacing:'0.32em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD, marginBottom:6 }}>Business Account</div>
               <h2 style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:4 }}>{profile?.fullName || session?.companyName || session?.name}</h2>
               <p style={{ fontSize:12, color:W4, fontFamily:FB, marginBottom:16 }}>{profile?.email || session?.email}</p>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'5px 14px', background:profile?.status==='approved'?'rgba(192,120,24,0.12)':'rgba(232,168,32,0.1)', border:`1px solid ${profile?.status==='approved'?'rgba(192,120,24,0.45)':'rgba(232,168,32,0.35)'}`, borderRadius:3, marginBottom:24 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'5px 14px', background:profile?.status==='approved'?'rgba(127,121,105,0.12)':'rgba(201,191,166,0.1)', border:`1px solid ${profile?.status==='approved'?'rgba(127,121,105,0.45)':'rgba(201,191,166,0.35)'}`, borderRadius:3, marginBottom:24 }}>
                 <div style={{ width:6, height:6, borderRadius:'50%', background:profile?.status==='approved'?GD:GL }} />
                 <span style={{ fontSize:10, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:profile?.status==='approved'?GD:GL, fontFamily:FD }}>
                   {profile?.status==='approved'?'Approved':profile?.status==='pending_review'?'Pending Review':profile?.status||'Pending Review'}
                 </span>
               </div>
               {saveMsg && (
-                <div style={{ padding:'10px 14px', background:saveMsg.startsWith('✓')||!saveMsg.includes('fail')?'rgba(192,120,24,0.12)':'rgba(139,90,26,0.2)', border:`1px solid ${saveMsg.startsWith('✓')||!saveMsg.includes('fail')?'rgba(192,120,24,0.4)':'rgba(139,90,26,0.5)'}`, borderRadius:3, fontSize:12, color:saveMsg.includes('fail')||saveMsg.includes('error')?'#E8C090':GL, fontFamily:FD, marginBottom:20 }}>
+                <div style={{ padding:'10px 14px', background:saveMsg.startsWith('✓')||!saveMsg.includes('fail')?'rgba(127,121,105,0.12)':'rgba(112,106,90,0.2)', border:`1px solid ${saveMsg.startsWith('✓')||!saveMsg.includes('fail')?'rgba(127,121,105,0.4)':'rgba(112,106,90,0.5)'}`, borderRadius:3, fontSize:12, color:saveMsg.includes('fail')||saveMsg.includes('error')?'#F0F0F0':GL, fontFamily:FD, marginBottom:20 }}>
                   {saveMsg}
                 </div>
               )}
@@ -292,10 +292,10 @@ export default function BusinessLayout() {
                       { label:'Tax PIN / Clearance', url:profile?.taxPinUrl },
                       { label:'Bank Proof',          url:profile?.bizBankProofUrl },
                     ].map(doc=>(
-                      <div key={doc.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'11px 0', borderBottom:'1px solid rgba(212,136,10,0.16)' }}>
+                      <div key={doc.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'11px 0', borderBottom:'1px solid rgba(170,160,135,0.16)' }}>
                         <span style={{ fontSize:12, color:W4, fontFamily:FB }}>{doc.label}</span>
                         {doc.url?(
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer" download style={{ fontSize:11, color:GL, fontFamily:FD, fontWeight:700, textDecoration:'none', display:'flex', alignItems:'center', gap:5, padding:'4px 10px', background:'rgba(232,168,32,0.08)', border:'1px solid rgba(232,168,32,0.25)', borderRadius:2 }}>
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer" download style={{ fontSize:11, color:GL, fontFamily:FD, fontWeight:700, textDecoration:'none', display:'flex', alignItems:'center', gap:5, padding:'4px 10px', background:'rgba(201,191,166,0.08)', border:'1px solid rgba(201,191,166,0.25)', borderRadius:2 }}>
                             Download
                           </a>
                         ):(
@@ -326,8 +326,8 @@ export default function BusinessLayout() {
                       <div key={f.key} style={{ marginBottom:14 }}>
                         <label style={{ display:'block', fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:W4, marginBottom:7, fontFamily:FD }}>{f.label}</label>
                         <input type="text" value={editForm[f.key]||''} onChange={e=>setEditForm((p:any)=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder}
-                          style={{ width:'100%', background:'rgba(212,136,10,0.04)', border:'1px solid rgba(212,136,10,0.16)', padding:'12px 14px', color:W, fontFamily:FB, fontSize:13, outline:'none', borderRadius:3 }}
-                          onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor='rgba(212,136,10,0.16)'} />
+                          style={{ width:'100%', background:'rgba(170,160,135,0.04)', border:'1px solid rgba(170,160,135,0.16)', padding:'12px 14px', color:W, fontFamily:FB, fontSize:13, outline:'none', borderRadius:3 }}
+                          onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor='rgba(170,160,135,0.16)'} />
                       </div>
                     ))}
                   </div>
@@ -341,13 +341,13 @@ export default function BusinessLayout() {
                       <div key={d.key} style={{ marginBottom:12 }}>
                         <label style={{ display:'block', fontSize:9, fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:W4, marginBottom:7, fontFamily:FD }}>{d.label}</label>
                         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                          <label style={{ flex:1, display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:'rgba(212,136,10,0.04)', border:`1px dashed ${d.file?'rgba(232,168,32,0.6)':'rgba(212,136,10,0.25)'}`, borderRadius:3, cursor:'pointer' }}>
+                          <label style={{ flex:1, display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:'rgba(170,160,135,0.04)', border:`1px dashed ${d.file?'rgba(201,191,166,0.6)':'rgba(170,160,135,0.25)'}`, borderRadius:3, cursor:'pointer' }}>
                             <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:'none' }} onChange={e=>{if(e.target.files?.[0])d.setFile(e.target.files[0])}} />
                             <span style={{ fontSize:16 }}>{d.file?'📄':'↑'}</span>
                             <span style={{ fontSize:12, color:d.file?GL:W4, fontFamily:FB }}>{d.file?d.file.name:d.current?'Replace document':'Upload document'}</span>
                           </label>
                           {d.current&&!d.file&&(
-                            <a href={d.current} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:GL, fontFamily:FD, fontWeight:700, textDecoration:'none', padding:'10px 12px', background:'rgba(232,168,32,0.08)', border:'1px solid rgba(232,168,32,0.25)', borderRadius:3, whiteSpace:'nowrap' }}>View</a>
+                            <a href={d.current} target="_blank" rel="noopener noreferrer" style={{ fontSize:10, color:GL, fontFamily:FD, fontWeight:700, textDecoration:'none', padding:'10px 12px', background:'rgba(201,191,166,0.08)', border:'1px solid rgba(201,191,166,0.25)', borderRadius:3, whiteSpace:'nowrap' }}>View</a>
                           )}
                         </div>
                       </div>
@@ -360,7 +360,7 @@ export default function BusinessLayout() {
                     )}
                   </div>
                   <div style={{ display:'flex', gap:10 }}>
-                    <button onClick={()=>setEditMode(false)} style={{ flex:1, padding:'12px', background:'transparent', border:'1px solid rgba(212,136,10,0.16)', color:W4, fontFamily:FD, fontSize:11, cursor:'pointer', borderRadius:3 }}>Cancel</button>
+                    <button onClick={()=>setEditMode(false)} style={{ flex:1, padding:'12px', background:'transparent', border:'1px solid rgba(170,160,135,0.16)', color:W4, fontFamily:FD, fontSize:11, cursor:'pointer', borderRadius:3 }}>Cancel</button>
                     <button onClick={handleSaveProfile} disabled={saving}
                       style={{ flex:2, padding:'12px', background:saving?'rgba(255,255,255,0.05)':`linear-gradient(135deg,${GL},${GD})`, border:'none', color:saving?W4:BLK, fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', cursor:saving?'wait':'pointer', borderRadius:3 }}>
                       {saving?'Saving…':'Save Profile Changes'}
@@ -376,7 +376,7 @@ export default function BusinessLayout() {
       {/* MAIN */}
       <main style={{ flex:1, overflow:'auto', minWidth:0, background:BLK }}>
         {/* Top bar */}
-        <div style={{ position:'sticky', top:0, zIndex:100, background:`rgba(5,4,2,0.96)`, backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'0 36px', height:58, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ position:'sticky', top:0, zIndex:100, background:`rgba(2,2,2,0.96)`, backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'0 36px', height:58, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <div style={{ width:2, height:18, background:`linear-gradient(${GL},${GD})` }} />
             <p style={{ fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.28em', textTransform:'uppercase', color:GL }}>

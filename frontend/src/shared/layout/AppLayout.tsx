@@ -20,9 +20,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 }) => (
   <div style={{
     minHeight: '100vh', height: '100vh',
-    background: '#080808',
+    background: '#030302',
     display: 'flex', flexDirection: 'column',
-    color: '#F4EFE6',
+    color: '#F2F2F2',
     fontFamily: "'DM Sans','Segoe UI',sans-serif",
     overflow: 'hidden',
   }}>
@@ -35,8 +35,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         flex: 1, overflowY: 'auto',
         padding: '36px 40px',
         background: [
-          'radial-gradient(ellipse at 15% 0%, rgba(196,151,58,0.05) 0%, transparent 55%)',
-          'radial-gradient(ellipse at 85% 100%, rgba(196,151,58,0.03) 0%, transparent 50%)',
+          'radial-gradient(ellipse at 15% 0%, rgba(189,189,189,0.05) 0%, transparent 55%)',
+          'radial-gradient(ellipse at 85% 100%, rgba(189,189,189,0.03) 0%, transparent 50%)',
         ].join(','),
       }}>
         {children}

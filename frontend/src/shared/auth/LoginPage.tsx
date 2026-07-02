@@ -5,18 +5,18 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 /* ─── DESIGN TOKENS — all gold/amber/brown palette ──────────── */
-const BLACK        = '#080808'
-const BLACK_CARD   = '#161616'
+const BLACK        = '#030302'
+const BLACK_CARD   = '#0F0F0C'
 const BLACK_BORDER = 'rgba(255,255,255,0.07)'
-const GOLD         = '#C4973A'
-const GOLD_LIGHT   = '#DDB55A'
-const GOLD_DIM     = 'rgba(196,151,58,0.55)'
-const GOLD_PALE    = 'rgba(196,151,58,0.28)'
-const AMBER        = '#B8820A'
-const BROWN        = '#7A5C1E'
-const WHITE        = '#F4EFE6'
-const WHITE_MUTED  = 'rgba(244,239,230,0.55)'
-const WHITE_DIM    = 'rgba(244,239,230,0.22)'
+const GOLD         = '#9C9484'
+const GOLD_LIGHT   = '#CFC7B2'
+const GOLD_DIM     = 'rgba(189,189,189,0.55)'
+const GOLD_PALE    = 'rgba(189,189,189,0.28)'
+const AMBER        = '#807A6C'
+const BROWN        = '#5A5548'
+const WHITE        = '#F2F2F2'
+const WHITE_MUTED  = 'rgba(242,242,242,0.55)'
+const WHITE_DIM    = 'rgba(242,242,242,0.22)'
 const FD           = "'Playfair Display', Georgia, serif"
 const FB           = "'DM Sans', system-ui, sans-serif"
 
@@ -28,21 +28,21 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: string; accentColor: stri
     label:       'Promoter',
     icon:        '◉',
     accentColor: GOLD,
-    borderColor: `rgba(196,151,58,0.55)`,
+    borderColor: `rgba(189,189,189,0.55)`,
     description: 'Access your shifts, geo check-in, and earnings dashboard.',
   },
   business: {
     label:       'Business',
     icon:        '◈',
     accentColor: GOLD_LIGHT,
-    borderColor: `rgba(221,181,90,0.55)`,
+    borderColor: `rgba(196,189,171,0.55)`,
     description: 'Manage your promoter teams, monitor attendance, and view reports.',
   },
   admin: {
     label:       'Admin',
     icon:        '◆',
     accentColor: AMBER,
-    borderColor: `rgba(184,130,10,0.55)`,
+    borderColor: `rgba(128,122,106,0.55)`,
     description: 'Full platform access — users, jobs, payroll, and operations.',
   },
 }
@@ -62,9 +62,9 @@ const GLOBAL_CSS = `
     to   { opacity: 1; transform: translateY(0); }
   }
   .hg-form-wrap { animation: hg-fade-up 0.55s ease both; }
-  input::placeholder { color: rgba(196,151,58,0.2); }
+  input::placeholder { color: rgba(189,189,189,0.2); }
   input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px #0e0e0e inset !important;
+    -webkit-box-shadow: 0 0 0 30px #060605 inset !important;
     -webkit-text-fill-color: ${WHITE} !important;
   }
 `
@@ -95,8 +95,8 @@ function FloatingInput({
         onBlur={onBlur}
         style={{
           width: '100%',
-          background: 'rgba(196,151,58,0.03)',
-          border: `1px solid ${focused ? accentColor : 'rgba(196,151,58,0.15)'}`,
+          background: 'rgba(189,189,189,0.03)',
+          border: `1px solid ${focused ? accentColor : 'rgba(189,189,189,0.15)'}`,
           padding: '14px 16px',
           fontFamily: FB, fontSize: 14, color: WHITE,
           outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s',
@@ -211,9 +211,9 @@ export default function LoginPage() {
       <div style={{
         position: 'fixed', right: -240, top: '50%', transform: 'translateY(-50%)',
         width: 600, height: 600, borderRadius: '50%',
-        border: `1px solid rgba(196,151,58,0.07)`, pointerEvents: 'none', zIndex: 0,
+        border: `1px solid rgba(189,189,189,0.07)`, pointerEvents: 'none', zIndex: 0,
       }}>
-        <div style={{ position: 'absolute', inset: 80, borderRadius: '50%', border: `1px solid rgba(196,151,58,0.04)` }} />
+        <div style={{ position: 'absolute', inset: 80, borderRadius: '50%', border: `1px solid rgba(189,189,189,0.04)` }} />
       </div>
 
       <div className="hg-form-wrap" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 460 }}>
@@ -221,8 +221,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>CAMPARI</span>
-            <span style={{ color: WHITE }}></span>
+            <span style={{ color: GOLD }}>HONEY</span>
+            <span style={{ color: WHITE }}> GROUP</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 18px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>
@@ -232,8 +232,8 @@ export default function LoginPage() {
 
         {/* Role tabs */}
         <div style={{
-          display: 'flex', background: '#0d0d0d',
-          border: `1px solid rgba(196,151,58,0.12)`, padding: 4, marginBottom: 28, gap: 4,
+          display: 'flex', background: '#060605',
+          border: `1px solid rgba(189,189,189,0.12)`, padding: 4, marginBottom: 28, gap: 4,
         }}>
           {(Object.keys(ROLE_CONFIG) as Role[]).map(r => {
             const c = ROLE_CONFIG[r]
@@ -262,7 +262,7 @@ export default function LoginPage() {
 
         {/* Card */}
         <div style={{
-          background: BLACK_CARD, border: `1px solid rgba(196,151,58,0.12)`,
+          background: BLACK_CARD, border: `1px solid rgba(189,189,189,0.12)`,
           padding: '44px 40px', position: 'relative',
           boxShadow: `0 40px 100px rgba(0,0,0,0.6), 0 0 60px ${cfg.accentColor}08`,
           transition: 'box-shadow 0.5s',
@@ -287,7 +287,7 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <FloatingInput
-              label="Email Address" type="email" placeholder="you@campari.co.za"
+              label="Email Address" type="email" placeholder="you@honeygroup.co.za"
               value={email} onChange={setEmail}
               focused={focusedField === 'email'}
               onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
@@ -305,7 +305,7 @@ export default function LoginPage() {
           {error && (
             <div style={{
               marginTop: 18, padding: '10px 14px',
-              background: 'rgba(184,130,10,0.10)', border: `1px solid ${AMBER}44`,
+              background: 'rgba(128,122,106,0.10)', border: `1px solid ${AMBER}44`,
               fontFamily: FB, fontSize: 12, color: AMBER,
             }}>
               {error}
@@ -371,7 +371,7 @@ export default function LoginPage() {
         {/* ── Change-password panel (admin only) ── */}
         {role === 'admin' && showChangePw && (
           <div style={{
-            background: BLACK_CARD, border: `1px solid rgba(184,130,10,0.22)`,
+            background: BLACK_CARD, border: `1px solid rgba(128,122,106,0.22)`,
             padding: '32px 40px', marginTop: 12, position: 'relative',
           }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2,
@@ -396,8 +396,8 @@ export default function LoginPage() {
                       type="password" placeholder="••••••••" value={values[i]}
                       onChange={e => setters[i](e.target.value)}
                       onFocus={() => setCpFocused(field)} onBlur={() => setCpFocused(null)}
-                      style={{ width: '100%', background: 'rgba(184,130,10,0.03)',
-                        border: `1px solid ${cpFocused === field ? AMBER : 'rgba(184,130,10,0.15)'}`,
+                      style={{ width: '100%', background: 'rgba(128,122,106,0.03)',
+                        border: `1px solid ${cpFocused === field ? AMBER : 'rgba(128,122,106,0.15)'}`,
                         padding: '12px 16px', fontFamily: FB, fontSize: 14, color: WHITE,
                         outline: 'none', transition: 'border-color 0.2s',
                         boxShadow: cpFocused === field ? `0 0 0 3px ${AMBER}18` : 'none' }}
@@ -409,14 +409,14 @@ export default function LoginPage() {
 
             {cpError && (
               <div style={{ marginTop: 14, padding: '9px 14px',
-                background: 'rgba(184,130,10,0.08)', border: `1px solid ${AMBER}40`,
+                background: 'rgba(128,122,106,0.08)', border: `1px solid ${AMBER}40`,
                 fontFamily: FB, fontSize: 12, color: AMBER }}>
                 {cpError}
               </div>
             )}
             {cpSuccess && (
               <div style={{ marginTop: 14, padding: '9px 14px',
-                background: 'rgba(192,120,24,0.10)', border: `1px solid ${GOLD}50`,
+                background: 'rgba(127,121,105,0.10)', border: `1px solid ${GOLD}50`,
                 fontFamily: FB, fontSize: 12, color: GOLD }}>
                 ✓ Password changed successfully
               </div>

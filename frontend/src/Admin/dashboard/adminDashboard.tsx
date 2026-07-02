@@ -6,31 +6,31 @@ import { getAllJobsWithAdminJobs, getActiveJobs } from '../../shared/jobs/JobsPa
 import { injectAdminMobileStyles } from '../adminMobileStyles'
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G3  = '#C07818'
-const G4  = '#F0C050'
-const G5  = '#6B3F10'
-const B   = '#0C0A07'
-const D1  = '#0E0C06'
-const D2  = '#151209'
-const D3  = '#1C1709'
-const GM  = '#221C0A'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.06)'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G3  = '#7A756A'
+const G4  = '#D8D8D8'
+const G5  = '#443F36'
+const B   = '#050504'
+const D1  = '#070706'
+const D2  = '#0A0A08'
+const D3  = '#100F0B'
+const GM  = '#14140E'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.06)'
 
-const W   = '#CEC5B2'
-const W85 = 'rgba(210,198,180,0.95)'
-const W55 = 'rgba(220,208,188,0.90)'
-const W28 = 'rgba(200,185,162,0.80)'
-const WM  = 'rgba(200,188,168,0.88)'
+const W   = '#F0F0F0'
+const W85 = 'rgba(204,204,204,0.95)'
+const W55 = 'rgba(214,214,214,0.90)'
+const W28 = 'rgba(187,187,187,0.80)'
+const WM  = 'rgba(222,222,222,0.88)'
 
-const C_ACTIVE   = '#C07818'
-const C_PENDING  = '#E8A820'
-const C_REJECTED = '#C8B898'
-const C_NEW      = '#F0C050'
-const C_INACTIVE = '#C8B898'
+const C_ACTIVE   = '#7A756A'
+const C_PENDING  = '#C9BFA6'
+const C_REJECTED = '#CBCBCB'
+const C_NEW      = '#D8D8D8'
+const C_INACTIVE = '#CBCBCB'
 
 const FD   = "'Playfair Display', Georgia, serif"
 const MONO = "'DM Mono', 'Courier New', monospace"
@@ -51,17 +51,17 @@ function statusColor(s: string): string {
   return W28
 }
 function statusBg(s: string): string {
-  if (s==='approved'||s==='active')        return hex2rgba('#C07818',0.12)
-  if (s==='rejected'||s==='inactive')      return hex2rgba('#6B4020',0.35)
-  if (s==='pending'||s==='pending_review') return hex2rgba('#E8A820',0.12)
-  if (s==='new')                           return hex2rgba('#F0C050',0.10)
+  if (s==='approved'||s==='active')        return hex2rgba('#7A756A',0.12)
+  if (s==='rejected'||s==='inactive')      return hex2rgba('#463F35',0.35)
+  if (s==='pending'||s==='pending_review') return hex2rgba('#C9BFA6',0.12)
+  if (s==='new')                           return hex2rgba('#D8D8D8',0.10)
   return 'transparent'
 }
 function statusBorder(s: string): string {
-  if (s==='approved'||s==='active')        return hex2rgba('#C07818',0.45)
-  if (s==='rejected'||s==='inactive')      return hex2rgba('#8B6040',0.60)
-  if (s==='pending'||s==='pending_review') return hex2rgba('#E8A820',0.45)
-  if (s==='new')                           return hex2rgba('#F0C050',0.42)
+  if (s==='approved'||s==='active')        return hex2rgba('#7A756A',0.45)
+  if (s==='rejected'||s==='inactive')      return hex2rgba('#666052',0.60)
+  if (s==='pending'||s==='pending_review') return hex2rgba('#C9BFA6',0.45)
+  if (s==='new')                           return hex2rgba('#D8D8D8',0.42)
   return BB
 }
 function normalizeStatus(s: string) { return s==='pending_review'?'pending':s||'pending' }
@@ -114,7 +114,7 @@ const STATIC_ACTIVITY = [
   { time:'31m ago', msg:'Payroll batch calculated — R12,400',          type:'payment', ts: Date.now() - 31*60*1000 },
   { time:'45m ago', msg:'Lerato Mokoena flagged late — Rosebank Mall', type:'flag',    ts: Date.now() - 45*60*1000 },
 ]
-const TYPE_CLR: Record<string,string> = { checkin:GL, apply:G3, job:G4, doc:G2, payment:GL, flag:'#8B5A1A', approve:GL, reject:G2 }
+const TYPE_CLR: Record<string,string> = { checkin:GL, apply:G3, job:G4, doc:G2, payment:GL, flag:'#8A8474', approve:GL, reject:G2 }
 
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000)
@@ -167,14 +167,14 @@ function Btn({ children, onClick, outline=false, small=false, color=G, disabled=
 
 function FilterBtn({ label, active, color, onClick }: { label:string; active:boolean; color:string; onClick:()=>void }) {
   const safeColor = color.startsWith('#')?color:GL
-  return <button onClick={onClick} style={{ padding:'6px 14px', border:`1px solid ${active?safeColor:'rgba(212,136,10,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(safeColor,0.18):'transparent', color:active?safeColor:W55, transition:'all 0.18s', whiteSpace:'nowrap' as const }}>{label}</button>
+  return <button onClick={onClick} style={{ padding:'6px 14px', border:`1px solid ${active?safeColor:'rgba(170,160,135,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(safeColor,0.18):'transparent', color:active?safeColor:W55, transition:'all 0.18s', whiteSpace:'nowrap' as const }}>{label}</button>
 }
 
 function StatCard({ label, value, sub, color, onClick }: { label:string; value:any; sub?:string; color:string; onClick?:()=>void }) {
   return (
-    <div onClick={onClick} style={{ background:'rgba(20,16,5,0.6)', padding:'22px 20px', position:'relative', overflow:'hidden', borderRadius:2, cursor:onClick?'pointer':'default', transition:'background 0.2s' }}
-      onMouseEnter={e=>{ if(onClick) e.currentTarget.style.background='rgba(30,22,8,0.8)' }}
-      onMouseLeave={e=>{ if(onClick) e.currentTarget.style.background='rgba(20,16,5,0.6)' }}>
+    <div onClick={onClick} style={{ background:'rgba(9,9,7,0.6)', padding:'22px 20px', position:'relative', overflow:'hidden', borderRadius:2, cursor:onClick?'pointer':'default', transition:'background 0.2s' }}
+      onMouseEnter={e=>{ if(onClick) e.currentTarget.style.background='rgba(21,20,16,0.8)' }}
+      onMouseLeave={e=>{ if(onClick) e.currentTarget.style.background='rgba(9,9,7,0.6)' }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${color},${hex2rgba(color,0.4)})` }} />
       <div style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:W55, marginBottom:8, fontFamily:FD }}>{label}</div>
       <div className="hg-stat-val" style={{ fontFamily:FD, fontSize:36, fontWeight:700, color:W, lineHeight:1 }}>{value}</div>
@@ -280,7 +280,7 @@ function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clie
         {stats.map((s,i)=><StatCard key={i} label={s.label} value={s.value} sub={s.sub} color={s.color} onClick={()=>onRoute(s.id)} />)}
       </div>
       <div className="hg-dash-two-col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:BB }}>
-        <div style={{ background:'rgba(20,16,5,0.6)', padding:24 }}>
+        <div style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
           <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:16, fontWeight:700, fontFamily:FD }}>Quick Actions</div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:BB }}>
             {quickActions.map(a=>(
@@ -293,7 +293,7 @@ function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clie
             ))}
           </div>
         </div>
-        <div style={{ background:'rgba(20,16,5,0.6)', padding:24 }}>
+        <div style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
             <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>Live Activity</div>
             <div style={{ display:'flex', alignItems:'center', gap:6 }}><div style={{ width:6, height:6, borderRadius:'50%', background:GL }} /><span style={{ fontSize:10, color:W55, fontFamily:FD }}>Live</span></div>
@@ -546,7 +546,7 @@ function downloadCSV(rows: string[][], filename: string) {
 
 function downloadPDF(htmlContent: string, filename: string) {
   // Build a printable HTML file and download it, then auto-print
-  const fullHtml=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filename}</title><style>body{font-family:Georgia,serif;padding:32px;color:#111;font-size:13px}h1{font-size:24px;margin-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#f0ece4;padding:8px 12px;text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase}td{padding:8px 12px;border-bottom:1px solid #e0d8cc}@media print{body{padding:16px}}</style></head><body>${htmlContent}</body></html>`
+  const fullHtml=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filename}</title><style>body{font-family:Georgia,serif;padding:32px;color:#111;font-size:13px}h1{font-size:24px;margin-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#ECECEC;padding:8px 12px;text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase}td{padding:8px 12px;border-bottom:1px solid #D9D9D9}@media print{body{padding:16px}}</style></head><body>${htmlContent}</body></html>`
   triggerDownload(new Blob([fullHtml],{type:'text/html;charset=utf-8;'}),filename+'.html')
 }
 
@@ -571,7 +571,7 @@ function downloadExcel(rows: string[][], filename: string) {
 function buildTablePDF(title: string, headers: string[], rows: (string|number)[][]): string {
   const ths = headers.map(h=>`<th>${h}</th>`).join('')
   const trs = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-  return `<h1 style="font-family:Georgia;color:#b36b00;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">Campari · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
+  return `<h1 style="font-family:Georgia;color:#6E6A5E;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">Campari · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
 }
 
 function ReportsTab({ regs }: { regs:any[] }) {
@@ -610,8 +610,8 @@ function ReportsTab({ regs }: { regs:any[] }) {
 
   const campaignSections=Object.entries(PAYROLL_MOCK.reduce((acc:any,r)=>{(acc[r.job]=acc[r.job]||[]).push(r);return acc},{})).map(([job,recs]:any)=>{
     const totalNet=recs.reduce((s:number,r:any)=>s+net(r),0)
-    const rows=recs.map((r:any)=>`<tr><td>${r.promoter}</td><td>${r.date}</td><td>${r.hours}h</td><td>R${r.rate}/hr</td><td style="color:#b36b00;font-weight:700">R${net(r)}</td><td style="text-transform:capitalize">${r.status}</td></tr>`).join('')
-    return `<h2 style="font-size:15px;color:#b36b00;border-left:3px solid #b36b00;padding-left:10px;margin:24px 0 12px">${job}</h2><table><thead><tr><th>Promoter</th><th>Date</th><th>Hours</th><th>Rate</th><th>Net Pay</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table><p style="text-align:right;font-size:12px;font-weight:700;margin-top:6px">Campaign total: R${totalNet}</p>`
+    const rows=recs.map((r:any)=>`<tr><td>${r.promoter}</td><td>${r.date}</td><td>${r.hours}h</td><td>R${r.rate}/hr</td><td style="color:#6E6A5E;font-weight:700">R${net(r)}</td><td style="text-transform:capitalize">${r.status}</td></tr>`).join('')
+    return `<h2 style="font-size:15px;color:#6E6A5E;border-left:3px solid #6E6A5E;padding-left:10px;margin:24px 0 12px">${job}</h2><table><thead><tr><th>Promoter</th><th>Date</th><th>Hours</th><th>Rate</th><th>Net Pay</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table><p style="text-align:right;font-size:12px;font-weight:700;margin-top:6px">Campaign total: R${totalNet}</p>`
   }).join('')
 
   const inp:React.CSSProperties={ width:'100%', background:BB2, border:`1px solid ${BB}`, padding:'11px 14px', fontFamily:FD, fontSize:14, color:W, outline:'none', borderRadius:3, boxSizing:'border-box' as any }
@@ -632,7 +632,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
       btns:[
         {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.csv`);flash('✓ Campaign CSV downloaded')}},
         {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.xls`);flash('✓ Campaign Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#b36b00">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honey-group-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
+        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honey-group-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
       ]
     },
     {
@@ -763,7 +763,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
 // ─── SETTINGS TAB// ─── SETTINGS TAB ─────────────────────────────────────────────────────────────
 function SettingsTab() {
   const [saved,    setSaved   ]=useState(false)
-  const [platName, setPlatName]=useState('Campari Promotions')
+  const [platName, setPlatName]=useState('Honey Group Promotions')
   const [email,    setEmail   ]=useState('admin@honeygroup.co.za')
   const [otp,      setOtp     ]=useState("Africa's Talking")
   const [payment,  setPayment ]=useState('Paystack')
@@ -776,7 +776,7 @@ function SettingsTab() {
   const inp:React.CSSProperties={ width:'100%', background:BB2, border:`1px solid ${BB}`, padding:'10px 14px', color:W, fontFamily:FD, fontSize:13, outline:'none', borderRadius:3 }
   const lbl:React.CSSProperties={ fontSize:9, fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase' as any, color:W55, display:'block', marginBottom:7, fontFamily:FD }
   const Toggle=({val,set}:{val:boolean;set:(v:boolean)=>void})=>(
-    <div onClick={()=>set(!val)} style={{ width:40, height:22, borderRadius:11, background:val?`linear-gradient(135deg,${GL},${G})`:'rgba(42,34,16,0.8)', cursor:'pointer', position:'relative', transition:'background 0.25s', flexShrink:0, border:`1px solid ${val?G:BB}` }}>
+    <div onClick={()=>set(!val)} style={{ width:40, height:22, borderRadius:11, background:val?`linear-gradient(135deg,${GL},${G})`:'rgba(32,30,25,0.8)', cursor:'pointer', position:'relative', transition:'background 0.25s', flexShrink:0, border:`1px solid ${val?G:BB}` }}>
       <div style={{ position:'absolute', top:3, left:val?19:3, width:14, height:14, borderRadius:'50%', background:val?B:W55, transition:'left 0.25s' }} />
     </div>
   )
@@ -792,7 +792,7 @@ function SettingsTab() {
       {saved&&<div style={{ padding:'12px 16px', background:hex2rgba(G3,0.1), border:`1px solid ${hex2rgba(G3,0.35)}`, marginBottom:20, fontSize:13, color:GL, fontWeight:700, borderRadius:3, fontFamily:FD }}>✓ Settings saved.</div>}
       <div className="hg-card-grid-2" style={{ gap:1 }}>
         {[{title:'General',fields:[{label:'Platform Name',value:platName,set:setPlatName,type:'text'},{label:'Support Email',value:email,set:setEmail,type:'email'}]},{title:'Geo & Radius',fields:[{label:'Check-in Radius (m)',value:geoR,set:setGeoR,type:'number'},{label:'Job Notification Radius (km)',value:jobR,set:setJobR,type:'number'}]}].map(section=>(
-          <div key={section.title} style={{ background:'rgba(20,16,5,0.6)', padding:24 }}>
+          <div key={section.title} style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
             <div style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, marginBottom:18, fontWeight:700, fontFamily:FD }}>{section.title}</div>
             {section.fields.map((f,i)=>(
               <div key={f.label} style={{ marginBottom:i<section.fields.length-1?16:0 }}>
@@ -803,12 +803,12 @@ function SettingsTab() {
             ))}
           </div>
         ))}
-        <div style={{ background:'rgba(20,16,5,0.6)', padding:24 }}>
+        <div style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
           <div style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, marginBottom:18, fontWeight:700, fontFamily:FD }}>Integrations</div>
           <div style={{ marginBottom:16 }}><label style={lbl}>OTP Provider</label><select value={otp} onChange={e=>setOtp(e.target.value)} style={{ ...inp, background:D3, cursor:'pointer' }}>{["Africa's Talking",'Clickatell','Twilio'].map(o=><option key={o}>{o}</option>)}</select></div>
           <div><label style={lbl}>Payment Gateway</label><select value={payment} onChange={e=>setPayment(e.target.value)} style={{ ...inp, background:D3, cursor:'pointer' }}>{['Paystack Reference','PayFast Reference','Manual EFT'].map(o=><option key={o}>{o}</option>)}</select></div>
         </div>
-        <div style={{ background:'rgba(20,16,5,0.6)', padding:24 }}>
+        <div style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
           <div style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, marginBottom:18, fontWeight:700, fontFamily:FD }}>Feature Flags</div>
           {[{label:'Push Notifications',desc:'Send job alerts to promoters',val:notifs,set:setNotifs},{label:'POPIA Compliance',desc:'Enforce data protection',val:popia,set:setPopia},{label:'Maintenance Mode',desc:'Block non-admin access',val:maint,set:setMaint}].map(row=>(
             <div key={row.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'13px 0', borderBottom:`1px solid ${BB}` }}>

@@ -60,12 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   if (loading) {
     return (
       <div style={{
-        background: '#080808',
+        background: '#030302',
         height: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#F4EFE6',
+        color: '#F2F2F2',
         fontFamily: "'DM Sans', system-ui, sans-serif",
       }}>
         Loading...

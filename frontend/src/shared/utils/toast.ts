@@ -15,7 +15,7 @@ const COLORS = {
   success: '#22C55E',
   error: '#EF4444',
   warning: '#F59E0B',
-  info: '#C4973A',
+  info: '#9C9484',
 };
 
 const createContainer = () => {
@@ -44,7 +44,7 @@ const render = () => {
       padding: 12px 20px;
       border-radius: 8px;
       background: ${COLORS[toast.type]};
-      color: ${toast.type === 'info' ? '#080808' : '#fff'};
+      color: ${toast.type === 'info' ? '#030302' : '#fff'};
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;

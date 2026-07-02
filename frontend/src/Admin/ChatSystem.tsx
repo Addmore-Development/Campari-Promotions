@@ -9,20 +9,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G3  = '#C07818'
-const G5  = '#6B3F10'
-const B   = '#0C0A07'
-const D1  = '#0E0C06'
-const D2  = '#151209'
-const D3  = '#1C1709'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.06)'
-const W   = '#FAF3E8'
-const W55 = 'rgba(250,243,232,0.55)'
-const W28 = 'rgba(250,243,232,0.65)'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G3  = '#7A756A'
+const G5  = '#443F36'
+const B   = '#050504'
+const D1  = '#070706'
+const D2  = '#0A0A08'
+const D3  = '#100F0B'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.06)'
+const W   = '#F8F8F8'
+const W55 = 'rgba(248,248,248,0.55)'
+const W28 = 'rgba(248,248,248,0.65)'
 const FD  = "'Playfair Display', Georgia, serif"
 const FB  = "'DM Sans', system-ui, sans-serif"
 
@@ -108,7 +108,7 @@ function Bubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
           </div>
         )}
         <div style={{ fontSize: 13, color: W, lineHeight: 1.6, fontFamily: FB }}>{msg.text}</div>
-        <div style={{ fontSize: 9, color: isMine ? 'rgba(250,243,232,0.4)' : W28, marginTop: 4, textAlign: 'right', fontFamily: FD }}>
+        <div style={{ fontSize: 9, color: isMine ? 'rgba(248,248,248,0.4)' : W28, marginTop: 4, textAlign: 'right', fontFamily: FD }}>
           {formatTime(msg.createdAt)}
         </div>
       </div>
@@ -290,7 +290,7 @@ export function AdminChatTab() {
             <div style={{ display: 'flex', gap: 4 }}>
               {(['all','promoter','business'] as const).map(r => (
                 <button key={r} onClick={() => setFilterRole(r)}
-                  style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(232,168,32,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
+                  style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(201,191,166,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
                   {r}
                 </button>
               ))}
@@ -401,7 +401,7 @@ export function AdminChatTab() {
             <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
               {(['all','promoter','business'] as const).map(r => (
                 <button key={r} onClick={() => setNewFilter(r)}
-                  style={{ flex: 1, padding: '6px', border: `1px solid ${newFilter===r?GL:BB}`, background: newFilter===r?'rgba(232,168,32,0.14)':'transparent', color: newFilter===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: newFilter===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
+                  style={{ flex: 1, padding: '6px', border: `1px solid ${newFilter===r?GL:BB}`, background: newFilter===r?'rgba(201,191,166,0.14)':'transparent', color: newFilter===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: newFilter===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
                   {r === 'all' ? 'All Users' : r === 'promoter' ? 'Promoters' : 'Businesses'}
                 </button>
               ))}
@@ -576,10 +576,10 @@ export function FloatingChat() {
 
       {/* ── Chat window ── */}
       {open && (
-        <div style={{ position: 'fixed', bottom: 92, right: 28, width: 360, height: 520, background: D2, border: `1px solid ${BB}`, borderRadius: 12, boxShadow: `0 24px 60px rgba(0,0,0,0.7),0 0 40px rgba(232,168,32,0.08)`, display: 'flex', flexDirection: 'column', zIndex: 9998, animation: 'hg-chat-pop 0.3s cubic-bezier(0.22,1,0.36,1)', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', bottom: 92, right: 28, width: 360, height: 520, background: D2, border: `1px solid ${BB}`, borderRadius: 12, boxShadow: `0 24px 60px rgba(0,0,0,0.7),0 0 40px rgba(201,191,166,0.08)`, display: 'flex', flexDirection: 'column', zIndex: 9998, animation: 'hg-chat-pop 0.3s cubic-bezier(0.22,1,0.36,1)', overflow: 'hidden' }}>
 
           {/* Header */}
-          <div style={{ padding: '12px 16px', background: `linear-gradient(135deg,${G5},#2A1E06)`, borderBottom: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ padding: '12px 16px', background: `linear-gradient(135deg,${G5},#17170F)`, borderBottom: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: GL, flexShrink: 0 }} />
               <div>
@@ -677,7 +677,7 @@ export function FloatingChat() {
       {/* ── Floating button ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ position: 'fixed', bottom: 28, right: 28, width: 54, height: 54, borderRadius: '50%', background: open?D2:`linear-gradient(135deg,${GL},${G})`, border: open?`1px solid ${BB}`:'none', cursor: 'pointer', zIndex: 9999, boxShadow: `0 8px 24px rgba(0,0,0,0.5),0 0 20px rgba(232,168,32,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: open?GL:B, transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)' }}>
+        style={{ position: 'fixed', bottom: 28, right: 28, width: 54, height: 54, borderRadius: '50%', background: open?D2:`linear-gradient(135deg,${GL},${G})`, border: open?`1px solid ${BB}`:'none', cursor: 'pointer', zIndex: 9999, boxShadow: `0 8px 24px rgba(0,0,0,0.5),0 0 20px rgba(201,191,166,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: open?GL:B, transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)' }}>
         {open ? '✕' : '◆'}
         {!open && unread > 0 && (
           <div style={{ position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: '50%', background: GL, color: B, fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'hg-badge-pop 1.5s ease-in-out infinite', border: `2px solid ${B}` }}>

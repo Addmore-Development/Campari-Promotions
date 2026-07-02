@@ -2,18 +2,18 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /* ─── DESIGN TOKENS ──────────────────────────────────────────── */
-const BLACK        = '#080808'
-const BLACK_CARD   = '#161616'
-const BLACK_BORDER = 'rgba(196,151,58,0.15)'
-const GOLD         = '#C4973A'
-const GOLD_LIGHT   = '#DDB55A'
-const GOLD_DIM     = 'rgba(196,151,58,0.55)'
-const GOLD_PALE    = 'rgba(196,151,58,0.28)'
-const GOLD_FAINT   = 'rgba(196,151,58,0.12)'
-const AMBER        = '#B8820A'
-const BROWN        = '#7A5C1E'
-const WHITE        = '#F4EFE6'
-const WHITE_MUTED  = 'rgba(244,239,230,0.55)'
+const BLACK        = '#030302'
+const BLACK_CARD   = '#0F0F0C'
+const BLACK_BORDER = 'rgba(189,189,189,0.15)'
+const GOLD         = '#9C9484'
+const GOLD_LIGHT   = '#CFC7B2'
+const GOLD_DIM     = 'rgba(189,189,189,0.55)'
+const GOLD_PALE    = 'rgba(189,189,189,0.28)'
+const GOLD_FAINT   = 'rgba(189,189,189,0.12)'
+const AMBER        = '#807A6C'
+const BROWN        = '#5A5548'
+const WHITE        = '#F2F2F2'
+const WHITE_MUTED  = 'rgba(242,242,242,0.55)'
 const FD           = "'Playfair Display', Georgia, serif"
 const FB           = "'DM Sans', system-ui, sans-serif"
 
@@ -161,7 +161,7 @@ function Field({ label, type = 'text', placeholder, value, onChange, focused, on
     <div>
       <label style={{ display: 'block', fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: focused ? GOLD : GOLD_DIM, marginBottom: 8, transition: 'color 0.2s' }}>{label}</label>
       <input type={type} placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} onFocus={onFocus} onBlur={onBlur}
-        style={{ width: '100%', background: 'rgba(196,151,58,0.03)', border: `1px solid ${error ? `${AMBER}66` : focused ? GOLD : BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s', boxShadow: focused ? `0 0 0 3px ${GOLD}10` : 'none' }} />
+        style={{ width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${error ? `${AMBER}66` : focused ? GOLD : BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s', boxShadow: focused ? `0 0 0 3px ${GOLD}10` : 'none' }} />
       {error && <p style={{ fontFamily: FB, fontSize: 11, color: AMBER, marginTop: 5 }}>{error}</p>}
       {hint && !error && <p style={{ fontFamily: FB, fontSize: 11, color: GOLD_PALE, marginTop: 5 }}>{hint}</p>}
     </div>
@@ -181,7 +181,7 @@ function FileUploadZone({ label, accept, file, onChange, hint, required }: {
         {label}{required && <span style={{ color: GOLD, fontSize: 12 }}>*</span>}
       </label>
       <div onClick={() => inputRef.current?.click()} onDragEnter={() => setDragging(true)} onDragLeave={() => setDragging(false)} onDragOver={e => e.preventDefault()} onDrop={handleDrop}
-        style={{ border: `1px dashed ${dragging ? GOLD : file ? `${GOLD}55` : BLACK_BORDER}`, background: dragging ? GOLD_FAINT : file ? 'rgba(196,151,58,0.04)' : 'rgba(196,151,58,0.02)', padding: '22px 20px', cursor: 'pointer', transition: 'all 0.25s', textAlign: 'center' }}>
+        style={{ border: `1px dashed ${dragging ? GOLD : file ? `${GOLD}55` : BLACK_BORDER}`, background: dragging ? GOLD_FAINT : file ? 'rgba(189,189,189,0.04)' : 'rgba(189,189,189,0.02)', padding: '22px 20px', cursor: 'pointer', transition: 'all 0.25s', textAlign: 'center' }}>
         <input ref={inputRef} type="file" accept={accept} style={{ display: 'none' }} onChange={e => { if (e.target.files?.[0]) onChange(e.target.files[0]) }} />
         {file ? (
           <div>
@@ -214,7 +214,7 @@ function PhotoUpload({ label, file, onChange, hint, required, aspectHint }: {
         {label}{required && <span style={{ color: GOLD, fontSize: 12 }}>*</span>}
       </label>
       <div onClick={() => inputRef.current?.click()}
-        style={{ height: 220, border: `1px dashed ${file ? `${GOLD}55` : BLACK_BORDER}`, background: file ? 'rgba(196,151,58,0.04)' : 'rgba(196,151,58,0.02)', cursor: 'pointer', transition: 'all 0.25s', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        style={{ height: 220, border: `1px dashed ${file ? `${GOLD}55` : BLACK_BORDER}`, background: file ? 'rgba(189,189,189,0.04)' : 'rgba(189,189,189,0.02)', cursor: 'pointer', transition: 'all 0.25s', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
         {preview ? (
           <>
@@ -263,7 +263,7 @@ function CVUpload({ file, onChange }: { file: File | null; onChange: (f: File) =
         onDrop={handleDrop}
         style={{
           border: `1px dashed ${dragging ? GOLD : file ? `${GOLD}66` : BLACK_BORDER}`,
-          background: dragging ? GOLD_FAINT : file ? 'rgba(196,151,58,0.06)' : 'rgba(196,151,58,0.02)',
+          background: dragging ? GOLD_FAINT : file ? 'rgba(189,189,189,0.06)' : 'rgba(189,189,189,0.02)',
           padding: '20px 24px',
           cursor: 'pointer',
           transition: 'all 0.25s',
@@ -282,7 +282,7 @@ function CVUpload({ file, onChange }: { file: File | null; onChange: (f: File) =
         {/* Icon */}
         <div style={{
           width: 44, height: 44, borderRadius: 2,
-          background: file ? GOLD_FAINT : 'rgba(196,151,58,0.06)',
+          background: file ? GOLD_FAINT : 'rgba(189,189,189,0.06)',
           border: `1px solid ${file ? `${GOLD}44` : BLACK_BORDER}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0, fontSize: 20, transition: 'all 0.2s',
@@ -341,7 +341,7 @@ function PasswordStrength({ password }: { password: string }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-        {[1,2,3,4,5].map(i => <div key={i} style={{ flex: 1, height: 3, background: i <= score ? barColor : 'rgba(196,151,58,0.1)', transition: 'background 0.3s' }} />)}
+        {[1,2,3,4,5].map(i => <div key={i} style={{ flex: 1, height: 3, background: i <= score ? barColor : 'rgba(189,189,189,0.1)', transition: 'background 0.3s' }} />)}
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
         {items.map(item => (
@@ -368,7 +368,7 @@ function StepBar({ current, total }: { current: number; total: number }) {
   return (
     <div style={{ display: 'flex', gap: 6, marginBottom: 28 }}>
       {Array.from({ length: total }).map((_, i) => (
-        <div key={i} style={{ height: 3, flex: 1, background: i < current ? GOLD : i === current ? `linear-gradient(90deg, ${GOLD}, ${AMBER})` : 'rgba(196,151,58,0.1)', transition: 'background 0.4s' }} />
+        <div key={i} style={{ height: 3, flex: 1, background: i < current ? GOLD : i === current ? `linear-gradient(90deg, ${GOLD}, ${AMBER})` : 'rgba(189,189,189,0.1)', transition: 'background 0.4s' }} />
       ))}
     </div>
   )
@@ -381,14 +381,14 @@ function SuccessModal({ isPromoter, onDashboard, onHome }: { isPromoter: boolean
       <div style={{ background: BLACK_CARD, border: `1px solid ${BLACK_BORDER}`, padding: '52px 44px', maxWidth: 460, width: '100%', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BROWN}, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, ${BROWN})` }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ width: 76, height: 76, borderRadius: '50%', background: 'rgba(196,151,58,0.10)', border: '1px solid rgba(196,151,58,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 34 }}>⏳</div>
+          <div style={{ width: 76, height: 76, borderRadius: '50%', background: 'rgba(189,189,189,0.10)', border: '1px solid rgba(189,189,189,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 34 }}>⏳</div>
           <p style={{ fontFamily: FB, fontSize: 9, fontWeight: 700, letterSpacing: '0.44em', textTransform: 'uppercase', color: GOLD, marginBottom: 14 }}>
             {isPromoter ? 'Application Submitted' : 'Account Created'}
           </p>
           <h2 style={{ fontFamily: FD, fontSize: 28, fontWeight: 700, color: WHITE, marginBottom: 20, lineHeight: 1.2 }}>
             {isPromoter ? "You're on the list." : 'Welcome aboard.'}
           </h2>
-          <div style={{ background: 'rgba(196,151,58,0.06)', border: '1px solid rgba(196,151,58,0.20)', padding: '18px 20px', marginBottom: 28 }}>
+          <div style={{ background: 'rgba(189,189,189,0.06)', border: '1px solid rgba(189,189,189,0.20)', padding: '18px 20px', marginBottom: 28 }}>
             <p style={{ fontFamily: FB, fontSize: 13, color: WHITE_MUTED, lineHeight: 1.85 }}>
               Your account has been created and is currently{' '}
               <span style={{ color: GOLD, fontWeight: 600 }}>pending admin approval</span>.
@@ -401,7 +401,7 @@ function SuccessModal({ isPromoter, onDashboard, onHome }: { isPromoter: boolean
               Go to Dashboard
             </button>
             <button onClick={onHome}
-              style={{ width: '100%', padding: '13px 0', background: 'transparent', border: '1px solid rgba(196,151,58,0.22)', fontFamily: FB, fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD_DIM, cursor: 'pointer' }}>
+              style={{ width: '100%', padding: '13px 0', background: 'transparent', border: '1px solid rgba(189,189,189,0.22)', fontFamily: FB, fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD_DIM, cursor: 'pointer' }}>
               Back to Home
             </button>
           </div>
@@ -636,7 +636,7 @@ export default function RegisterPage() {
 
   /* ─── STYLES ──────────────────────────────────────────────── */
   const stepLabels = isPromoter ? ['Profile', 'Photos & Banking', 'Account'] : ['Company', 'Documents', 'Account']
-  const selectStyle: React.CSSProperties = { width: '100%', background: 'rgba(196,151,58,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none', appearance: 'none', cursor: 'pointer' }
+  const selectStyle: React.CSSProperties = { width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none', appearance: 'none', cursor: 'pointer' }
   const chipSectionLabel = (text: string, count: number) => (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
       <span style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: GOLD_DIM }}>{text}</span>
@@ -651,11 +651,11 @@ export default function RegisterPage() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { -webkit-font-smoothing: antialiased; background: ${BLACK}; }
-        input::placeholder { color: rgba(196,151,58,0.2); }
-        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 30px #0e0e0e inset !important; -webkit-text-fill-color: ${WHITE} !important; }
+        input::placeholder { color: rgba(189,189,189,0.2); }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 30px #060605 inset !important; -webkit-text-fill-color: ${WHITE} !important; }
         @keyframes hg-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .hg-reg { animation: hg-fade-up 0.5s ease both; }
-        select option { background: #161616; color: ${WHITE}; }
+        select option { background: #0F0F0C; color: ${WHITE}; }
       `}</style>
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.025, backgroundImage: `linear-gradient(${GOLD} 1px,transparent 1px),linear-gradient(90deg,${GOLD} 1px,transparent 1px)`, backgroundSize: '72px 72px' }} />
@@ -667,14 +667,14 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>CAMPARI</span><span style={{ color: WHITE }}></span>
+            <span style={{ color: GOLD }}>HONEY</span><span style={{ color: WHITE }}> GROUP</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 16px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>Create Account</p>
         </div>
 
         {/* Role toggle */}
-        <div style={{ display: 'flex', background: '#0d0d0d', border: `1px solid ${BLACK_BORDER}`, padding: 4, marginBottom: 24, gap: 4 }}>
+        <div style={{ display: 'flex', background: '#060605', border: `1px solid ${BLACK_BORDER}`, padding: 4, marginBottom: 24, gap: 4 }}>
           {(['promoter', 'business'] as Role[]).map(r => (
             <button key={r} onClick={() => switchRole(r)}
               style={{ flex: 1, padding: '11px 8px', background: role === r ? GOLD_FAINT : 'transparent', border: role === r ? `1px solid ${GOLD}44` : '1px solid transparent', color: role === r ? GOLD : GOLD_PALE, fontFamily: FB, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s' }}>
@@ -755,7 +755,7 @@ export default function RegisterPage() {
                 <div>
                   <label style={{ display: 'block', fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD_DIM, marginBottom: 8 }}>Height (cm)</label>
                   <input type="number" value={promoHeight} onChange={e => setPromoHeight(e.target.value)} placeholder="e.g. 170" min="140" max="220"
-                    style={{ width: '100%', background: 'rgba(196,151,58,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none' }}
+                    style={{ width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none' }}
                     onFocus={e => e.currentTarget.style.borderColor = GOLD} onBlur={e => e.currentTarget.style.borderColor = BLACK_BORDER} />
                 </div>
                 <div>
@@ -837,7 +837,7 @@ export default function RegisterPage() {
 
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  By creating an account you agree to Campari's Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
+                  By creating an account you agree to Honey Group's Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
                 </p>
               </div>
             </div>
@@ -884,7 +884,7 @@ export default function RegisterPage() {
                       placeholder="e.g. Agricultural shows, Mining expos..."
                       value={bizOtherCategory}
                       onChange={e => setBizOtherCategory(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(196,151,58,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '11px 14px', fontFamily: FB, fontSize: 13, color: WHITE, outline: 'none' }}
+                      style={{ width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '11px 14px', fontFamily: FB, fontSize: 13, color: WHITE, outline: 'none' }}
                       onFocus={e => e.currentTarget.style.borderColor = GOLD}
                       onBlur={e => e.currentTarget.style.borderColor = BLACK_BORDER}
                     />
@@ -917,7 +917,7 @@ export default function RegisterPage() {
                       placeholder="e.g. Portuguese, French, Mandarin..."
                       value={bizOtherLanguage}
                       onChange={e => setBizOtherLanguage(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(196,151,58,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '11px 14px', fontFamily: FB, fontSize: 13, color: WHITE, outline: 'none' }}
+                      style={{ width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '11px 14px', fontFamily: FB, fontSize: 13, color: WHITE, outline: 'none' }}
                       onFocus={e => e.currentTarget.style.borderColor = GOLD}
                       onBlur={e => e.currentTarget.style.borderColor = BLACK_BORDER}
                     />
@@ -957,7 +957,7 @@ export default function RegisterPage() {
               <Field label="Confirm Password" type="password" placeholder="••••••••" value={bizConfirmPw} onChange={setBizConfirmPw} focused={focused === 'bizConfirmPw'} onFocus={() => setFocused('bizConfirmPw')} onBlur={() => setFocused(null)} error={errors.bizConfirmPw} />
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Campari administrators.
+                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Honey Group administrators.
                 </p>
               </div>
             </div>

@@ -5,26 +5,26 @@ import { getActiveJobs, getAllJobsWithAdminJobs } from '../jobs/jobsData';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 // ── Color tokens ──────────────────────────────────────────────────────────────
-const GL  = '#E8A820'
-const G   = '#D4880A'
-const G3  = '#C07818'
-const G5  = '#6B3F10'
-const B   = '#0C0A07'
-const D1  = '#141008'
-const D2  = '#1A1408'
-const W   = '#CEC5B2'
-const WM  = 'rgba(200,188,168,0.88)'
-const WD  = 'rgba(168,152,130,0.55)'
-const BB  = 'rgba(212,136,10,0.16)'
-const JB6 = 'rgba(12,10,7,0.60)'
-const JBB = 'rgba(12,10,7,0.22)'
+const GL  = '#C9BFA6'
+const G   = '#8F8A7C'
+const G3  = '#7A756A'
+const G5  = '#443F36'
+const B   = '#050504'
+const D1  = '#080807'
+const D2  = '#0D0D0A'
+const W   = '#F0F0F0'
+const WM  = 'rgba(222,222,222,0.88)'
+const WD  = 'rgba(189,189,189,0.55)'
+const BB  = 'rgba(170,160,135,0.16)'
+const JB6 = 'rgba(5,5,4,0.60)'
+const JBB = 'rgba(5,5,4,0.22)'
 
-// ── Filter button colors for the GOLD section background (#AB8D3F) ────────────
+// ── Filter button colors for the GOLD section background (#928A76) ────────────
 // High-contrast dark text on gold — much more readable
 const FILTER_ACTIVE_BG    = 'rgba(0,0,0,0.72)'
-const FILTER_ACTIVE_TEXT  = '#F5E6C0'           // near-white warm cream
+const FILTER_ACTIVE_TEXT  = '#EFEFEF'           // near-white warm cream
 const FILTER_IDLE_BG      = 'rgba(0,0,0,0.28)'
-const FILTER_IDLE_TEXT    = '#1A1000'           // very dark brown — strong contrast on gold
+const FILTER_IDLE_TEXT    = '#0A0A08'           // very dark brown — strong contrast on gold
 
 const FD = "'Work Sans', 'worksans', sans-serif"
 
@@ -41,7 +41,7 @@ const GLOBAL_CSS = `
   .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  @keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 0 rgba(232,168,32,0.5)} 50%{box-shadow:0 0 0 16px rgba(232,168,32,0)} }
+  @keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 0 rgba(201,191,166,0.5)} 50%{box-shadow:0 0 0 16px rgba(201,191,166,0)} }
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
   @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
   @keyframes hero-fade { 0%{opacity:0;transform:translateY(30px)} 100%{opacity:1;transform:translateY(0)} }
@@ -52,20 +52,25 @@ const GLOBAL_CSS = `
   @keyframes card-rise { 0%{opacity:0;transform:translateY(60px)} 100%{opacity:1;transform:translateY(0)} }
   @keyframes img-scale { 0%{transform:scale(1.08)} 100%{transform:scale(1)} }
 
+  /* Hero media: color photos/video show in black & white until hovered, */
+  /* then reveal their real color. Already-B&W media is untouched. */
+  .hero-media-mono img, .hero-media-mono video { filter: grayscale(1) contrast(1.05); transition: filter 0.6s ease; }
+  .hero-media-mono:hover img, .hero-media-mono:hover video { filter: grayscale(0) contrast(1); }
+
   .feat-card-0, .feat-card-1, .feat-card-2 {
     transition: transform 0.55s cubic-bezier(0.22,1,0.36,1), box-shadow 0.55s ease, z-index 0s;
   }
 
-  .nav-link { color: rgba(192,178,158,0.80); background: none; border: none; cursor: pointer; font-family: ${FD}; font-size: 12px; font-weight: 400; letter-spacing: 0.12em; padding: 0; transition: color 0.25s; }
+  .nav-link { color: rgba(196,187,163,0.80); background: none; border: none; cursor: pointer; font-family: ${FD}; font-size: 12px; font-weight: 400; letter-spacing: 0.12em; padding: 0; transition: color 0.25s; }
   .nav-link:hover { color: ${GL}; }
 
   .ticker-wrap { overflow: hidden; border-top: 1px solid ${BB}; border-bottom: 1px solid ${BB}; background: ${D1}; }
   .ticker-inner { display: flex; white-space: nowrap; animation: ticker 28s linear infinite; }
-  .ticker-item { padding: 0 56px; font-size: 10px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(192,178,158,0.82); display: flex; align-items: center; gap: 24px; height: 42px; font-family: ${FD}; }
+  .ticker-item { padding: 0 56px; font-size: 10px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(196,187,163,0.82); display: flex; align-items: center; gap: 24px; height: 42px; font-family: ${FD}; }
   .ticker-item span { color: ${GL}; font-size: 8px; }
 
   .job-card-hover:hover { transform: translateY(-6px) !important; }
-  .job-card-hover:hover .card-inner { border-color: rgba(232,168,32,0.5) !important; box-shadow: 0 24px 48px rgba(0,0,0,0.7), 0 0 32px rgba(232,168,32,0.12) !important; }
+  .job-card-hover:hover .card-inner { border-color: rgba(201,191,166,0.5) !important; box-shadow: 0 24px 48px rgba(0,0,0,0.7), 0 0 32px rgba(201,191,166,0.12) !important; }
 
   .triptych-img { overflow: hidden; position: relative; }
   .triptych-img img { width:100%; height:100%; object-fit:cover; transition: transform 0.8s cubic-bezier(0.22,1,0.36,1); filter: grayscale(100%); }
@@ -98,7 +103,7 @@ const GLOBAL_CSS = `
   }
   .filter-btn.idle:hover {
     background: rgba(0,0,0,0.45);
-    color: #F5E6C0;
+    color: #EFEFEF;
     border-color: rgba(0,0,0,0.5);
   }
 
@@ -255,27 +260,27 @@ function JobCard({ job, index, isLoggedIn, isPromoter, applyingJobId, onLock, on
         style={{
           position: 'relative', overflow: 'hidden', height: '100%',
           background: isFeatured
-            ? `linear-gradient(160deg, #2A1E06 0%, #1E1504 50%, #160F03 100%)`
-            : `linear-gradient(160deg, ${D2} 0%, rgba(20,16,5,0.98) 100%)`,
-          border: `1px solid ${isFeatured ? 'rgba(232,168,32,0.4)' : BB}`,
+            ? `linear-gradient(160deg, #17170F 0%, #0F0F0C 50%, #080807 100%)`
+            : `linear-gradient(160deg, ${D2} 0%, rgba(9,9,7,0.98) 100%)`,
+          border: `1px solid ${isFeatured ? 'rgba(201,191,166,0.4)' : BB}`,
           transition: 'border-color 0.3s, box-shadow 0.3s',
           boxShadow: isFeatured
-            ? `0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(232,168,32,0.08)`
+            ? `0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(201,191,166,0.08)`
             : `0 4px 16px rgba(0,0,0,0.4)`,
           cursor: 'pointer',
           padding: '0 0 20px 0',
           display: 'flex', flexDirection: 'column',
         }}
       >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: isFeatured ? 3 : 2, background: isFeatured ? `linear-gradient(90deg, ${G5}, ${GL}, #F5C842, ${GL}, ${G5})` : `linear-gradient(90deg, ${G5}, ${accent}88, ${G5})` }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: isFeatured ? 3 : 2, background: isFeatured ? `linear-gradient(90deg, ${G5}, ${GL}, #F0F0F0, ${GL}, ${G5})` : `linear-gradient(90deg, ${G5}, ${accent}88, ${G5})` }} />
 
         {isFeatured && (
-          <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', width: 200, height: 120, background: 'radial-gradient(ellipse, rgba(232,168,32,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', width: 200, height: 120, background: 'radial-gradient(ellipse, rgba(201,191,166,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
         )}
 
         <div style={{ padding: '20px 20px 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: isFeatured ? GL : WD, fontFamily: FD, padding: isFeatured ? '3px 8px' : '0', background: isFeatured ? 'rgba(232,168,32,0.1)' : 'transparent', border: isFeatured ? `1px solid rgba(232,168,32,0.2)` : 'none' }}>
+            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: isFeatured ? GL : WD, fontFamily: FD, padding: isFeatured ? '3px 8px' : '0', background: isFeatured ? 'rgba(201,191,166,0.1)' : 'transparent', border: isFeatured ? `1px solid rgba(201,191,166,0.2)` : 'none' }}>
               {isFeatured ? '★ Featured' : job.type}
             </span>
             <span style={{ fontSize: 8, color: WD, fontFamily: FD }}>{job.slotsLeft} left</span>
@@ -287,7 +292,7 @@ function JobCard({ job, index, isLoggedIn, isPromoter, applyingJobId, onLock, on
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 10 }}>
             <span style={{ fontFamily: FD, fontSize: isFeatured ? 26 : 20, fontWeight: 900, color: GL, lineHeight: 1 }}>{job.pay}</span>
-            <span style={{ fontSize: 10, color: 'rgba(192,178,158,0.82)', fontFamily: FD }}>{job.payPer}</span>
+            <span style={{ fontSize: 10, color: 'rgba(196,187,163,0.82)', fontFamily: FD }}>{job.payPer}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
@@ -296,7 +301,7 @@ function JobCard({ job, index, isLoggedIn, isPromoter, applyingJobId, onLock, on
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <div style={{ height: 2, background: 'rgba(206,197,178,0.08)', overflow: 'hidden' }}>
+            <div style={{ height: 2, background: 'rgba(236,236,236,0.08)', overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${fillPct}%`, background: `linear-gradient(90deg, ${G5}, ${accent})`, transition: 'width 0.7s ease' }} />
             </div>
           </div>
@@ -306,9 +311,9 @@ function JobCard({ job, index, isLoggedIn, isPromoter, applyingJobId, onLock, on
               <button
                 onClick={() => onApply(job)}
                 disabled={applyingJobId === job.id}
-                style={{ flex: 1, padding: '9px', border: `1px solid ${isFeatured ? 'rgba(232,168,32,0.6)' : 'rgba(232,168,32,0.35)'}`, background: applyingJobId === job.id ? 'rgba(232,168,32,0.06)' : isFeatured ? 'rgba(232,168,32,0.14)' : 'rgba(232,168,32,0.08)', color: GL, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: applyingJobId === job.id ? 'wait' : 'pointer', transition: 'all 0.2s', opacity: applyingJobId === job.id ? 0.6 : 1 }}
-                onMouseEnter={e => { if(applyingJobId !== job.id){ e.currentTarget.style.background = 'rgba(232,168,32,0.22)'; e.currentTarget.style.borderColor = GL }}}
-                onMouseLeave={e => { e.currentTarget.style.background = isFeatured ? 'rgba(232,168,32,0.14)' : 'rgba(232,168,32,0.08)'; e.currentTarget.style.borderColor = isFeatured ? 'rgba(232,168,32,0.6)' : 'rgba(232,168,32,0.35)' }}>
+                style={{ flex: 1, padding: '9px', border: `1px solid ${isFeatured ? 'rgba(201,191,166,0.6)' : 'rgba(201,191,166,0.35)'}`, background: applyingJobId === job.id ? 'rgba(201,191,166,0.06)' : isFeatured ? 'rgba(201,191,166,0.14)' : 'rgba(201,191,166,0.08)', color: GL, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: applyingJobId === job.id ? 'wait' : 'pointer', transition: 'all 0.2s', opacity: applyingJobId === job.id ? 0.6 : 1 }}
+                onMouseEnter={e => { if(applyingJobId !== job.id){ e.currentTarget.style.background = 'rgba(201,191,166,0.22)'; e.currentTarget.style.borderColor = GL }}}
+                onMouseLeave={e => { e.currentTarget.style.background = isFeatured ? 'rgba(201,191,166,0.14)' : 'rgba(201,191,166,0.08)'; e.currentTarget.style.borderColor = isFeatured ? 'rgba(201,191,166,0.6)' : 'rgba(201,191,166,0.35)' }}>
                 {applyingJobId === job.id ? 'Applying…' : 'Apply →'}
               </button>
               <button onClick={() => onView(job.id)} style={{ padding: '9px 10px', border: `1px solid ${BB}`, background: 'transparent', color: WM, fontFamily: FD, fontSize: 9, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
@@ -318,9 +323,9 @@ function JobCard({ job, index, isLoggedIn, isPromoter, applyingJobId, onLock, on
               </button>
             </div>
           ) : isLoggedIn ? (
-            <button onClick={() => onView(job.id)} style={{ width: '100%', padding: '9px', border: `1px solid ${isFeatured ? 'rgba(232,168,32,0.45)' : BB}`, background: isFeatured ? 'rgba(232,168,32,0.08)' : 'transparent', color: GL, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,168,32,0.14)'; e.currentTarget.style.borderColor = GL }}
-              onMouseLeave={e => { e.currentTarget.style.background = isFeatured ? 'rgba(232,168,32,0.08)' : 'transparent'; e.currentTarget.style.borderColor = isFeatured ? 'rgba(232,168,32,0.45)' : BB }}>
+            <button onClick={() => onView(job.id)} style={{ width: '100%', padding: '9px', border: `1px solid ${isFeatured ? 'rgba(201,191,166,0.45)' : BB}`, background: isFeatured ? 'rgba(201,191,166,0.08)' : 'transparent', color: GL, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,191,166,0.14)'; e.currentTarget.style.borderColor = GL }}
+              onMouseLeave={e => { e.currentTarget.style.background = isFeatured ? 'rgba(201,191,166,0.08)' : 'transparent'; e.currentTarget.style.borderColor = isFeatured ? 'rgba(201,191,166,0.45)' : BB }}>
               View Details →
             </button>
           ) : (
@@ -394,7 +399,7 @@ function JobsSection({ jobs, isLoggedIn, isPromoter, applyingJobId, onLock, onVi
         </div>
 
         {/* Count */}
-        <div className="filter-count" style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#1A1000', fontFamily: FD }}>
+        <div className="filter-count" style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#0A0A08', fontFamily: FD }}>
           {filtered.length} position{filtered.length !== 1 ? 's' : ''}
         </div>
       </div>
@@ -407,7 +412,7 @@ function JobsSection({ jobs, isLoggedIn, isPromoter, applyingJobId, onLock, onVi
       </div>
 
       {filtered.length === 0 && (
-        <div style={{ padding: '40px 0', textAlign: 'center', color: '#1A1000', fontFamily: FD, fontSize: 13 }}>
+        <div style={{ padding: '40px 0', textAlign: 'center', color: '#0A0A08', fontFamily: FD, fontSize: 13 }}>
           No jobs match your filters.
         </div>
       )}
@@ -417,9 +422,9 @@ function JobsSection({ jobs, isLoggedIn, isPromoter, applyingJobId, onLock, onVi
 
 
 // ── Extra color constants needed by the modal components ──────────────────────
-const BC  = '#1A1408'   // card background (matches promoter dark)
-const G2  = '#8B5A1A'   // deep gold
-const G4  = '#8B5A1A'   // alias
+const BC  = '#0D0D0A'   // card background (matches promoter dark)
+const G2  = '#8A8474'   // deep gold
+const G4  = '#8A8474'   // alias
 const FB  = "'DM Sans', system-ui, sans-serif"  // body font
 
 // ── Terms & Conditions Modal (shared with JobsPage) ─────────────────────────
@@ -443,8 +448,8 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         </div>
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
-          {!scrolled&&<div style={{ background:'rgba(232,168,32,0.06)', border:`1px solid rgba(232,168,32,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promoter Terms & Conditions apply.'}</div>
+          {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard CampariS Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -452,7 +457,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
             <span style={{ fontSize:12, color:WM, lineHeight:1.6, fontFamily:FB }}>I have read and understand the Terms & Conditions. I accept this engagement as an independent contractor.</span>
           </label>
           <div style={{ display:'flex', gap:10 }}>
-            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(206,197,178,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
+            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(236,236,236,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
             <button onClick={onClose} style={{ padding:'13px 18px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:2 }}>Cancel</button>
           </div>
         </div>
@@ -483,7 +488,7 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
               <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:G, marginBottom:4, fontFamily:FB }}>Demo Payment Gateway</div>
               <h2 style={{ fontFamily:FD, fontSize:18, color:W, marginBottom:4 }}>Confirm Application</h2>
               <div style={{ fontSize:12, color:WM, fontFamily:FB }}>{job.title} — {job.company}</div>
-              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(232,168,32,0.08)', border:`1px solid rgba(232,168,32,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
+              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(201,191,166,0.08)', border:`1px solid rgba(201,191,166,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
                 <span style={{ fontSize:11, color:WM, fontFamily:FB }}>Application Fee (Demo)</span>
                 <span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 25.00</span>
               </div>
@@ -491,11 +496,11 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
             </div>
             <div style={{ padding:'16px 24px 22px' }}>
               <div style={{ display:'flex', gap:6, marginBottom:16 }}>
-                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(196,151,58,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
+                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(189,189,189,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
               </div>
               {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
-              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
+              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Promotions Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`CP-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
+              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>CP Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
               <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
               <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
             </div>
@@ -513,7 +518,7 @@ function LoginPromptModal({ onClose, onLogin, onRegister }: { onClose: () => voi
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: D2, border: `1px solid ${BB}`, padding: '52px 48px', maxWidth: 420, width: '100%', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${G5}, ${GL}, ${G5})` }} />
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: `rgba(212,136,10,0.12)`, border: `1px solid rgba(232,168,32,0.35)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 26, animation: 'float 3s ease-in-out infinite' }}>⬡</div>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: `rgba(170,160,135,0.12)`, border: `1px solid rgba(201,191,166,0.35)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 26, animation: 'float 3s ease-in-out infinite' }}>⬡</div>
         <div style={{ fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: GL, marginBottom: 12, fontFamily: FD }}>Members Only</div>
         <h2 style={{ fontFamily: FD, fontSize: 26, fontWeight: 700, color: W, marginBottom: 14, lineHeight: 1.2 }}>Unlock Job Details</h2>
         <p style={{ fontSize: 13, color: WM, lineHeight: 1.75, marginBottom: 36, fontFamily: FD }}>Create a free account or sign in to view full job details, requirements, and apply for promoter positions.</p>
@@ -524,7 +529,7 @@ function LoginPromptModal({ onClose, onLogin, onRegister }: { onClose: () => voi
             Create Free Account
           </button>
           <button onClick={onLogin} style={{ width: '100%', padding: '15px', background: 'transparent', border: `1px solid ${BB}`, color: WM, fontFamily: FD, fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.25s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(232,168,32,0.45)`; e.currentTarget.style.color = GL }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(201,191,166,0.45)`; e.currentTarget.style.color = GL }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = WM }}>
             Already Have an Account
           </button>
@@ -538,9 +543,9 @@ function LoginPromptModal({ onClose, onLogin, onRegister }: { onClose: () => voi
 // ── Feature Cards ─────────────────────────────────────────────────────────────
 function FeatureSlideshow() {
   const features = [
-    { tag: 'Smart Dispatch', icon: '◎', title: 'Right person, right place.', body: 'AI-powered matching filters promoters by location, reliability score, and physical attributes — filling your brand activations with precision.', stat: '280+', statLabel: 'Active Promoters', bg: `linear-gradient(160deg, #1E1608 0%, #120D03 100%)`, border: 'rgba(232,168,32,0.30)', accent: GL, rotate: '-3deg', translateY: '12px', zIndex: 1 },
-    { tag: 'Geo-Verified Shifts', icon: '⬡', title: 'Attendance you can trust.', body: 'Promoters check in only when within 5m of the venue. GPS verification plus mandatory selfie — no proxy clock-ins, ever.', stat: '98%', statLabel: 'Shift Attendance', bg: `linear-gradient(160deg, #3D2E0A 0%, #2A1E05 100%)`, border: '#AB8D3F', accent: '#AB8D3F', rotate: '0deg', translateY: '0px', zIndex: 3 },
-    { tag: 'Smart Payroll', icon: '◈', title: 'Calculate pay in minutes.', body: 'Hours × Rate calculations done instantly. View earnings per promoter and per campaign. Admin approves — no direct payments on-platform.', stat: '12', statLabel: 'Cities Covered', bg: `linear-gradient(160deg, #1E1608 0%, #120D03 100%)`, border: 'rgba(232,168,32,0.30)', accent: GL, rotate: '3deg', translateY: '12px', zIndex: 1 },
+    { tag: 'Smart Dispatch', icon: '◎', title: 'Right person, right place.', body: 'AI-powered matching filters promoters by location, reliability score, and physical attributes — filling your brand activations with precision.', stat: '280+', statLabel: 'Active Promoters', bg: `linear-gradient(160deg, #100F0B 0%, #060605 100%)`, border: 'rgba(201,191,166,0.30)', accent: GL, rotate: '-3deg', translateY: '12px', zIndex: 1 },
+    { tag: 'Geo-Verified Shifts', icon: '⬡', title: 'Attendance you can trust.', body: 'Promoters check in only when within 5m of the venue. GPS verification plus mandatory selfie — no proxy clock-ins, ever.', stat: '98%', statLabel: 'Shift Attendance', bg: `linear-gradient(160deg, #2E2E2E 0%, #17170F 100%)`, border: '#928A76', accent: '#928A76', rotate: '0deg', translateY: '0px', zIndex: 3 },
+    { tag: 'Smart Payroll', icon: '◈', title: 'Calculate pay in minutes.', body: 'Hours × Rate calculations done instantly. View earnings per promoter and per campaign. Admin approves — no direct payments on-platform.', stat: '12', statLabel: 'Cities Covered', bg: `linear-gradient(160deg, #100F0B 0%, #060605 100%)`, border: 'rgba(201,191,166,0.30)', accent: GL, rotate: '3deg', translateY: '12px', zIndex: 1 },
   ]
 
   return (
@@ -548,10 +553,10 @@ function FeatureSlideshow() {
       {features.map((f, i) => (
         <div key={i} className={`feat-card-${i}`}
           style={{ transform: `rotate(${f.rotate}) translateY(${f.translateY})`, zIndex: f.zIndex, transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s ease', transformStyle: 'preserve-3d', cursor: 'default', position: 'relative' }}
-          onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = `rotate(0deg) translateY(-16px) rotateY(4deg)`; el.style.zIndex = '10'; el.style.boxShadow = `0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(232,168,32,0.12)` }}
+          onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = `rotate(0deg) translateY(-16px) rotateY(4deg)`; el.style.zIndex = '10'; el.style.boxShadow = `0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(201,191,166,0.12)` }}
           onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = `rotate(${f.rotate}) translateY(${f.translateY})`; el.style.zIndex = String(f.zIndex); el.style.boxShadow = 'none' }}>
-          <div style={{ background: f.bg, border: `1px solid ${f.border}`, position: 'relative', overflow: 'hidden', boxShadow: i === 1 ? `0 16px 48px rgba(0,0,0,0.6), 0 0 40px rgba(171,141,63,0.15)` : `0 8px 32px rgba(0,0,0,0.5)` }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: i === 1 ? 4 : 2, background: i === 1 ? `linear-gradient(90deg, #6B4F10, #AB8D3F, #D4B86A, #AB8D3F, #6B4F10)` : `linear-gradient(90deg, ${G5}, ${GL}, ${G5})` }} />
+          <div style={{ background: f.bg, border: `1px solid ${f.border}`, position: 'relative', overflow: 'hidden', boxShadow: i === 1 ? `0 16px 48px rgba(0,0,0,0.6), 0 0 40px rgba(146,139,120,0.15)` : `0 8px 32px rgba(0,0,0,0.5)` }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: i === 1 ? 4 : 2, background: i === 1 ? `linear-gradient(90deg, #4C4840, #928A76, #CFC7B2, #928A76, #4C4840)` : `linear-gradient(90deg, ${G5}, ${GL}, ${G5})` }} />
             <div style={{ padding: '48px 36px 44px', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 420, justifyContent: 'space-between' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
@@ -564,7 +569,7 @@ function FeatureSlideshow() {
                 <h3 style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, lineHeight: 1.2, color: W, marginBottom: 16, letterSpacing: '-0.01em' }}>{f.title}</h3>
                 <p style={{ fontSize: 13, lineHeight: 1.8, color: WM, fontFamily: FD }}>{f.body}</p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, paddingTop: 24, borderTop: `1px solid ${i === 1 ? 'rgba(171,141,63,0.2)' : BB}` }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, paddingTop: 24, borderTop: `1px solid ${i === 1 ? 'rgba(146,139,120,0.2)' : BB}` }}>
                 <span style={{ fontSize: 32, fontWeight: 900, color: f.accent, fontFamily: FD, lineHeight: 1 }}>{f.stat}</span>
                 <span style={{ fontSize: 11, color: WD, fontFamily: FD, letterSpacing: '0.06em' }}>{f.statLabel}</span>
               </div>
@@ -583,7 +588,7 @@ function ImageTriptych() {
       <div className="triptych-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr 1fr', height: 520 }}>
         <div className="triptych-img triptych-side" style={{ position: 'relative' }}>
           <img src="/leftFooter.jpg" alt="Concert crowd" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%) brightness(0.7)', transition: 'transform 0.8s cubic-bezier(0.22,1,0.36,1)' }} onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.04)' }} onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(12,10,7,0.3), transparent)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(5,5,4,0.3), transparent)' }} />
         </div>
         <div className="triptych-img center triptych-center" style={{ position: 'relative', zIndex: 2 }}>
           <img src="/centreFooter.jpg" alt="Promoter at event" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', filter: 'brightness(1.05) saturate(1.1)', transition: 'transform 0.8s cubic-bezier(0.22,1,0.36,1)' }} onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.04)' }} onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }} />
@@ -593,7 +598,7 @@ function ImageTriptych() {
         </div>
         <div className="triptych-img triptych-side" style={{ position: 'relative' }}>
           <img src="/rightFooter.jpg" alt="Street crowd" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'grayscale(100%) brightness(0.7)', transition: 'transform 0.8s cubic-bezier(0.22,1,0.36,1)' }} onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.04)' }} onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(12,10,7,0.3), transparent)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(5,5,4,0.3), transparent)' }} />
         </div>
       </div>
     </section>
@@ -621,12 +626,15 @@ export default function LandingPage() {
   const rFeatures = useReveal()
   const rJobs     = useReveal()
 
+  // `mono: true` = this photo/video is originally in color, so it's shown
+  // desaturated (black & white) by default and reveals its real color on
+  // hover. All five hero pieces are color media, so all five get the effect.
   const heroMedia = [
-    { type: 'image', src: '/1_hero.jpg' },
-    { type: 'image', src: '/2_hero.jpg' },
-    { type: 'video', src: '/3_hero.mp4' },
-    { type: 'image', src: '/4_hero.jpg' },
-    { type: 'image', src: '/5_hero.jpg' },
+    { type: 'image', src: '/1_hero.jpg', mono: true },
+    { type: 'image', src: '/2_hero.jpg', mono: true },
+    { type: 'video', src: '/3_hero.mp4', mono: true },
+    { type: 'image', src: '/4_hero.jpg', mono: true },
+    { type: 'image', src: '/5_hero.jpg', mono: true },
   ]
 
   useEffect(() => {
@@ -645,8 +653,8 @@ export default function LandingPage() {
     // Merge localStorage (admin broadcast) jobs with live API jobs so
     // newly created admin jobs appear immediately without a page refresh.
     const mergeAndSet = (apiJobs: any[] = []) => {
-      const GL2  = '#E8A820'
-      const ACCENT_PALETTE = [GL2,'#D4880A','#AB8D3F','#C4973A','#8B5A1A']
+      const GL2  = '#C9BFA6'
+      const ACCENT_PALETTE = [GL2,'#8F8A7C','#928A76','#9C9484','#8A8474']
       const mapped = apiJobs.map((j: any, idx: number) => ({
         id: j.id,
         title: j.title,
@@ -665,7 +673,7 @@ export default function LandingPage() {
         duration: j.startTime && j.endTime ? `${j.startTime}–${j.endTime}` : '',
         tags: [j.filters?.gender, j.filters?.category].filter(Boolean),
         accentLine: ACCENT_PALETTE[idx % ACCENT_PALETTE.length],
-        gradient: 'linear-gradient(135deg, rgba(232,168,32,0.10) 0%, rgba(196,151,58,0.04) 100%)',
+        gradient: 'linear-gradient(135deg, rgba(201,191,166,0.10) 0%, rgba(189,189,189,0.04) 100%)',
         status: (j.status || 'OPEN').toLowerCase(),
         filters: j.filters,
         termsAndConditions: j.termsAndConditions,
@@ -703,7 +711,7 @@ export default function LandingPage() {
             slots: j.totalSlots, slotsLeft: j.totalSlots - (j.filledSlots || 0),
             status: (j.status || 'open').toLowerCase(),
             tags: [j.filters?.gender, j.filters?.category].filter(Boolean),
-            accentLine: '#E8A820', gradient: 'transparent',
+            accentLine: '#C9BFA6', gradient: 'transparent',
             companyInitial: (j.client || '?').charAt(0),
             filters: j.filters,
           }))))
@@ -789,7 +797,7 @@ export default function LandingPage() {
       {/* ── NAV ── */}
       <nav className="nav-root" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200, padding: '0 48px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
         <div className="nav-logo" style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.01em', flexShrink: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}></span>
+          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}> GROUP</span>
         </div>
 
         {/* Desktop nav links — hidden on mobile */}
@@ -809,11 +817,11 @@ export default function LandingPage() {
           {session ? (
             <>
               <button onClick={handleDashboard} style={{ fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: GL, border: 'none', color: B, padding: '11px 24px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = G} onMouseLeave={e => e.currentTarget.style.background = GL}>My Dashboard</button>
-              <button onClick={handleLogout} style={{ fontFamily: FD, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: '1px solid rgba(206,197,178,0.3)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = GL }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(206,197,178,0.3)'; e.currentTarget.style.color = WM }}>Log Out</button>
+              <button onClick={handleLogout} style={{ fontFamily: FD, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: '1px solid rgba(236,236,236,0.3)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = GL }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(236,236,236,0.3)'; e.currentTarget.style.color = WM }}>Log Out</button>
             </>
           ) : (
             <>
-              <button onClick={() => navigate('/login')} style={{ fontFamily: FD, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: '1px solid rgba(206,197,178,0.3)', color: WM, padding: '11px 22px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = GL }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(206,197,178,0.3)'; e.currentTarget.style.color = WM }}>LOG IN</button>
+              <button onClick={() => navigate('/login')} style={{ fontFamily: FD, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: '1px solid rgba(236,236,236,0.3)', color: WM, padding: '11px 22px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = GL }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(236,236,236,0.3)'; e.currentTarget.style.color = WM }}>LOG IN</button>
               <button onClick={() => navigate('/register')} style={{ fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: GL, border: 'none', color: B, padding: '11px 24px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = G} onMouseLeave={e => e.currentTarget.style.background = GL}>REGISTER</button>
             </>
           )}
@@ -824,7 +832,7 @@ export default function LandingPage() {
       <section className="hero-root" style={{ height: '75vh', minHeight: 540, maxHeight: 820, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'stretch', background: '#000', marginTop: 68, padding: '28px 48px' }}>
         <div className="hero-media-panel" style={{ position: 'absolute', top: 28, left: '48%', right: 48, bottom: 28, borderRadius: 16, overflow: 'hidden', zIndex: 1 }}>
           {heroMedia.map((media, idx) => (
-            <div key={idx} style={{ position: 'absolute', inset: 0, opacity: heroSlide === idx ? 1 : 0, transition: 'opacity 1s ease', zIndex: heroSlide === idx ? 1 : 0 }}>
+            <div key={idx} className={media.mono ? 'hero-media-item hero-media-mono' : 'hero-media-item'} style={{ position: 'absolute', inset: 0, opacity: heroSlide === idx ? 1 : 0, transition: 'opacity 1s ease', zIndex: heroSlide === idx ? 1 : 0 }}>
               {media.type === 'video' ? (
                 <video autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}><source src={media.src} type="video/mp4" /></video>
               ) : (
@@ -847,15 +855,15 @@ export default function LandingPage() {
             <span style={{ color: W, display: 'inline-block', maxWidth: '46%' }}>CENTRE STAGE</span>
           </h1>
           {session ? (
-            <button className="hero-cta-btn" onClick={handleDashboard} style={{ fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', border: '2px solid rgba(206,197,178,0.7)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8, pointerEvents: 'all', width: 'fit-content', whiteSpace: 'nowrap', maxWidth: '38%' }}
+            <button className="hero-cta-btn" onClick={handleDashboard} style={{ fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', border: '2px solid rgba(236,236,236,0.7)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8, pointerEvents: 'all', width: 'fit-content', whiteSpace: 'nowrap', maxWidth: '38%' }}
               onMouseEnter={e => { e.currentTarget.style.background = GL; e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = B }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(206,197,178,0.7)'; e.currentTarget.style.color = WM }}>
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(236,236,236,0.7)'; e.currentTarget.style.color = WM }}>
               ▶ MY DASHBOARD
             </button>
           ) : (
-            <button className="hero-cta-btn" onClick={() => navigate('/register')} style={{ fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', border: '2px solid rgba(206,197,178,0.7)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8, pointerEvents: 'all', width: 'fit-content', whiteSpace: 'nowrap', maxWidth: '38%' }}
+            <button className="hero-cta-btn" onClick={() => navigate('/register')} style={{ fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', border: '2px solid rgba(236,236,236,0.7)', color: WM, padding: '11px 20px', cursor: 'pointer', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8, pointerEvents: 'all', width: 'fit-content', whiteSpace: 'nowrap', maxWidth: '38%' }}
               onMouseEnter={e => { e.currentTarget.style.background = GL; e.currentTarget.style.borderColor = GL; e.currentTarget.style.color = B }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(206,197,178,0.7)'; e.currentTarget.style.color = WM }}>
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(236,236,236,0.7)'; e.currentTarget.style.color = WM }}>
               ▶ JOIN AS PROMOTER
             </button>
           )}
@@ -878,10 +886,10 @@ export default function LandingPage() {
           secJobsRef.current = el
         }}
         className="reveal jobs-section-root"
-        style={{ padding: '48px 80px 56px', background: '#AB8D3F', borderBottom: `1px solid rgba(120,75,0,0.4)`, position: 'relative', overflow: 'hidden' }}
+        style={{ padding: '48px 80px 56px', background: '#928A76', borderBottom: `1px solid rgba(78,74,64,0.4)`, position: 'relative', overflow: 'hidden' }}
       >
         {/* Ambient glow */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: 'radial-gradient(ellipse at 15% 40%, rgba(255,210,90,0.22) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(90,45,0,0.18) 0%, transparent 50%)' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: 'radial-gradient(ellipse at 15% 40%, rgba(212,212,212,0.22) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(50,47,40,0.18) 0%, transparent 50%)' }} />
 
         {/* Corner star decorations */}
         <div style={{ position: 'absolute', top: 0, left: 0, width: 340, height: 340, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
@@ -903,7 +911,7 @@ export default function LandingPage() {
                 <span style={{ color: B }}>Live </span>
                 <span style={{ color: B, fontStyle: 'italic' }}>Jobs.</span>
               </h2>
-              <p style={{ fontSize: 13, color: '#1A1000', fontWeight: 600, lineHeight: 1.6, fontFamily: FD }}>
+              <p style={{ fontSize: 13, color: '#0A0A08', fontWeight: 600, lineHeight: 1.6, fontFamily: FD }}>
                 {allJobs.length} active positions across South Africa.
                 {!session && <> <span style={{ color: B, fontWeight: 800, textDecoration: 'underline', cursor: 'pointer' }} onClick={() => navigate('/login')}>Login</span> or <span style={{ color: B, fontWeight: 800, textDecoration: 'underline', cursor: 'pointer' }} onClick={() => navigate('/register')}>register</span> to apply.</>}
               </p>
@@ -914,7 +922,7 @@ export default function LandingPage() {
                   <span style={{ fontSize: 12, color: B }}>⬡</span>
                   <div>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: B, fontFamily: FD }}>Members Only</div>
-                    <div style={{ fontSize: 11, color: '#1A1000', marginTop: 1, fontFamily: FD }}>Login to apply</div>
+                    <div style={{ fontSize: 11, color: '#0A0A08', marginTop: 1, fontFamily: FD }}>Login to apply</div>
                   </div>
                 </div>
               ) : (
@@ -922,7 +930,7 @@ export default function LandingPage() {
                   <span style={{ fontSize: 12, color: B }}>◉</span>
                   <div>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: B, fontFamily: FD }}>Logged In</div>
-                    <div style={{ fontSize: 11, color: '#1A1000', marginTop: 1, fontFamily: FD }}>{session.name}</div>
+                    <div style={{ fontSize: 11, color: '#0A0A08', marginTop: 1, fontFamily: FD }}>{session.name}</div>
                   </div>
                 </div>
               )}
@@ -930,12 +938,12 @@ export default function LandingPage() {
           </div>
 
           {applySuccess && (
-            <div style={{ position:'fixed', bottom: 28, left:'50%', transform:'translateX(-50%)', zIndex:999, padding: '14px 28px', background: 'rgba(20,40,20,0.97)', border: '1px solid rgba(74,171,100,0.6)', color: '#6DEFA0', fontFamily: FD, fontSize: 13, borderRadius: 6, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', whiteSpace:'nowrap', maxWidth:'90vw', textAlign:'center' }}>
+            <div style={{ position:'fixed', bottom: 28, left:'50%', transform:'translateX(-50%)', zIndex:999, padding: '14px 28px', background: 'rgba(30,28,23,0.97)', border: '1px solid rgba(74,171,100,0.6)', color: '#6DEFA0', fontFamily: FD, fontSize: 13, borderRadius: 6, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', whiteSpace:'nowrap', maxWidth:'90vw', textAlign:'center' }}>
               ✓ {applySuccess}
             </div>
           )}
           {applyError && (
-            <div style={{ position:'fixed', bottom: 28, left:'50%', transform:'translateX(-50%)', zIndex:999, padding: '14px 28px', background: 'rgba(40,10,5,0.97)', border: '1px solid rgba(196,97,74,0.6)', color: '#F0896A', fontFamily: FD, fontSize: 13, borderRadius: 6, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', whiteSpace:'nowrap', maxWidth:'90vw', textAlign:'center' }}>
+            <div style={{ position:'fixed', bottom: 28, left:'50%', transform:'translateX(-50%)', zIndex:999, padding: '14px 28px', background: 'rgba(16,16,13,0.97)', border: '1px solid rgba(196,97,74,0.6)', color: '#F0896A', fontFamily: FD, fontSize: 13, borderRadius: 6, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', whiteSpace:'nowrap', maxWidth:'90vw', textAlign:'center' }}>
               ⚠ {applyError}
             </div>
           )}
@@ -969,9 +977,9 @@ export default function LandingPage() {
           <FeatureSlideshow />
           <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => navigate('/about')}
-              style={{ fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', background: 'transparent', border: `1px solid rgba(232,168,32,0.4)`, color: GL, padding: '14px 44px', cursor: 'pointer', transition: 'all 0.3s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = `rgba(232,168,32,0.08)`; e.currentTarget.style.borderColor = GL }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(232,168,32,0.4)` }}>
+              style={{ fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', background: 'transparent', border: `1px solid rgba(201,191,166,0.4)`, color: GL, padding: '14px 44px', cursor: 'pointer', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = `rgba(201,191,166,0.08)`; e.currentTarget.style.borderColor = GL }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(201,191,166,0.4)` }}>
               About Us →
             </button>
           </div>
@@ -982,7 +990,7 @@ export default function LandingPage() {
       <ImageTriptych />
 
       {/* ── GOLD LINE ── */}
-      <div style={{ height: 3, background: `linear-gradient(90deg, ${G5}, ${GL}, #F5C842, ${GL}, ${G5})` }} />
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${G5}, ${GL}, #F0F0F0, ${GL}, ${G5})` }} />
 
       {/* ── FOOTER ── */}
       <footer style={{ background: B }}>
@@ -990,14 +998,14 @@ export default function LandingPage() {
           <div className="footer-grid-3col" style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1fr', gap: 80, alignItems: 'start' }}>
             {/* Newsletter */}
             <div>
-              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}></span></div>
+              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span></div>
               <h3 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 12, lineHeight: 1.2 }}>Newsletter Sign-Up</h3>
               <p style={{ fontSize: 13, color: WM, lineHeight: 1.75, fontFamily: FD, marginBottom: 28, maxWidth: 300 }}>Subscribe to receive our latest opportunities and platform updates directly to your inbox.</p>
               <div style={{ marginBottom: 12 }}>
-                <input type="text" placeholder="YOUR NAME" style={{ width: '100%', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 0, padding: '14px 16px', fontFamily: FD, fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', color: WM, outline: 'none' }} onFocus={e => e.currentTarget.style.borderColor = `rgba(232,168,32,0.5)`} onBlur={e => e.currentTarget.style.borderColor = BB} />
+                <input type="text" placeholder="YOUR NAME" style={{ width: '100%', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 0, padding: '14px 16px', fontFamily: FD, fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', color: WM, outline: 'none' }} onFocus={e => e.currentTarget.style.borderColor = `rgba(201,191,166,0.5)`} onBlur={e => e.currentTarget.style.borderColor = BB} />
               </div>
               <div style={{ marginBottom: 20 }}>
-                <input type="email" placeholder="YOUR EMAIL" style={{ width: '100%', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 0, padding: '14px 16px', fontFamily: FD, fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', color: WM, outline: 'none' }} onFocus={e => e.currentTarget.style.borderColor = `rgba(232,168,32,0.5)`} onBlur={e => e.currentTarget.style.borderColor = BB} />
+                <input type="email" placeholder="YOUR EMAIL" style={{ width: '100%', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 0, padding: '14px 16px', fontFamily: FD, fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', color: WM, outline: 'none' }} onFocus={e => e.currentTarget.style.borderColor = `rgba(201,191,166,0.5)`} onBlur={e => e.currentTarget.style.borderColor = BB} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', paddingBottom: 6, borderBottom: `1px solid ${BB}`, width: 'fit-content' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = GL }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = BB }}>
                 <span style={{ fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: W }}>SUBMIT</span>
@@ -1016,7 +1024,7 @@ export default function LandingPage() {
 
             {/* Contact + social */}
             <div style={{ paddingTop: 8 }}>
-              {[{ label: 'Partnership Opportunities', email: 'partnerships@campari.co.za' }, { label: 'Career Opportunities', email: 'careers@campari.co.za' }, { label: 'Press', email: 'press@campari.co.za' }].map(c => (
+              {[{ label: 'Partnership Opportunities', email: 'partnerships@honeygroup.co.za' }, { label: 'Career Opportunities', email: 'careers@honeygroup.co.za' }, { label: 'Press', email: 'press@honeygroup.co.za' }].map(c => (
                 <div key={c.label} style={{ marginBottom: 32 }}>
                   <h4 style={{ fontFamily: FD, fontSize: 16, fontWeight: 700, color: W, marginBottom: 6 }}>{c.label}</h4>
                   <a href={`mailto:${c.email}`} style={{ fontFamily: FD, fontSize: 13, color: GL, textDecoration: 'underline', textUnderlineOffset: 3 }}>{c.email}</a>
@@ -1024,7 +1032,7 @@ export default function LandingPage() {
               ))}
               <div style={{ display: 'flex', gap: 10, marginBottom: 40 }}>
                 {[{ label: 'LI', title: 'LinkedIn' }, { label: 'IG', title: 'Instagram' }, { label: 'FB', title: 'Facebook' }].map(s => (
-                  <div key={s.label} title={s.title} style={{ width: 38, height: 38, border: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s', fontSize: 10, fontWeight: 700, color: WD, fontFamily: FD, letterSpacing: '0.04em' }} onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(232,168,32,0.5)`; e.currentTarget.style.color = GL; e.currentTarget.style.background = `rgba(232,168,32,0.06)` }} onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = WD; e.currentTarget.style.background = 'transparent' }}>{s.label}</div>
+                  <div key={s.label} title={s.title} style={{ width: 38, height: 38, border: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s', fontSize: 10, fontWeight: 700, color: WD, fontFamily: FD, letterSpacing: '0.04em' }} onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(201,191,166,0.5)`; e.currentTarget.style.color = GL; e.currentTarget.style.background = `rgba(201,191,166,0.06)` }} onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = WD; e.currentTarget.style.background = 'transparent' }}>{s.label}</div>
                 ))}
               </div>
               <div style={{ borderTop: `1px solid ${BB}`, paddingTop: 24 }}>

@@ -12,12 +12,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 // New admin‑style tokens
-const G = '#D4880A';
-const GL = '#E8A820';
-const B = '#0C0A07';
-const BB = 'rgba(212,136,10,0.14)';
-const W = '#FAF3E8';
-const WM = 'rgba(250,243,232,0.55)';
+const G = '#8F8A7C';
+const GL = '#C9BFA6';
+const B = '#050504';
+const BB = 'rgba(170,160,135,0.14)';
+const W = '#F8F8F8';
+const WM = 'rgba(248,248,248,0.55)';
 const CORAL = '#C4614A';
 const FB = "'DM Sans', system-ui, sans-serif";
 
@@ -56,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variants: Record<ButtonVariant, React.CSSProperties> = {
     primary:   { background: `linear-gradient(135deg, ${G}, ${GL})`, color: B },
-    secondary: { background: 'rgba(232,168,32,0.1)', color: GL, border: `1px solid ${GL}80` },
+    secondary: { background: 'rgba(201,191,166,0.1)', color: GL, border: `1px solid ${GL}80` },
     ghost:     { background: 'transparent', color: WM, border: `1px solid ${BB}` },
     danger:    { background: 'rgba(196,97,74,0.15)', color: CORAL, border: `1px solid ${CORAL}80` },
   };

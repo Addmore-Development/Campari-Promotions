@@ -2,18 +2,18 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { AdminLayout } from '../AdminLayout'
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
-const GL   = '#E8A820'
-const G    = '#D4880A'
-const G2   = '#8B5A1A'
-const G3   = '#C07818'
-const G4   = '#F0C050'
-const D1   = '#0E0C06'
-const D2   = '#151209'
-const BB   = 'rgba(212,136,10,0.16)'
-const BB2  = 'rgba(212,136,10,0.06)'
-const W    = '#FAF3E8'
-const WM   = 'rgba(250,243,232,0.82)'
-const WD   = 'rgba(250,243,232,0.58)'
+const GL   = '#C9BFA6'
+const G    = '#8F8A7C'
+const G2   = '#8A8474'
+const G3   = '#7A756A'
+const G4   = '#D8D8D8'
+const D1   = '#070706'
+const D2   = '#0A0A08'
+const BB   = 'rgba(170,160,135,0.16)'
+const BB2  = 'rgba(170,160,135,0.06)'
+const W    = '#F8F8F8'
+const WM   = 'rgba(248,248,248,0.82)'
+const WD   = 'rgba(248,248,248,0.58)'
 const FD   = "'Playfair Display', Georgia, serif"
 
 function hex2rgba(hex: string, alpha: number): string {
@@ -27,13 +27,13 @@ function hex2rgba(hex: string, alpha: number): string {
 type CheckStatus = 'checked-in' | 'late' | 'absent' | 'completed'
 
 const STATUS_COLOR: Record<CheckStatus, string> = {
-  'checked-in': GL,   'late': G4,   'absent': '#E8D5A8',   'completed': G3,
+  'checked-in': GL,   'late': G4,   'absent': '#DBDBDB',   'completed': G3,
 }
 const STATUS_BG: Record<CheckStatus, string> = {
-  'checked-in': hex2rgba(GL,0.14), 'late': hex2rgba(G4,0.14), 'absent': hex2rgba('#8B6840',0.26), 'completed': hex2rgba(G3,0.14),
+  'checked-in': hex2rgba(GL,0.14), 'late': hex2rgba(G4,0.14), 'absent': hex2rgba('#69645A',0.26), 'completed': hex2rgba(G3,0.14),
 }
 const STATUS_BORDER: Record<CheckStatus, string> = {
-  'checked-in': hex2rgba(GL,0.50), 'late': hex2rgba(G4,0.46), 'absent': hex2rgba('#8B6840',0.58), 'completed': hex2rgba(G3,0.50),
+  'checked-in': hex2rgba(GL,0.50), 'late': hex2rgba(G4,0.46), 'absent': hex2rgba('#69645A',0.58), 'completed': hex2rgba(G3,0.50),
 }
 const STATUS_LABEL: Record<CheckStatus, string> = {
   'checked-in': 'Checked In', 'late': 'Late', 'absent': 'Absent', 'completed': 'Completed',
@@ -84,33 +84,33 @@ function loadGoogleMaps(): Promise<void> {
 }
 
 const MAP_STYLES = [
-  { elementType:'geometry',                    stylers:[{ color:'#080602' }] },
-  { elementType:'labels.text.stroke',          stylers:[{ color:'#080602' }] },
-  { elementType:'labels.text.fill',            stylers:[{ color:'#8B5A1A' }] },
-  { featureType:'administrative',              elementType:'geometry',           stylers:[{ color:'#1A1205' }] },
-  { featureType:'administrative.country',      elementType:'labels.text.fill',   stylers:[{ color:'#C07818' }] },
-  { featureType:'administrative.province',     elementType:'labels.text.fill',   stylers:[{ color:'#8B5A1A' }] },
-  { featureType:'administrative.locality',     elementType:'labels.text.fill',   stylers:[{ color:'#D4880A' }] },
-  { featureType:'landscape',                   stylers:[{ color:'#0C0903' }] },
-  { featureType:'landscape.natural',           stylers:[{ color:'#0A0702' }] },
+  { elementType:'geometry',                    stylers:[{ color:'#030302' }] },
+  { elementType:'labels.text.stroke',          stylers:[{ color:'#030302' }] },
+  { elementType:'labels.text.fill',            stylers:[{ color:'#8A8474' }] },
+  { featureType:'administrative',              elementType:'geometry',           stylers:[{ color:'#0B0B08' }] },
+  { featureType:'administrative.country',      elementType:'labels.text.fill',   stylers:[{ color:'#7A756A' }] },
+  { featureType:'administrative.province',     elementType:'labels.text.fill',   stylers:[{ color:'#8A8474' }] },
+  { featureType:'administrative.locality',     elementType:'labels.text.fill',   stylers:[{ color:'#8F8A7C' }] },
+  { featureType:'landscape',                   stylers:[{ color:'#090909' }] },
+  { featureType:'landscape.natural',           stylers:[{ color:'#070707' }] },
   { featureType:'poi',                         stylers:[{ visibility:'off' }] },
-  { featureType:'road',                        elementType:'geometry',           stylers:[{ color:'#1C1508' }] },
-  { featureType:'road',                        elementType:'geometry.stroke',    stylers:[{ color:'#100C04' }] },
-  { featureType:'road',                        elementType:'labels.text.fill',   stylers:[{ color:'#6B4A14' }] },
+  { featureType:'road',                        elementType:'geometry',           stylers:[{ color:'#0F0F0C' }] },
+  { featureType:'road',                        elementType:'geometry.stroke',    stylers:[{ color:'#070706' }] },
+  { featureType:'road',                        elementType:'labels.text.fill',   stylers:[{ color:'#4E4E4E' }] },
   { featureType:'road.local',                  elementType:'labels',             stylers:[{ visibility:'off' }] },
-  { featureType:'road.highway',                elementType:'geometry',           stylers:[{ color:'#2A1E08' }] },
-  { featureType:'road.highway',                elementType:'geometry.stroke',    stylers:[{ color:'#1A1304' }] },
-  { featureType:'road.highway',                elementType:'labels.text.fill',   stylers:[{ color:'#E8A820' }] },
-  { featureType:'road.highway',                elementType:'labels.text.stroke', stylers:[{ color:'#080602' }] },
+  { featureType:'road.highway',                elementType:'geometry',           stylers:[{ color:'#17170F' }] },
+  { featureType:'road.highway',                elementType:'geometry.stroke',    stylers:[{ color:'#0B0B08' }] },
+  { featureType:'road.highway',                elementType:'labels.text.fill',   stylers:[{ color:'#C9BFA6' }] },
+  { featureType:'road.highway',                elementType:'labels.text.stroke', stylers:[{ color:'#030302' }] },
   { featureType:'transit',                     stylers:[{ visibility:'off' }] },
-  { featureType:'water',                       elementType:'geometry',           stylers:[{ color:'#040301' }] },
-  { featureType:'water',                       elementType:'labels.text.fill',   stylers:[{ color:'#2A1A05' }] },
-  { featureType:'administrative.country',      elementType:'geometry.stroke',    stylers:[{ color:'#3D2A0A' }] },
-  { featureType:'administrative.province',     elementType:'geometry.stroke',    stylers:[{ color:'#2A1C06' }] },
+  { featureType:'water',                       elementType:'geometry',           stylers:[{ color:'#030303' }] },
+  { featureType:'water',                       elementType:'labels.text.fill',   stylers:[{ color:'#14140E' }] },
+  { featureType:'administrative.country',      elementType:'geometry.stroke',    stylers:[{ color:'#2C2C2C' }] },
+  { featureType:'administrative.province',     elementType:'geometry.stroke',    stylers:[{ color:'#1E1E1E' }] },
 ]
 
 function makePinElement(color: string): HTMLElement {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 14 22 14 22S28 23.63 28 14C28 6.27 21.73 0 14 0z" fill="${color}" stroke="#0C0A07" stroke-width="1.5"/><circle cx="14" cy="14" r="5" fill="#0C0A07" opacity="0.6"/></svg>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 14 22 14 22S28 23.63 28 14C28 6.27 21.73 0 14 0z" fill="${color}" stroke="#050504" stroke-width="1.5"/><circle cx="14" cy="14" r="5" fill="#050504" opacity="0.6"/></svg>`
   const div = document.createElement('div'); div.innerHTML = svg.trim(); div.style.cursor = 'pointer'; return div
 }
 
@@ -220,7 +220,7 @@ export default function ViewLiveMap() {
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: true,
-        backgroundColor: '#080602',
+        backgroundColor: '#030302',
       })
       infoWindowRef.current = new window.google.maps.InfoWindow(); setMapReady(true)
     }).catch(() => setMapError('Google Maps unavailable — check VITE_GOOGLE_MAPS_KEY'))
@@ -234,7 +234,7 @@ export default function ViewLiveMap() {
     vis.forEach(p => {
       const color = STATUS_COLOR[p.status]
       const svgIcon = {
-        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 14 22 14 22S28 23.63 28 14C28 6.27 21.73 0 14 0z" fill="${color}" stroke="#080602" stroke-width="1.5"/><circle cx="14" cy="14" r="5" fill="#080602" opacity="0.7"/></svg>`)}`,
+        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 14 22 14 22S28 23.63 28 14C28 6.27 21.73 0 14 0z" fill="${color}" stroke="#030302" stroke-width="1.5"/><circle cx="14" cy="14" r="5" fill="#030302" opacity="0.7"/></svg>`)}`,
         scaledSize: new window.google.maps.Size(28, 36),
         anchor: new window.google.maps.Point(14, 36),
       }
@@ -251,7 +251,7 @@ export default function ViewLiveMap() {
         })
         mk.addListener('click', () => {
           setSelected(p)
-          infoWindowRef.current?.setContent(`<div style="background:#0C0A06;color:#FAF3E8;padding:10px 14px;font-family:'DM Sans',sans-serif;min-width:170px;border-radius:4px;border:1px solid rgba(212,136,10,0.3);"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">${p.name}</div><div style="font-size:11px;color:#D4880A;margin-bottom:2px;">${p.venue}</div><div style="font-size:10px;color:rgba(250,243,232,0.72);">${p.job}</div><div style="font-size:10px;margin-top:6px;color:${color};font-weight:600;">${STATUS_LABEL[p.status]}${p.time!=='—'?' · In at '+p.time:''}</div></div>`)
+          infoWindowRef.current?.setContent(`<div style="background:#050504;color:#F8F8F8;padding:10px 14px;font-family:'DM Sans',sans-serif;min-width:170px;border-radius:4px;border:1px solid rgba(170,160,135,0.3);"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">${p.name}</div><div style="font-size:11px;color:#8F8A7C;margin-bottom:2px;">${p.venue}</div><div style="font-size:10px;color:rgba(248,248,248,0.72);">${p.job}</div><div style="font-size:10px;margin-top:6px;color:${color};font-weight:600;">${STATUS_LABEL[p.status]}${p.time!=='—'?' · In at '+p.time:''}</div></div>`)
           infoWindowRef.current?.open({ map: mapInstance.current, anchor: mk })
         })
         markersRef.current.set(p.id, mk)
@@ -302,7 +302,7 @@ export default function ViewLiveMap() {
             { key:'all',        label:'Total',      color:GL },
             { key:'checked-in', label:'Checked In', color:GL },
             { key:'late',       label:'Late',       color:G4 },
-            { key:'absent',     label:'Absent',     color:'#E8D5A8' },
+            { key:'absent',     label:'Absent',     color:'#DBDBDB' },
             { key:'completed',  label:'Done',       color:G3 },
           ] as const).map(s => {
             const cnt = s.key === 'all' ? counts.all : counts[s.key as CheckStatus]
@@ -324,7 +324,7 @@ export default function ViewLiveMap() {
           <div style={{ position:'absolute', top:14, left:14, zIndex:10, display:'flex', gap:6, flexWrap:'wrap' }}>
             {(['all','checked-in','late','absent','completed'] as const).map(s => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                style={{ padding:'5px 12px', background:filterStatus===s?hex2rgba((STATUS_COLOR[s as CheckStatus]||GL),0.22):'rgba(12,10,7,0.88)', border:`1px solid ${filterStatus===s?(STATUS_COLOR[s as CheckStatus]||GL):'rgba(212,136,10,0.22)'}`, color:filterStatus===s?(STATUS_COLOR[s as CheckStatus]||GL):WM, fontFamily:FD, fontSize:10, cursor:'pointer', letterSpacing:'0.08em', borderRadius:3 }}>
+                style={{ padding:'5px 12px', background:filterStatus===s?hex2rgba((STATUS_COLOR[s as CheckStatus]||GL),0.22):'rgba(5,5,4,0.88)', border:`1px solid ${filterStatus===s?(STATUS_COLOR[s as CheckStatus]||GL):'rgba(170,160,135,0.22)'}`, color:filterStatus===s?(STATUS_COLOR[s as CheckStatus]||GL):WM, fontFamily:FD, fontSize:10, cursor:'pointer', letterSpacing:'0.08em', borderRadius:3 }}>
                 {s==='all' ? 'All' : STATUS_LABEL[s as CheckStatus]}
               </button>
             ))}
@@ -332,7 +332,7 @@ export default function ViewLiveMap() {
           <div style={{ position:'absolute', top:52, left:14, zIndex:10, display:'flex', gap:6, flexWrap:'wrap' }}>
             {cities.map(c => (
               <button key={c} onClick={() => setFilterCity(c)}
-                style={{ padding:'4px 10px', background:filterCity===c?hex2rgba(G2,0.45):'rgba(12,10,7,0.88)', border:`1px solid ${filterCity===c?G2:'rgba(212,136,10,0.18)'}`, color:filterCity===c?GL:WM, fontFamily:FD, fontSize:9, cursor:'pointer', letterSpacing:'0.06em', borderRadius:3 }}>
+                style={{ padding:'4px 10px', background:filterCity===c?hex2rgba(G2,0.45):'rgba(5,5,4,0.88)', border:`1px solid ${filterCity===c?G2:'rgba(170,160,135,0.18)'}`, color:filterCity===c?GL:WM, fontFamily:FD, fontSize:9, cursor:'pointer', letterSpacing:'0.06em', borderRadius:3 }}>
                 {c==='all' ? 'All Cities' : c}
               </button>
             ))}
@@ -345,7 +345,7 @@ export default function ViewLiveMap() {
               <div style={{ fontSize:10, color:WD, fontFamily:FD }}>Add VITE_GOOGLE_MAPS_KEY to your .env and restart</div>
             </div>
           )}
-          <div style={{ position:'absolute', bottom:14, left:14, background:'rgba(10,8,4,0.92)', border:`1px solid ${BB}`, padding:'8px 14px', display:'flex', gap:14, borderRadius:3, zIndex:5 }}>
+          <div style={{ position:'absolute', bottom:14, left:14, background:'rgba(4,4,3,0.92)', border:`1px solid ${BB}`, padding:'8px 14px', display:'flex', gap:14, borderRadius:3, zIndex:5 }}>
             {(Object.keys(STATUS_COLOR) as CheckStatus[]).map(s => (
               <div key={s} style={{ display:'flex', alignItems:'center', gap:6 }}>
                 <div style={{ width:8, height:8, borderRadius:'50%', background:STATUS_COLOR[s], flexShrink:0 }} />

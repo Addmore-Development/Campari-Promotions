@@ -4,19 +4,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 // Admin-style tokens
-const G    = '#D4880A';
-const GL   = '#E8A820';
-const G2   = '#8B5A1A';
-const B    = '#0C0A07';
-const BC   = '#141008';
-const BB   = 'rgba(212,136,10,0.12)';
-const W    = '#FAF3E8';
-const WM   = 'rgba(250,243,232,0.65)';
-const WD   = 'rgba(250,243,232,0.28)';
+const G    = '#8F8A7C';
+const GL   = '#C9BFA6';
+const G2   = '#8A8474';
+const B    = '#050504';
+const BC   = '#080807';
+const BB   = 'rgba(170,160,135,0.12)';
+const W    = '#F8F8F8';
+const WM   = 'rgba(248,248,248,0.65)';
+const WD   = 'rgba(248,248,248,0.28)';
 const FD   = "'Playfair Display', Georgia, serif";
 const FB   = "'DM Sans', system-ui, sans-serif";
 const TEAL  = '#4AABB8';
-const AMBER = '#E8A820';
+const AMBER = '#C9BFA6';
 const CORAL = '#C4614A';
 const SKY   = '#5A9EC4';
 const GREEN = '#4ade80';
@@ -329,7 +329,7 @@ export const ViewEarnings: React.FC = () => {
         <p style={{ fontFamily: FB, fontSize: 11, color: WD, lineHeight: 1.6 }}>
           Payments are transferred directly by your client after shift completion.
           Once marked as paid, please allow up to <strong style={{ color: WM }}>3 business days</strong> for funds to reflect in your bank account.
-          For queries, contact Campari support via the chat widget.
+          For queries, contact Honey Group support via the chat widget.
         </p>
       </div>
     </div>

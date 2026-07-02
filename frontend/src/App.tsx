@@ -14,6 +14,8 @@ import ViewLiveMap                  from './Admin/shifts/ViewLiveMap'
 import ApproveExport                from './Admin/payments/ApproveExport'
 import ReviewApproveDocs            from './Admin/onboarding/ReviewApproveDocs'
 import ReviewsAndComplaintsPage     from './Admin/reviews/ReviewsandComplaintsPage'
+import ActivationReports            from './Admin/reports/ActivationReports'
+import BudgetTracking                from './Admin/finance/BudgetTracking'
 import { PromoterApp }              from './promoter/index'
 import PendingApprovalPage          from './promoter/PendingApprovalPage'
 import JobDetailPage                from './shared/jobs/JobdetailPage'
@@ -57,6 +59,8 @@ export default function App() {
             <Route path="/admin/payments"    element={<ApproveExport />}            />
             <Route path="/admin/onboarding"  element={<ReviewApproveDocs />}        />
             <Route path="/admin/reviews"     element={<ReviewsAndComplaintsPage />} />
+            <Route path="/admin/activation-reports" element={<ActivationReports />} />
+            <Route path="/admin/budget"      element={<BudgetTracking />}           />
           </Route>
 
           {/* ── Business — protected ── */}

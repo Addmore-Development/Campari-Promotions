@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { showToast } from '../../shared/utils/toast';
 
-const G   = '#D4880A';
-const GL  = '#E8A820';
-const G2  = '#8B5A1A';
-const B   = '#0C0A07';
-const BC  = '#141008';
-const D2  = '#1A1508';
-const D3  = '#221C0C';
-const BB  = 'rgba(212,136,10,0.12)';
-const W   = '#FAF3E8';
-const WM  = 'rgba(250,243,232,0.65)';
-const WD  = 'rgba(250,243,232,0.28)';
+const G   = '#8F8A7C';
+const GL  = '#C9BFA6';
+const G2  = '#8A8474';
+const B   = '#050504';
+const BC  = '#080807';
+const D2  = '#0D0D0A';
+const D3  = '#14140E';
+const BB  = 'rgba(170,160,135,0.12)';
+const W   = '#F8F8F8';
+const WM  = 'rgba(248,248,248,0.65)';
+const WD  = 'rgba(248,248,248,0.28)';
 const FD  = "'Playfair Display', Georgia, serif";
 const FB  = "'DM Sans', system-ui, sans-serif";
 const TEAL   = '#4AABB8';
@@ -26,7 +26,7 @@ function authHdr() {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'rgba(250,243,232,0.05)',
+  width: '100%', background: 'rgba(248,248,248,0.05)',
   border: `1px solid ${BB}`, padding: '10px 14px',
   color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2,
 };
@@ -165,10 +165,10 @@ export const EditOwnProfile: React.FC = () => {
   const statusBadge = () => {
     if (!profile) return null;
     const map: Record<string, { color: string; bg: string; label: string }> = {
-      pending_review: { color: GL, bg: 'rgba(232,168,32,0.1)', label: '⏳ Under Review' },
+      pending_review: { color: GL, bg: 'rgba(201,191,166,0.1)', label: '⏳ Under Review' },
       approved:       { color: TEAL, bg: 'rgba(74,171,184,0.1)', label: '✅ Approved' },
       rejected:       { color: CORAL, bg: 'rgba(196,97,74,0.1)', label: '❌ Rejected' },
-      incomplete:     { color: WM, bg: 'rgba(250,243,232,0.05)', label: '📝 Incomplete' },
+      incomplete:     { color: WM, bg: 'rgba(248,248,248,0.05)', label: '📝 Incomplete' },
       blacklisted:    { color: CORAL, bg: 'rgba(196,97,74,0.1)', label: '🚫 Suspended' },
     };
     const s = map[profile.onboardingStatus] ?? map['pending_review'];
@@ -353,7 +353,7 @@ export const EditOwnProfile: React.FC = () => {
               const active = categories.includes(cat);
               return (
                 <button key={cat} onClick={() => toggleCat(cat)} style={{
-                  padding: '7px 14px', background: active ? 'rgba(232,168,32,0.14)' : 'transparent',
+                  padding: '7px 14px', background: active ? 'rgba(201,191,166,0.14)' : 'transparent',
                   border: `1px solid ${active ? GL : BB}`, color: active ? GL : WD,
                   fontFamily: FB, fontSize: 11, fontWeight: active ? 600 : 400, cursor: 'pointer',
                   transition: 'all 0.18s', borderRadius: 2, display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -365,7 +365,7 @@ export const EditOwnProfile: React.FC = () => {
             })}
           </div>
           {categories.length > 0 && (
-            <div style={{ marginTop: 10, padding: '10px 12px', background: 'rgba(232,168,32,0.06)', border: `1px solid rgba(232,168,32,0.2)`, borderRadius: 2 }}>
+            <div style={{ marginTop: 10, padding: '10px 12px', background: 'rgba(201,191,166,0.06)', border: `1px solid rgba(201,191,166,0.2)`, borderRadius: 2 }}>
               <p style={{ fontFamily: FB, fontSize: 10, color: WD, marginBottom: 4, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Selected</p>
               <p style={{ fontFamily: FB, fontSize: 12, color: GL }}>{categories.join(' · ')}</p>
             </div>
@@ -383,7 +383,7 @@ export const EditOwnProfile: React.FC = () => {
               const active = languages.includes(lang);
               return (
                 <button key={lang} onClick={() => toggleLang(lang)} style={{
-                  padding: '7px 14px', background: active ? 'rgba(232,168,32,0.14)' : 'transparent',
+                  padding: '7px 14px', background: active ? 'rgba(201,191,166,0.14)' : 'transparent',
                   border: `1px solid ${active ? GL : BB}`, color: active ? GL : WD,
                   fontFamily: FB, fontSize: 11, fontWeight: active ? 600 : 400, cursor: 'pointer',
                   transition: 'all 0.18s', borderRadius: 2, display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -404,7 +404,7 @@ export const EditOwnProfile: React.FC = () => {
               const active = experience === opt;
               return (
                 <button key={opt} onClick={() => setExperience(active ? '' : opt)} style={{
-                  padding: '7px 14px', background: active ? 'rgba(232,168,32,0.14)' : 'transparent',
+                  padding: '7px 14px', background: active ? 'rgba(201,191,166,0.14)' : 'transparent',
                   border: `1px solid ${active ? GL : BB}`, color: active ? GL : WD,
                   fontFamily: FB, fontSize: 11, fontWeight: active ? 600 : 400, cursor: 'pointer',
                   transition: 'all 0.18s', borderRadius: 2, display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -495,7 +495,7 @@ export const EditOwnProfile: React.FC = () => {
               <span style={{ fontSize: 12, color: W, fontWeight: 600 }}>{row.value}</span>
             </div>
           ))}
-          <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(212,136,10,0.06)', border: `1px solid ${BB}`, borderRadius: 2, fontSize: 12, color: WM, lineHeight: 1.6 }}>
+          <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(170,160,135,0.06)', border: `1px solid ${BB}`, borderRadius: 2, fontSize: 12, color: WM, lineHeight: 1.6 }}>
             📎 To update your ID number, contact support. Document changes require admin review.
           </div>
         </div>
@@ -509,11 +509,11 @@ function DocumentCard({ label, url, onUpload, uploading, accept, icon }: {
   label: string; url?: string; onUpload: (f: File) => void;
   uploading: boolean; accept: string; icon: string;
 }) {
-  const GL = '#E8A820';
-  const BB = 'rgba(212,136,10,0.12)';
-  const W = '#FAF3E8';
-  const WM = 'rgba(250,243,232,0.65)';
-  const WD = 'rgba(250,243,232,0.28)';
+  const GL = '#C9BFA6';
+  const BB = 'rgba(170,160,135,0.12)';
+  const W = '#F8F8F8';
+  const WM = 'rgba(248,248,248,0.65)';
+  const WD = 'rgba(248,248,248,0.28)';
   const TEAL = '#4AABB8';
   const BACKEND = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -521,7 +521,7 @@ function DocumentCard({ label, url, onUpload, uploading, accept, icon }: {
   const isImage = fullUrl && /\.(jpg|jpeg|png|webp)/i.test(fullUrl);
 
   return (
-    <div style={{ background: 'rgba(212,136,10,0.04)', border: `1px solid ${BB}`, borderRadius: 2, overflow: 'hidden' }}>
+    <div style={{ background: 'rgba(170,160,135,0.04)', border: `1px solid ${BB}`, borderRadius: 2, overflow: 'hidden' }}>
       {/* Preview */}
       <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', position: 'relative' }}>
         {fullUrl ? (
@@ -546,7 +546,7 @@ function DocumentCard({ label, url, onUpload, uploading, accept, icon }: {
       {/* Label + Upload */}
       <div style={{ padding: '10px 12px' }}>
         <div style={{ fontSize: 11, color: WM, marginBottom: 8, fontWeight: 600 }}>{label}</div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'rgba(232,168,32,0.08)', border: `1px solid rgba(232,168,32,0.25)`, borderRadius: 2, cursor: 'pointer', fontSize: 10, color: GL, fontWeight: 700 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'rgba(201,191,166,0.08)', border: `1px solid rgba(201,191,166,0.25)`, borderRadius: 2, cursor: 'pointer', fontSize: 10, color: GL, fontWeight: 700 }}>
           <input type="file" accept={accept} style={{ display: 'none' }} disabled={uploading} onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} />
           {fullUrl ? '↑ Replace' : '↑ Upload'}
         </label>

@@ -14,6 +14,8 @@ import shiftRoutes from "./routes/shift.routes";
 import paymentRoutes from "./routes/payment.routes";
 import adminRoutes from "./routes/admin.routes";
 import chatRoutes from "./routes/chat.routes";
+import activationReportRoutes from "./routes/activationReport.routes";
+import purchaseOrderRoutes from "./routes/purchaseOrder.routes";
 
 const app = express();
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
@@ -33,6 +35,8 @@ app.use("/api/shifts", shiftRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/activation-reports", activationReportRoutes);
+app.use("/api/purchase-orders", purchaseOrderRoutes);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -41,7 +45,7 @@ app.get("/health", (_req, res) => {
 app.use((_req, res) => res.status(404).json({ error: "Route not found" }));
 
 app.listen(PORT, async () => {
-  console.log(`Campari Backend running on http://localhost:${PORT}`);
+  console.log(`Honey Group Backend running on http://localhost:${PORT}`);
   try {
     await prisma.$connect();
     console.log("PostgreSQL connected");

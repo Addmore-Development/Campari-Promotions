@@ -3,18 +3,18 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAllJobsWithAdminJobs } from './jobsData';
 
-const G   = '#C4973A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G3  = '#D4880A'
-const G5  = '#6B3F10'
-const B   = '#080808'
-const BC  = '#111008'
-const BC2 = '#161209'
-const BB  = 'rgba(212,136,10,0.14)'
-const W   = '#CEC5B2'
-const WM  = 'rgba(200,188,168,0.88)'
-const WD  = 'rgba(168,152,130,0.55)'
+const G   = '#9C9484'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G3  = '#8F8A7C'
+const G5  = '#443F36'
+const B   = '#030302'
+const BC  = '#0F0F0F'
+const BC2 = '#0A0A08'
+const BB  = 'rgba(170,160,135,0.14)'
+const W   = '#F0F0F0'
+const WM  = 'rgba(222,222,222,0.88)'
+const WD  = 'rgba(189,189,189,0.55)'
 const FD  = "'Playfair Display', Georgia, serif"
 const FB  = "'DM Sans', system-ui, sans-serif"
 
@@ -28,9 +28,9 @@ function injectJobDetailStyles() {
   el.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #080808; }
+    body { background: #030302; }
     ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #C4973A; }
+    ::-webkit-scrollbar-thumb { background: #9C9484; }
 
     .jd-layout {
       max-width: 1200px;
@@ -57,8 +57,8 @@ function injectJobDetailStyles() {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(212,136,10,0.14);
-      background: #111008;
+      border-bottom: 1px solid rgba(170,160,135,0.14);
+      background: #0F0F0F;
       position: sticky;
       top: 0;
       z-index: 50;
@@ -102,7 +102,7 @@ function NotPromoterPopup({ onClose, onNavigate }: { onClose:()=>void; onNavigat
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', backdropFilter:'blur(16px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:16 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{ background:BC2, border:`1px solid rgba(212,136,10,0.28)`, width:'100%', maxWidth:460, position:'relative', overflow:'hidden', borderRadius:4 }}>
+      <div style={{ background:BC2, border:`1px solid rgba(170,160,135,0.28)`, width:'100%', maxWidth:460, position:'relative', overflow:'hidden', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${G5},${G},${GL},${G},${G5})` }} />
         <div style={{ padding:'28px 24px' }}>
           <button onClick={onClose} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', cursor:'pointer', color:WD, fontSize:18 }}>✕</button>
@@ -111,7 +111,7 @@ function NotPromoterPopup({ onClose, onNavigate }: { onClose:()=>void; onNavigat
           <p style={{ fontSize:13, color:WM, lineHeight:1.7, marginBottom:20, fontFamily:FB }}>Only registered promoters can apply for shifts. Business and admin accounts are not eligible.</p>
           <div style={{ display:'flex', gap:10 }}>
             <button onClick={()=>{onClose();onNavigate('/login')}} style={{ flex:1, padding:'12px', background:`linear-gradient(135deg,${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Log In as Promoter</button>
-            <button onClick={()=>{onClose();onNavigate('/register')}} style={{ flex:1, padding:'12px', background:'transparent', border:`1px solid rgba(196,151,58,0.45)`, color:G, fontFamily:FB, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Register</button>
+            <button onClick={()=>{onClose();onNavigate('/register')}} style={{ flex:1, padding:'12px', background:'transparent', border:`1px solid rgba(189,189,189,0.45)`, color:G, fontFamily:FB, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Register</button>
           </div>
         </div>
       </div>
@@ -141,8 +141,8 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         </div>
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
-          {!scrolled&&<div style={{ background:'rgba(232,168,32,0.06)', border:`1px solid rgba(232,168,32,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promoter Terms & Conditions apply.'}</div>
+          {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -150,7 +150,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
             <span style={{ fontSize:12, color:WM, lineHeight:1.6, fontFamily:FB }}>I have read and understand the Terms & Conditions. I accept this engagement as an independent contractor.</span>
           </label>
           <div style={{ display:'flex', gap:10 }}>
-            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(206,197,178,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
+            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(236,236,236,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
             <button onClick={onClose} style={{ padding:'13px 18px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:2 }}>Cancel</button>
           </div>
         </div>
@@ -181,7 +181,7 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
               <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:G, marginBottom:4, fontFamily:FB }}>Demo Payment Gateway</div>
               <h2 style={{ fontFamily:FD, fontSize:18, color:W, marginBottom:4 }}>Confirm Application</h2>
               <div style={{ fontSize:12, color:WM, fontFamily:FB }}>{job.title} — {job.company}</div>
-              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(232,168,32,0.08)', border:`1px solid rgba(232,168,32,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
+              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(201,191,166,0.08)', border:`1px solid rgba(201,191,166,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
                 <span style={{ fontSize:11, color:WM, fontFamily:FB }}>Application Fee (Demo)</span>
                 <span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 25.00</span>
               </div>
@@ -189,11 +189,11 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
             </div>
             <div style={{ padding:'16px 24px 22px' }}>
               <div style={{ display:'flex', gap:6, marginBottom:16 }}>
-                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(196,151,58,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
+                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(189,189,189,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
               </div>
               {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
-              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(206,197,178,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
+              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Honey Group Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
+              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
               <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
               <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
             </div>
@@ -314,7 +314,7 @@ export default function JobDetailPage() {
 
   // ── Apply card (shared between mobile-top and desktop-sticky) ───────────────
   const ApplyCard = () => (
-    <div style={{ background:BC2, border:`1px solid rgba(212,136,10,0.28)`, borderRadius:4, overflow:'hidden' }}>
+    <div style={{ background:BC2, border:`1px solid rgba(170,160,135,0.28)`, borderRadius:4, overflow:'hidden' }}>
       <div style={{ height:3, background:`linear-gradient(90deg,${G5},${G},${GL})` }} />
       <div style={{ padding:'22px 20px' }}>
         <div style={{ fontFamily:FD, fontSize:24, fontWeight:700, color:G, lineHeight:1 }}>{pay}</div>
@@ -337,7 +337,7 @@ export default function JobDetailPage() {
               <span style={{ fontSize:10, color:WD, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:FB }}>Slots Filled</span>
               <span style={{ fontSize:10, color:G, fontWeight:700, fontFamily:FB }}>{slots-slotsLeft}/{slots}</span>
             </div>
-            <div style={{ height:4, background:'rgba(206,197,178,0.08)', borderRadius:3 }}>
+            <div style={{ height:4, background:'rgba(236,236,236,0.08)', borderRadius:3 }}>
               <div style={{ height:'100%', width:`${Math.min(((slots-slotsLeft)/slots)*100,100)}%`, background:`linear-gradient(90deg,${G2},${G})`, borderRadius:3 }} />
             </div>
           </div>
@@ -345,7 +345,7 @@ export default function JobDetailPage() {
 
         {/* Status badge */}
         <div style={{ marginBottom:16 }}>
-          <span style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:isOpen?GL:WD, background:isOpen?'rgba(232,168,32,0.12)':'rgba(206,197,178,0.05)', border:`1px solid ${isOpen?'rgba(232,168,32,0.35)':'rgba(206,197,178,0.12)'}`, padding:'4px 12px', borderRadius:2, fontFamily:FB }}>
+          <span style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:isOpen?GL:WD, background:isOpen?'rgba(201,191,166,0.12)':'rgba(236,236,236,0.05)', border:`1px solid ${isOpen?'rgba(201,191,166,0.35)':'rgba(236,236,236,0.12)'}`, padding:'4px 12px', borderRadius:2, fontFamily:FB }}>
             {status}
           </span>
         </div>
@@ -361,9 +361,9 @@ export default function JobDetailPage() {
           </div>
         ) : (
           <button className="jd-apply-btn" onClick={handleApplyClick} disabled={!isOpen}
-            style={{ width:'100%', padding:'13px', background:isOpen?`linear-gradient(135deg,${G},${GL})`:'rgba(206,197,178,0.05)', border:'none', color:isOpen?B:WM, fontFamily:FB, fontSize:13, fontWeight:700, cursor:isOpen?'pointer':'not-allowed', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10, borderRadius:3, transition:'all 0.2s', boxShadow:isOpen?`0 4px 20px rgba(196,151,58,0.35)`:'none' }}
-            onMouseEnter={e=>{if(isOpen){e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow=`0 8px 28px rgba(196,151,58,0.5)`}}}
-            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow=isOpen?`0 4px 20px rgba(196,151,58,0.35)`:'none'}}>
+            style={{ width:'100%', padding:'13px', background:isOpen?`linear-gradient(135deg,${G},${GL})`:'rgba(236,236,236,0.05)', border:'none', color:isOpen?B:WM, fontFamily:FB, fontSize:13, fontWeight:700, cursor:isOpen?'pointer':'not-allowed', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10, borderRadius:3, transition:'all 0.2s', boxShadow:isOpen?`0 4px 20px rgba(189,189,189,0.35)`:'none' }}
+            onMouseEnter={e=>{if(isOpen){e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow=`0 8px 28px rgba(189,189,189,0.5)`}}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow=isOpen?`0 4px 20px rgba(189,189,189,0.35)`:'none'}}>
             {isOpen ? 'Apply for This Job →' : 'Job Closed'}
           </button>
         )}
@@ -375,12 +375,12 @@ export default function JobDetailPage() {
         </button>
 
         {session&&userRole!=='promoter'&&(
-          <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(139,90,26,0.15)', border:`1px solid rgba(139,90,26,0.4)`, borderRadius:3, fontSize:11, color:'#C8B898', lineHeight:1.6, fontFamily:FB }}>
+          <div style={{ marginTop:12, padding:'10px 12px', background:'rgba(112,106,90,0.15)', border:`1px solid rgba(112,106,90,0.4)`, borderRadius:3, fontSize:11, color:'#CBCBCB', lineHeight:1.6, fontFamily:FB }}>
             ⚠ Only promoter accounts can apply. Logged in as <strong>{userRole}</strong>.
           </div>
         )}
         {!session&&(
-          <div style={{ marginTop:12, padding:'10px 12px', background:BB, border:`1px solid rgba(196,151,58,0.22)`, borderRadius:3, fontSize:11, color:WD, lineHeight:1.6, fontFamily:FB, textAlign:'center' }}>
+          <div style={{ marginTop:12, padding:'10px 12px', background:BB, border:`1px solid rgba(189,189,189,0.22)`, borderRadius:3, fontSize:11, color:WD, lineHeight:1.6, fontFamily:FB, textAlign:'center' }}>
             <button onClick={()=>navigate('/login')} style={{ background:'none', border:'none', color:G, cursor:'pointer', fontSize:11, fontFamily:FB, textDecoration:'underline' }}>Log in</button>
             {' '}or{' '}
             <button onClick={()=>navigate('/register')} style={{ background:'none', border:'none', color:G, cursor:'pointer', fontSize:11, fontFamily:FB, textDecoration:'underline' }}>register</button>
@@ -400,7 +400,7 @@ export default function JobDetailPage() {
           onMouseEnter={e=>e.currentTarget.style.color=W} onMouseLeave={e=>e.currentTarget.style.color=WM}>
           ← Jobs
         </button>
-        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>CAMPARI</span><span style={{ color:W }}></span></div>
+        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>HONEY</span><span style={{ color:W }}> GROUP</span></div>
         {session
           ? <span style={{ fontSize:11, color:WM, fontFamily:FB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:100 }}>{session.name}</span>
           : <button onClick={()=>navigate('/login')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:3 }}>Log In</button>
@@ -420,7 +420,7 @@ export default function JobDetailPage() {
           {/* Title row */}
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, marginBottom:20, flexWrap:'wrap' }}>
             <h1 className="jd-title" style={{ fontFamily:FD, fontSize:'clamp(28px,4vw,48px)', fontWeight:700, color:W, lineHeight:1.15, flex:1, minWidth:0 }}>{title}</h1>
-            {type&&<span style={{ flexShrink:0, fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:GL, background:'rgba(232,168,32,0.10)', border:`1px solid rgba(232,168,32,0.28)`, padding:'5px 12px', borderRadius:2, marginTop:6 }}>{type}</span>}
+            {type&&<span style={{ flexShrink:0, fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:GL, background:'rgba(201,191,166,0.10)', border:`1px solid rgba(201,191,166,0.28)`, padding:'5px 12px', borderRadius:2, marginTop:6 }}>{type}</span>}
           </div>
 
           {/* Stat grid */}
@@ -434,7 +434,7 @@ export default function JobDetailPage() {
             ))}
           </div>
 
-          {!isOpen&&<div style={{ padding:'12px 14px', background:'rgba(139,90,26,0.18)', border:`1px solid rgba(139,90,26,0.5)`, borderRadius:3, marginBottom:18, fontSize:13, color:'#C8B898', fontFamily:FB }}>⚠ This job is currently {status}.</div>}
+          {!isOpen&&<div style={{ padding:'12px 14px', background:'rgba(112,106,90,0.18)', border:`1px solid rgba(112,106,90,0.5)`, borderRadius:3, marginBottom:18, fontSize:13, color:'#CBCBCB', fontFamily:FB }}>⚠ This job is currently {status}.</div>}
 
           {/* Requirements */}
           {tags.length>0&&(

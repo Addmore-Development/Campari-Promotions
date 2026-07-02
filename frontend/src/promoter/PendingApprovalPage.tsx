@@ -5,18 +5,18 @@ import { useNavigate }         from 'react-router-dom'
 import { useAuth }             from '../shared/hooks/useAuth'
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────────── */
-const B   = '#0C0A07'
-const BC  = '#141008'
-const BC2 = '#1A1408'
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G5  = '#6B3F10'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.08)'
-const W   = '#FAF3E8'
-const WM  = 'rgba(250,243,232,0.65)'
-const WD  = 'rgba(250,243,232,0.28)'
+const B   = '#050504'
+const BC  = '#080807'
+const BC2 = '#0D0D0A'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G5  = '#443F36'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.08)'
+const W   = '#F8F8F8'
+const WM  = 'rgba(248,248,248,0.65)'
+const WD  = 'rgba(248,248,248,0.28)'
 const FD  = "'Playfair Display', Georgia, serif"
 const FB  = "'DM Sans', system-ui, sans-serif"
 
@@ -29,15 +29,15 @@ const STATUS_CONFIG: Record<Status, { icon: string; title: string; color: string
     icon: '⏳',
     title: 'Application Under Review',
     color: GL,
-    bg: 'rgba(232,168,32,0.08)',
-    border: 'rgba(232,168,32,0.30)',
+    bg: 'rgba(201,191,166,0.08)',
+    border: 'rgba(201,191,166,0.30)',
   },
   documents_submitted: {
     icon: '📋',
     title: 'Documents Received',
     color: GL,
-    bg: 'rgba(232,168,32,0.08)',
-    border: 'rgba(232,168,32,0.30)',
+    bg: 'rgba(201,191,166,0.08)',
+    border: 'rgba(201,191,166,0.30)',
   },
   rejected: {
     icon: '✕',
@@ -50,8 +50,8 @@ const STATUS_CONFIG: Record<Status, { icon: string; title: string; color: string
     icon: '✓',
     title: 'Application Approved',
     color: GL,
-    bg: 'rgba(232,168,32,0.08)',
-    border: 'rgba(232,168,32,0.30)',
+    bg: 'rgba(201,191,166,0.08)',
+    border: 'rgba(201,191,166,0.30)',
   },
   blacklisted: {
     icon: '⊘',
@@ -174,7 +174,7 @@ export default function PendingApprovalPage() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: ${B}; }
-        @keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 0 rgba(232,168,32,0.4)} 50%{box-shadow:0 0 0 20px rgba(232,168,32,0)} }
+        @keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 0 rgba(201,191,166,0.4)} 50%{box-shadow:0 0 0 20px rgba(201,191,166,0)} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to{transform:rotate(360deg)} }
         .hg-pending { animation: fadeUp 0.5s ease both; }
@@ -184,7 +184,7 @@ export default function PendingApprovalPage() {
       <div style={{
         position: 'fixed', top: '-20%', left: '50%', transform: 'translateX(-50%)',
         width: 900, height: 600, borderRadius: '50%', pointerEvents: 'none',
-        background: `radial-gradient(ellipse, ${isRejected ? 'rgba(200,112,96,0.06)' : 'rgba(212,136,10,0.07)'} 0%, transparent 70%)`,
+        background: `radial-gradient(ellipse, ${isRejected ? 'rgba(200,112,96,0.06)' : 'rgba(170,160,135,0.07)'} 0%, transparent 70%)`,
       }} />
 
       {/* Grid texture */}
@@ -199,8 +199,8 @@ export default function PendingApprovalPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 700 }}>
-            <span style={{ color: GL }}>Campari</span>
-            <span style={{ color: W }}></span>
+            <span style={{ color: GL }}>HONEY</span>
+            <span style={{ color: W }}> GROUP</span>
           </div>
           <div style={{ width: 28, height: 1, background: G, margin: '10px auto 0' }} />
         </div>
@@ -227,7 +227,7 @@ export default function PendingApprovalPage() {
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: 3,
             background: isRejected
-              ? 'linear-gradient(90deg, #6B3010, #C87060, #6B3010)'
+              ? 'linear-gradient(90deg, #3A342B, #C87060, #3A342B)'
               : `linear-gradient(90deg, ${G5}, ${GL}, ${G5})`,
           }} />
 
@@ -242,7 +242,7 @@ export default function PendingApprovalPage() {
           {!isRejected ? (
             <>
               <p style={{ fontSize: 14, color: WM, lineHeight: 1.75, marginBottom: 24 }}>
-                Your application is being reviewed by the Campari admin team. This typically takes
+                Your application is being reviewed by the Honey Group admin team. This typically takes
                 <span style={{ color: GL, fontWeight: 600 }}> 1–2 business days</span>. We'll activate your account as soon as your documents have been verified.
               </p>
 
@@ -255,7 +255,7 @@ export default function PendingApprovalPage() {
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: i < steps.length - 1 ? 10 : 0 }}>
                     <div style={{
                       width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                      background: step.done ? `rgba(232,168,32,0.15)` : 'rgba(255,255,255,0.04)',
+                      background: step.done ? `rgba(201,191,166,0.15)` : 'rgba(255,255,255,0.04)',
                       border: `1px solid ${step.done ? GL : BB}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 10, color: step.done ? GL : WD, fontWeight: 700,
@@ -265,7 +265,7 @@ export default function PendingApprovalPage() {
                     <div style={{
                       flex: 1, height: 1,
                       background: i < steps.length - 1
-                        ? (steps[i + 1].done ? `rgba(232,168,32,0.35)` : BB)
+                        ? (steps[i + 1].done ? `rgba(201,191,166,0.35)` : BB)
                         : 'transparent',
                       display: i < steps.length - 1 ? 'block' : 'none',
                       position: 'absolute', left: 0,
@@ -330,7 +330,7 @@ export default function PendingApprovalPage() {
                   color: WM, fontFamily: FB, fontSize: 11, cursor: 'pointer',
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,136,10,0.4)'; e.currentTarget.style.color = W }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(170,160,135,0.4)'; e.currentTarget.style.color = W }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = WM }}
               >
                 Browse Available Jobs
@@ -341,7 +341,7 @@ export default function PendingApprovalPage() {
               <div style={{ background: 'rgba(200,112,96,0.08)', border: '1px solid rgba(200,112,96,0.25)', padding: '16px 20px', marginBottom: 20 }}>
                 <p style={{ fontSize: 14, color: WM, lineHeight: 1.75 }}>
                   {status === 'blacklisted'
-                    ? 'Your account has been suspended. Please contact the Campari admin team for further information.'
+                    ? 'Your account has been suspended. Please contact the Honey Group admin team for further information.'
                     : 'Unfortunately your application was not approved at this time. You may re-apply with updated documentation.'}
                 </p>
                 {rejectionNote && (
@@ -370,7 +370,7 @@ export default function PendingApprovalPage() {
               )}
 
               <a
-                href="mailto:admin@Campari.co.za"
+                href="mailto:admin@honeygroup.co.za"
                 style={{
                   display: 'block', width: '100%', padding: '12px',
                   background: 'transparent', border: `1px solid ${BB}`,
@@ -394,7 +394,7 @@ export default function PendingApprovalPage() {
             <button
               onClick={handleLogout}
               style={{ background: 'none', border: `1px solid ${BB}`, color: WM, fontFamily: FB, fontSize: 11, cursor: 'pointer', padding: '7px 16px', letterSpacing: '0.1em' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,136,10,0.35)'; e.currentTarget.style.color = GL }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(170,160,135,0.35)'; e.currentTarget.style.color = GL }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = WM }}
             >
               Log Out

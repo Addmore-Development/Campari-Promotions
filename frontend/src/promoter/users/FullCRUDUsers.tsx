@@ -6,14 +6,14 @@ import React, { useState } from 'react';
 import { AppLayout } from '../../shared/layout/AppLayout';
 
 // Admin‑style tokens (same as promoter)
-const G = '#C4973A';
-const GL = '#DDB55A';
-const B = '#080808';
-const BC = '#161616';
-const BB = 'rgba(37, 9, 9, 0.07)';
-const W = '#F4EFE6';
-const WM = 'rgba(244,239,230,0.55)';
-const WD = 'rgba(244,239,230,0.22)';
+const G = '#9C9484';
+const GL = '#CFC7B2';
+const B = '#030302';
+const BC = '#0F0F0C';
+const BB = 'rgba(15,15,12, 0.07)';
+const W = '#F2F2F2';
+const WM = 'rgba(242,242,242,0.55)';
+const WD = 'rgba(242,242,242,0.22)';
 const FB = "'DM Sans', system-ui, sans-serif";
 const FD = "'Playfair Display', Georgia, serif";
 
@@ -265,7 +265,7 @@ export const FullCRUDUsers: React.FC = () => {
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 24 }}
             onClick={e => e.target === e.currentTarget && closeModal()}
           >
-            <div style={{ background: '#141414', border: `1px solid ${BB}`, padding: '40px', width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <div style={{ background: '#0D0D0A', border: `1px solid ${BB}`, padding: '40px', width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: G }} />
               <button onClick={closeModal} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: WM, fontSize: 18 }}>✕</button>
               <div style={{ fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: G, marginBottom: 8 }}>
@@ -306,7 +306,7 @@ export const FullCRUDUsers: React.FC = () => {
                       value={form.role}
                       onChange={e => F('role', e.target.value)}
                       style={{
-                        width: '100%', background: '#0e0e0e', border: `1px solid ${BB}`,
+                        width: '100%', background: '#060605', border: `1px solid ${BB}`,
                         padding: '12px 16px', fontFamily: FB, fontSize: 14, color: W, outline: 'none'
                       }}
                     >
@@ -321,7 +321,7 @@ export const FullCRUDUsers: React.FC = () => {
                       value={form.status}
                       onChange={e => F('status', e.target.value)}
                       style={{
-                        width: '100%', background: '#0e0e0e', border: `1px solid ${BB}`,
+                        width: '100%', background: '#060605', border: `1px solid ${BB}`,
                         padding: '12px 16px', fontFamily: FB, fontSize: 14, color: W, outline: 'none'
                       }}
                     >
@@ -355,7 +355,7 @@ export const FullCRUDUsers: React.FC = () => {
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 24 }}
             onClick={e => e.target === e.currentTarget && closeModal()}
           >
-            <div style={{ background: '#141414', border: `1px solid ${BB}`, padding: '40px', width: '100%', maxWidth: 460, position: 'relative' }}>
+            <div style={{ background: '#0D0D0A', border: `1px solid ${BB}`, padding: '40px', width: '100%', maxWidth: 460, position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: ROLE_COLOR[editing.role] }} />
               <button onClick={closeModal} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: WM, fontSize: 18 }}>✕</button>
 

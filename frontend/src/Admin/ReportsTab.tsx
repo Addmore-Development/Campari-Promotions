@@ -4,19 +4,19 @@
 
 import { useState } from 'react'
 
-const G    = '#D4880A'
-const GL   = '#E8A820'
-const G2   = '#8B5A1A'
-const G3   = '#C07818'
-const G4   = '#F0C050'
-const G5   = '#6B3F10'
-const B    = '#0C0A07'
-const D2   = '#151209'
-const BB   = 'rgba(212,136,10,0.16)'
-const BB2  = 'rgba(212,136,10,0.06)'
-const W    = '#FAF3E8'
-const W55  = 'rgba(250,243,232,0.55)'
-const W28  = 'rgba(250,243,232,0.28)'
+const G    = '#8F8A7C'
+const GL   = '#C9BFA6'
+const G2   = '#8A8474'
+const G3   = '#7A756A'
+const G4   = '#D8D8D8'
+const G5   = '#443F36'
+const B    = '#050504'
+const D2   = '#0A0A08'
+const BB   = 'rgba(170,160,135,0.16)'
+const BB2  = 'rgba(170,160,135,0.06)'
+const W    = '#F8F8F8'
+const W55  = 'rgba(248,248,248,0.55)'
+const W28  = 'rgba(248,248,248,0.28)'
 const FD   = "'Playfair Display', Georgia, serif"
 
 function hex2rgba(hex: string, alpha: number): string {
@@ -48,18 +48,18 @@ function downloadExcel(filename: string, rows: string[][], headers: string[]) {
 function downloadPDF(title: string, content: string) {
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
   <style>
-    body{font-family:'Georgia',serif;color:#1a1a1a;background:#fff;padding:40px;max-width:800px;margin:0 auto;}
-    h1{font-size:24px;border-bottom:2px solid #D4880A;padding-bottom:12px;margin-bottom:24px;color:#0C0A07;}
-    h2{font-size:16px;color:#8B5A1A;margin-top:24px;}
+    body{font-family:'Georgia',serif;color:#12120D;background:#fff;padding:40px;max-width:800px;margin:0 auto;}
+    h1{font-size:24px;border-bottom:2px solid #8F8A7C;padding-bottom:12px;margin-bottom:24px;color:#050504;}
+    h2{font-size:16px;color:#8A8474;margin-top:24px;}
     table{width:100%;border-collapse:collapse;margin-top:12px;}
-    th{background:#D4880A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;}
-    td{padding:8px 12px;border-bottom:1px solid #e5d9c8;font-size:12px;}
-    tr:nth-child(even) td{background:#fdf8f0;}
+    th{background:#8F8A7C;color:#fff;padding:8px 12px;text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;}
+    td{padding:8px 12px;border-bottom:1px solid #DBDBDB;font-size:12px;}
+    tr:nth-child(even) td{background:#F9F9F9;}
     .meta{font-size:11px;color:#888;margin-bottom:32px;}
     @media print{body{padding:20px;}}
   </style></head><body>
   <h1>${title}</h1>
-  <div class="meta">Generated: ${new Date().toLocaleString('en-ZA')} · Campari Admin Console</div>
+  <div class="meta">Generated: ${new Date().toLocaleString('en-ZA')} · Honey Group Admin Console</div>
   ${content}
   </body></html>`
   const blob = new Blob([html], { type: 'text/html' })
@@ -262,7 +262,7 @@ export default function ReportsTab({ regs }: Props) {
       )}
 
       {/* PAYOUT CALCULATOR */}
-      <div style={{ background:'rgba(20,16,5,0.6)', border:`1px solid ${BB}`, padding:28, marginBottom:20, borderRadius:4 }}>
+      <div style={{ background:'rgba(9,9,7,0.6)', border:`1px solid ${BB}`, padding:28, marginBottom:20, borderRadius:4 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
           <span style={{ fontSize:18, color:GL }}>◈</span>
           <div style={{ fontSize:10, letterSpacing:'0.25em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>Promoter Payout Calculator</div>
@@ -290,7 +290,7 @@ export default function ReportsTab({ regs }: Props) {
       {/* EXPORT CARDS */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:20 }}>
         {cards.map((c,i)=>(
-          <div key={i} style={{ background:'rgba(20,16,5,0.6)', border:`1px solid ${BB}`, borderRadius:4, padding:24, position:'relative', overflow:'hidden' }}
+          <div key={i} style={{ background:'rgba(9,9,7,0.6)', border:`1px solid ${BB}`, borderRadius:4, padding:24, position:'relative', overflow:'hidden' }}
             onMouseEnter={e=>(e.currentTarget.style.borderColor=hex2rgba(c.color,0.5))}
             onMouseLeave={e=>(e.currentTarget.style.borderColor=BB)}>
             <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${c.color},${hex2rgba(c.color,0.3)})` }} />
@@ -319,7 +319,7 @@ export default function ReportsTab({ regs }: Props) {
       </div>
 
       {/* PLATFORM SUMMARY */}
-      <div style={{ background:'rgba(20,16,5,0.6)', border:`1px solid ${BB}`, borderRadius:4 }}>
+      <div style={{ background:'rgba(9,9,7,0.6)', border:`1px solid ${BB}`, borderRadius:4 }}>
         <div style={{ padding:'14px 22px', borderBottom:`1px solid ${BB}`, fontSize:9, letterSpacing:'0.25em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>Platform Summary</div>
         <table style={{ width:'100%', borderCollapse:'collapse' }}>
           <tbody>

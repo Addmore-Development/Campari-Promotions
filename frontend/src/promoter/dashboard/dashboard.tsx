@@ -2,17 +2,17 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // ─── Strict Brown/Gold/Yellow Palette ─────────────────────────────────────────
-const BLK  = '#050402'
-const BLK1 = '#0A0804'
-const BLK2 = '#100C05'
-const GL   = '#E8A820'      // Gold
-const GD   = '#C07818'      // Brown
-const GD2  = '#8B5A1A'      // Dark Brown
-const BB   = 'rgba(212,136,10,0.16)'  // Brown border
-const W    = '#FAF3E8'
-const W7   = 'rgba(250,243,232,0.70)'
-const W4   = 'rgba(250,243,232,0.40)'
-const TEAL = '#C07818'      // Changed to Brown (was teal)
+const BLK  = '#020201'
+const BLK1 = '#030302'
+const BLK2 = '#070706'
+const GL   = '#C9BFA6'      // Gold
+const GD   = '#7A756A'      // Brown
+const GD2  = '#8A8474'      // Dark Brown
+const BB   = 'rgba(170,160,135,0.16)'  // Brown border
+const W    = '#F8F8F8'
+const W7   = 'rgba(248,248,248,0.70)'
+const W4   = 'rgba(248,248,248,0.40)'
+const TEAL = '#7A756A'      // Changed to Brown (was teal)
 const FD   = "'Playfair Display', Georgia, serif"
 const FB   = "'DM Sans', system-ui, sans-serif"
 
@@ -193,7 +193,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 ? `You have ${allocatedApps.length} confirmed job${allocatedApps.length > 1 ? 's' : ''}`
                 : pendingApps.length > 0
                 ? `${pendingApps.length} application${pendingApps.length > 1 ? 's' : ''} pending review`
-                : 'Welcome back to your Campari portal'}
+                : 'Welcome back to your Campari Promotions portal'}
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
@@ -228,7 +228,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </div>
           </div>
           <button onClick={() => nav('shifts')}
-            style={{ padding: '10px 18px', background: GD, border: 'none', color: '#0C0A07', fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            style={{ padding: '10px 18px', background: GD, border: 'none', color: '#050504', fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {todayShift.status === 'CHECKED_IN' ? 'Check Out →' : 'Check In →'}
           </button>
         </div>

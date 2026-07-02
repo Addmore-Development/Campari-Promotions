@@ -55,6 +55,7 @@ model User {
   @@map("users")
   sentMessages     ChatMessage[] @relation("SentMessages")
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
+  activationReports ActivationReport[] @relation("ActivationReportSubmitter")
 
 }
 
@@ -71,6 +72,7 @@ model Client {
   registeredDate DateTime @default(now())
   categorySpecs  Json?
   regulations    Json[]
+  purchaseOrders PurchaseOrder[] @relation("ClientPurchaseOrders")
   @@map("clients")
 }
 
@@ -105,6 +107,8 @@ model Job {
   createdByUser User          @relation("JobCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   shifts        Shift[]       @relation("JobShifts")
   applications  Application[] @relation("JobApplications")
+  activationReport   ActivationReport?   @relation("JobActivationReport")
+  commitmentEntries  CommitmentEntry[]   @relation("JobCommitmentEntries")
   @@map("jobs")
 }
 
@@ -236,4 +240,74 @@ enum PaymentStatus {
   PROCESSING
   PAID
   FAILED
+}
+
+// ── Activation Reporting ─────────────────────────────────────────────────────
+// One report per Job ("activation"), filed by the on-site supervisor/promoter,
+// so admins can auto-generate client-facing reports: serves/conversions,
+// insights, feedback, and a required 3-shot photo set.
+model ActivationReport {
+  id              String    @id @default(uuid())
+  jobId           String    @unique
+  submittedBy     String
+  unitsServed     Int       @default(0)
+  conversions     Int       @default(0)
+  insights        String?
+  feedback        String?
+  shotSetupUrl    String?
+  shotMidEventUrl String?
+  shotCloseUrl    String?
+  status          String    @default("draft") // draft | submitted
+  submittedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  job      Job  @relation("JobActivationReport", fields: [jobId], references: [id], onDelete: Cascade)
+  reporter User @relation("ActivationReportSubmitter", fields: [submittedBy], references: [id], onDelete: Restrict)
+
+  @@map("activation_reports")
+}
+
+// ── Purchase Order / Commitment Entry budget tracking ────────────────────────
+// A Client releases a PO for a set amount over a period (e.g. a quarter).
+// Each time a job/activation is booked against that PO, a Commitment Entry
+// (CE) is logged so admins can track pending/approved/cancelled spend and
+// keep the running budget accurate.
+model PurchaseOrder {
+  id          String   @id @default(uuid())
+  clientId    String
+  poNumber    String
+  amount      Int
+  periodStart DateTime
+  periodEnd   DateTime
+  description String?
+  status      String   @default("active") // active | closed | cancelled
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client      Client            @relation("ClientPurchaseOrders", fields: [clientId], references: [id], onDelete: Restrict)
+  commitments CommitmentEntry[] @relation("PurchaseOrderCommitments")
+
+  @@map("purchase_orders")
+}
+
+model CommitmentEntry {
+  id              String    @id @default(uuid())
+  purchaseOrderId String
+  jobId           String?
+  ceNumber        String?
+  amount          Int
+  status          String    @default("pending") // pending | approved | cancelled
+  notes           String?
+  createdBy       String
+  approvedBy      String?
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  purchaseOrder PurchaseOrder @relation("PurchaseOrderCommitments", fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  job           Job?          @relation("JobCommitmentEntries", fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@map("commitment_entries")
 }

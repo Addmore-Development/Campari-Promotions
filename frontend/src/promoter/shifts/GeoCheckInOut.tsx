@@ -3,19 +3,19 @@ import { useAuth } from '../../shared/hooks/useAuth';
 import { showToast } from '../../shared/utils/toast';
 import { shiftsService } from '../../shared/services/shiftsService';
 
-const G   = '#D4880A';
-const GL  = '#E8A820';
-const G2  = '#8B5A1A';
-const B   = '#0C0A07';
-const BC  = '#141008';
-const BB  = 'rgba(212,136,10,0.12)';
-const W   = '#FAF3E8';
-const WM  = 'rgba(250,243,232,0.65)';
-const WD  = 'rgba(250,243,232,0.28)';
+const G   = '#8F8A7C';
+const GL  = '#C9BFA6';
+const G2  = '#8A8474';
+const B   = '#050504';
+const BC  = '#080807';
+const BB  = 'rgba(170,160,135,0.12)';
+const W   = '#F8F8F8';
+const WM  = 'rgba(248,248,248,0.65)';
+const WD  = 'rgba(248,248,248,0.28)';
 const FD  = "'Playfair Display', Georgia, serif";
 const FB  = "'DM Sans', system-ui, sans-serif";
 const TEAL  = '#4AABB8';
-const AMBER = '#E8A820';
+const AMBER = '#C9BFA6';
 const CORAL = '#C4614A';
 const GREEN = '#4ade80';
 
@@ -72,7 +72,7 @@ function MapsButton({ lat, lng }: { lat: number; lng: number }) {
     <a
       href={`https://www.google.com/maps?q=${lat},${lng}`}
       target="_blank" rel="noopener noreferrer"
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(232,168,32,0.08)', border: '1px solid rgba(232,168,32,0.3)', borderRadius: 3, color: GL, fontSize: 11, fontFamily: FD, fontWeight: 700, textDecoration: 'none' }}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(201,191,166,0.08)', border: '1px solid rgba(201,191,166,0.3)', borderRadius: 3, color: GL, fontSize: 11, fontFamily: FD, fontWeight: 700, textDecoration: 'none' }}
     >
       Open in Google Maps
     </a>
@@ -563,8 +563,8 @@ export const GeoCheckInOut: React.FC = () => {
     const map: Record<string, { color: string; label: string; bg: string }> = {
       SCHEDULED:        { color: '#5A9EC4', label: 'Scheduled',        bg: 'rgba(90,158,196,0.1)'  },
       CHECKED_IN:       { color: GREEN,     label: 'On Shift',         bg: 'rgba(74,222,128,0.1)'  },
-      PENDING_APPROVAL: { color: AMBER,     label: 'Pending Approval', bg: 'rgba(232,168,32,0.1)'  },
-      APPROVED:         { color: GL,        label: 'Approved',         bg: 'rgba(232,168,32,0.1)'  },
+      PENDING_APPROVAL: { color: AMBER,     label: 'Pending Approval', bg: 'rgba(201,191,166,0.1)'  },
+      APPROVED:         { color: GL,        label: 'Approved',         bg: 'rgba(201,191,166,0.1)'  },
       NO_SHOW:          { color: CORAL,     label: 'No Show',          bg: 'rgba(196,97,74,0.1)'   },
     };
     const s = map[status] || { color: WD, label: status, bg: 'transparent' };
@@ -620,7 +620,7 @@ export const GeoCheckInOut: React.FC = () => {
             <div style={{ fontSize: 12, color: WM, marginBottom: 16 }}>{job.venue} · R{job.hourlyRate}/hr</div>
             {s.checkInTime && <LiveEarningsTimer checkInTime={s.checkInTime} hourlyRate={job.hourlyRate} />}
             {s.issueReport?.startsWith('LATE_CHECK_IN:') && (
-              <div style={{ marginTop: 10, padding: '6px 12px', background: 'rgba(232,168,32,0.1)', border: `1px solid ${AMBER}`, borderRadius: 3, fontSize: 11, color: AMBER, fontWeight: 700, display: 'inline-block' }}>
+              <div style={{ marginTop: 10, padding: '6px 12px', background: 'rgba(201,191,166,0.1)', border: `1px solid ${AMBER}`, borderRadius: 3, fontSize: 11, color: AMBER, fontWeight: 700, display: 'inline-block' }}>
                 Late by {s.issueReport.replace('LATE_CHECK_IN:', '')} min
               </div>
             )}
@@ -644,7 +644,7 @@ export const GeoCheckInOut: React.FC = () => {
           const count = opt.v === 'all' ? shifts.length : shifts.filter(s => s.status === opt.v).length;
           return (
             <button key={opt.v} onClick={() => setStatusFilter(opt.v)}
-              style={{ padding: '7px 16px', border: `1px solid ${statusFilter === opt.v ? GL : BB}`, background: statusFilter === opt.v ? 'rgba(232,168,32,0.12)' : 'transparent', color: statusFilter === opt.v ? GL : WM, fontFamily: FB, fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 2, transition: 'all 0.2s' }}>
+              style={{ padding: '7px 16px', border: `1px solid ${statusFilter === opt.v ? GL : BB}`, background: statusFilter === opt.v ? 'rgba(201,191,166,0.12)' : 'transparent', color: statusFilter === opt.v ? GL : WM, fontFamily: FB, fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 2, transition: 'all 0.2s' }}>
               {opt.l}
               {count > 0 && <span style={{ marginLeft: 6, fontSize: 10, color: statusFilter === opt.v ? GL : WD }}>({count})</span>}
             </button>
@@ -760,7 +760,7 @@ export const GeoCheckInOut: React.FC = () => {
 
                   {/* Late warning */}
                   {activeShift.status === 'SCHEDULED' && lateMinutes > 0 && !isBeforeStart && (
-                    <div style={{ marginBottom: 20, padding: '12px 16px', background: 'rgba(232,168,32,0.10)', border: `1px solid ${AMBER}`, borderRadius: 6, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ marginBottom: 20, padding: '12px 16px', background: 'rgba(201,191,166,0.10)', border: `1px solid ${AMBER}`, borderRadius: 6, display: 'flex', alignItems: 'center', gap: 12 }}>
                       <span style={{ fontSize: 20 }}>⏰</span>
                       <div>
                         <p style={{ fontSize: 13, color: AMBER, fontWeight: 700, marginBottom: 2 }}>
@@ -779,7 +779,7 @@ export const GeoCheckInOut: React.FC = () => {
                       <div style={{ fontSize: 11, color: GREEN, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8, fontFamily: FB }}>Live Earnings</div>
                       <LiveEarningsTimer checkInTime={activeShift.checkInTime} hourlyRate={job.hourlyRate} />
                       {activeShift.issueReport?.startsWith('LATE_CHECK_IN:') && (
-                        <div style={{ marginTop: 10, padding: '5px 12px', background: 'rgba(232,168,32,0.1)', border: `1px solid ${AMBER}`, borderRadius: 3, fontSize: 11, color: AMBER, fontWeight: 700, display: 'inline-block' }}>
+                        <div style={{ marginTop: 10, padding: '5px 12px', background: 'rgba(201,191,166,0.1)', border: `1px solid ${AMBER}`, borderRadius: 3, fontSize: 11, color: AMBER, fontWeight: 700, display: 'inline-block' }}>
                           Late check-in: {activeShift.issueReport.replace('LATE_CHECK_IN:', '')} min
                         </div>
                       )}

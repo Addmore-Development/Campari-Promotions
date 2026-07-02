@@ -19,20 +19,20 @@ export function Table<T>({ columns, data, rowKey, emptyMessage = 'No data availa
     <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
         <thead>
-          <tr style={{ borderBottom: '1px solid rgba(212,175,55,0.2)' }}>
+          <tr style={{ borderBottom: '1px solid rgba(201,191,166,0.2)' }}>
             {columns.map(col => (
               <th
                 key={col.key}
                 style={{
                   padding: '12px 16px',
                   textAlign: 'left',
-                  color: '#D4AF37',
+                  color: '#C9BFA6',
                   fontWeight: 600,
                   fontSize: '11px',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   width: col.width,
-                  background: 'rgba(212,175,55,0.05)',
+                  background: 'rgba(201,191,166,0.05)',
                 }}
               >
                 {col.header}

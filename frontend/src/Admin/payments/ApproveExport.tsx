@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { AdminLayout } from '../AdminLayout'
 
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G3  = '#C07818'
-const G4  = '#F0C050'
-const B   = '#0C0A07'
-const D2  = '#151209'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.06)'
-const W   = '#FAF3E8'
-const WM  = 'rgba(250,243,232,0.82)'
-const WD  = 'rgba(250,243,232,0.58)'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G3  = '#7A756A'
+const G4  = '#D8D8D8'
+const B   = '#050504'
+const D2  = '#0A0A08'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.06)'
+const W   = '#F8F8F8'
+const WM  = 'rgba(248,248,248,0.82)'
+const WD  = 'rgba(248,248,248,0.58)'
 const FD  = "'Playfair Display', Georgia, serif"
 
 function hex2rgba(hex: string, alpha: number): string {
@@ -38,9 +38,9 @@ function exportCSV(rows: string[][], filename: string) {
 
 // Excel export — creates a simple .xls (HTML table format, opens in Excel)
 function exportExcel(headers: string[], rows: (string|number)[][], filename: string) {
-  const ths = headers.map(h => `<th style="background:#1a1200;color:#E8A820;padding:8px 12px;border:1px solid #3a2800;font-family:Georgia,serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">${h}</th>`).join('')
+  const ths = headers.map(h => `<th style="background:#0A0A08;color:#C9BFA6;padding:8px 12px;border:1px solid #292929;font-family:Georgia,serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">${h}</th>`).join('')
   const trs = rows.map(row =>
-    `<tr>${row.map(cell => `<td style="padding:8px 12px;border:1px solid #2a2000;color:#1a1200;font-family:Arial,sans-serif;font-size:12px;">${cell ?? ''}</td>`).join('')}</tr>`
+    `<tr>${row.map(cell => `<td style="padding:8px 12px;border:1px solid #17170F;color:#0A0A08;font-family:Arial,sans-serif;font-size:12px;">${cell ?? ''}</td>`).join('')}</tr>`
   ).join('')
   const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Report</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`
   triggerDownload(new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' }), filename)
@@ -92,10 +92,10 @@ function buildCampaignPDFHtml(records: PayRecord[]): string {
     const totalHours = cr.reduce((s, r) => s + r.hours, 0)
     const totalCost  = cr.reduce((s, r) => s + net(r), 0)
     const promoters  = new Set(cr.map(r => r.promoter)).size
-    const rows = cr.map(r => `<tr><td>${r.promoter}</td><td>${r.job}</td><td>${r.date}</td><td style="text-align:center">${r.hours}h</td><td>R${r.rate}/hr</td><td style="color:#E8A820;font-weight:700">${fmtZAR(net(r))}</td><td style="text-transform:capitalize">${r.status}</td></tr>`).join('')
-    return `<div class="section"><div class="client-name">${client}</div><div class="summary"><div class="card"><div class="card-label">Promoters</div><div class="card-value">${promoters}</div></div><div class="card"><div class="card-label">Shifts</div><div class="card-value">${cr.length}</div></div><div class="card"><div class="card-label">Total Hours</div><div class="card-value">${totalHours}h</div></div><div class="card"><div class="card-label">Total Payout</div><div class="card-value" style="color:#E8A820">${fmtZAR(totalCost)}</div></div></div><table><thead><tr><th>Promoter</th><th>Job</th><th>Date</th><th>Hours</th><th>Rate</th><th>Net Payout</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    const rows = cr.map(r => `<tr><td>${r.promoter}</td><td>${r.job}</td><td>${r.date}</td><td style="text-align:center">${r.hours}h</td><td>R${r.rate}/hr</td><td style="color:#C9BFA6;font-weight:700">${fmtZAR(net(r))}</td><td style="text-transform:capitalize">${r.status}</td></tr>`).join('')
+    return `<div class="section"><div class="client-name">${client}</div><div class="summary"><div class="card"><div class="card-label">Promoters</div><div class="card-value">${promoters}</div></div><div class="card"><div class="card-label">Shifts</div><div class="card-value">${cr.length}</div></div><div class="card"><div class="card-label">Total Hours</div><div class="card-value">${totalHours}h</div></div><div class="card"><div class="card-label">Total Payout</div><div class="card-value" style="color:#C9BFA6">${fmtZAR(totalCost)}</div></div></div><table><thead><tr><th>Promoter</th><th>Job</th><th>Date</th><th>Hours</th><th>Rate</th><th>Net Payout</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
   }).join('')
-  return `<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#0C0A07;color:#FAF3E8;padding:48px;font-size:13px}.header{border-bottom:2px solid #D4880A;padding-bottom:24px;margin-bottom:36px}.logo{font-size:26px;font-weight:700;color:#E8A820}.logo span{color:#FAF3E8}.sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#C07818;margin-top:6px}.date{font-size:11px;color:rgba(250,243,232,.45);margin-top:10px}.section{margin-bottom:44px;page-break-inside:avoid}.client-name{font-size:15px;font-weight:700;color:#E8A820;border-left:3px solid #E8A820;padding-left:12px;margin-bottom:14px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.card{background:rgba(212,136,10,.08);border:1px solid rgba(212,136,10,.2);padding:12px 14px;border-radius:3px}.card-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,243,232,.5);margin-bottom:6px}.card-value{font-size:20px;font-weight:700;color:#FAF3E8}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:rgba(212,136,10,.1)}th{padding:9px 12px;text-align:left;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,243,232,.5);border-bottom:1px solid rgba(212,136,10,.2)}td{padding:9px 12px;border-bottom:1px solid rgba(212,136,10,.08);color:rgba(250,243,232,.85)}.footer{margin-top:40px;padding-top:14px;border-top:1px solid rgba(212,136,10,.18);font-size:10px;color:rgba(250,243,232,.25)}@media print{body{background:#fff;color:#111}.logo{color:#b36b00}.client-name{color:#b36b00;border-color:#b36b00}.card{background:#f5f0e8}.card-value{color:#111}td{color:#333}}</style><div class="header"><div class="logo">CAMPARI <span></span></div><div class="sub">Campaign Attendance &amp; Payroll Report</div><div class="date">Generated: ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>${clientSections}<div class="footer">Campari · Campaign Report · Confidential · ${new Date().toISOString()}</div>`
+  return `<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#050504;color:#F8F8F8;padding:48px;font-size:13px}.header{border-bottom:2px solid #8F8A7C;padding-bottom:24px;margin-bottom:36px}.logo{font-size:26px;font-weight:700;color:#C9BFA6}.logo span{color:#F8F8F8}.sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#7A756A;margin-top:6px}.date{font-size:11px;color:rgba(248,248,248,.45);margin-top:10px}.section{margin-bottom:44px;page-break-inside:avoid}.client-name{font-size:15px;font-weight:700;color:#C9BFA6;border-left:3px solid #C9BFA6;padding-left:12px;margin-bottom:14px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.card{background:rgba(170,160,135,.08);border:1px solid rgba(170,160,135,.2);padding:12px 14px;border-radius:3px}.card-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,248,248,.5);margin-bottom:6px}.card-value{font-size:20px;font-weight:700;color:#F8F8F8}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:rgba(170,160,135,.1)}th{padding:9px 12px;text-align:left;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(248,248,248,.5);border-bottom:1px solid rgba(170,160,135,.2)}td{padding:9px 12px;border-bottom:1px solid rgba(170,160,135,.08);color:rgba(248,248,248,.85)}.footer{margin-top:40px;padding-top:14px;border-top:1px solid rgba(170,160,135,.18);font-size:10px;color:rgba(248,248,248,.25)}@media print{body{background:#fff;color:#111}.logo{color:#6E6A5E}.client-name{color:#6E6A5E;border-color:#6E6A5E}.card{background:#F1F1F1}.card-value{color:#111}td{color:#333}}</style><div class="header"><div class="logo">HONEY <span>GROUP</span></div><div class="sub">Campaign Attendance &amp; Payroll Report</div><div class="date">Generated: ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>${clientSections}<div class="footer">Honey Group · Campaign Report · Confidential · ${new Date().toISOString()}</div>`
 }
 
 function buildJobsData() {
@@ -194,7 +194,7 @@ export default function ReportsExports() {
             description="All active and archived jobs with slots, pay rates, locations, and status."
             onCSV={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `honey-group-jobs-${today()}.csv`); flash('Jobs CSV downloaded') }}
             onExcel={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportExcel(d.headers, d.rows, `honey-group-jobs-${today()}.xls`); flash('Jobs Excel downloaded') }}
-            onPDF={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string) => `<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#0C0A07;color:#FAF3E8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(212,136,10,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#E8A820}td{padding:8px;border-bottom:1px solid rgba(212,136,10,0.12);font-size:12px;color:rgba(250,243,232,0.85)}</style><h2 style="color:#E8A820;font-family:Georgia;margin-bottom:24px">Jobs Register</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-jobs-${today()}`); flash('Jobs PDF export initiated') }}
+            onPDF={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string) => `<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Jobs Register</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-jobs-${today()}`); flash('Jobs PDF export initiated') }}
           />
 
           <ExportCard
@@ -202,7 +202,7 @@ export default function ReportsExports() {
             description="Full promoter list with city, reliability scores, and onboarding status."
             onCSV={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `honey-group-promoters-${today()}.csv`); flash('Promoters CSV downloaded') }}
             onExcel={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportExcel(d.headers, d.rows, `honey-group-promoters-${today()}.xls`); flash('Promoters Excel downloaded') }}
-            onPDF={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string)=>`<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#0C0A07;color:#FAF3E8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(212,136,10,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#E8A820}td{padding:8px;border-bottom:1px solid rgba(212,136,10,0.12);font-size:12px;color:rgba(250,243,232,0.85)}</style><h2 style="color:#E8A820;font-family:Georgia;margin-bottom:24px">Promoter Roster</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-promoters-${today()}`); flash('Promoters PDF export initiated') }}
+            onPDF={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string)=>`<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Promoter Roster</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-promoters-${today()}`); flash('Promoters PDF export initiated') }}
           />
 
           <ExportCard
@@ -227,8 +227,8 @@ export default function ReportsExports() {
             onPDF={() => {
               const approved = MOCK_RECORDS.filter(r => r.status === 'approved')
               if (!approved.length) { flash('No approved records to export'); return }
-              const trs = approved.map(r => `<tr><td>${r.promoter}</td><td>${r.email}</td><td>${r.bank}</td><td>${r.accountNo}</td><td style="color:#E8A820;font-weight:700">${fmtZAR(net(r))}</td><td>${r.job}</td><td>${r.date}</td></tr>`).join('')
-              exportPDF(`<style>body{font-family:Georgia;background:#0C0A07;color:#FAF3E8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(212,136,10,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#E8A820}td{padding:8px;border-bottom:1px solid rgba(212,136,10,0.12);font-size:12px;color:rgba(250,243,232,0.85)}</style><h2 style="color:#E8A820;font-family:Georgia;margin-bottom:24px">EFT Batch — ${approved.length} Records</h2><table><thead><tr><th>Promoter</th><th>Email</th><th>Bank</th><th>Account No</th><th>Net Payout</th><th>Job</th><th>Date</th></tr></thead><tbody>${trs}</tbody></table>`, `honey-group-eft-batch-${today()}`)
+              const trs = approved.map(r => `<tr><td>${r.promoter}</td><td>${r.email}</td><td>${r.bank}</td><td>${r.accountNo}</td><td style="color:#C9BFA6;font-weight:700">${fmtZAR(net(r))}</td><td>${r.job}</td><td>${r.date}</td></tr>`).join('')
+              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">EFT Batch — ${approved.length} Records</h2><table><thead><tr><th>Promoter</th><th>Email</th><th>Bank</th><th>Account No</th><th>Net Payout</th><th>Job</th><th>Date</th></tr></thead><tbody>${trs}</tbody></table>`, `honey-group-eft-batch-${today()}`)
               flash('EFT PDF export initiated')
             }}
           />
@@ -240,7 +240,7 @@ export default function ReportsExports() {
             onExcel={() => { exportExcel(attendanceHeaders, attendanceRows(MOCK_RECORDS), `honey-group-attendance-${today()}.xls`); flash('Attendance Excel downloaded') }}
             onPDF={() => {
               const trs = attendanceRows(MOCK_RECORDS).map(r => `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-              exportPDF(`<style>body{font-family:Georgia;background:#0C0A07;color:#FAF3E8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(212,136,10,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#E8A820}td{padding:8px;border-bottom:1px solid rgba(212,136,10,0.12);font-size:12px;color:rgba(250,243,232,0.85)}</style><h2 style="color:#E8A820;font-family:Georgia;margin-bottom:24px">Attendance Summary</h2><table><thead><tr>${attendanceHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-attendance-${today()}`)
+              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Attendance Summary</h2><table><thead><tr>${attendanceHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-attendance-${today()}`)
               flash('Attendance PDF export initiated')
             }}
           />

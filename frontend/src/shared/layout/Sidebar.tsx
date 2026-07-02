@@ -5,13 +5,13 @@
 import React from 'react';
 
 // Admin‑style tokens
-const G = '#C4973A';
-const B = '#080808';
-const BC = '#161616';
+const G = '#9C9484';
+const B = '#030302';
+const BC = '#0F0F0C';
 const BB = 'rgba(255,255,255,0.07)';
-const W = '#F4EFE6';
-const WM = 'rgba(244,239,230,0.55)';
-const WD = 'rgba(244,239,230,0.22)';
+const W = '#F2F2F2';
+const WM = 'rgba(242,242,242,0.55)';
+const WD = 'rgba(242,242,242,0.22)';
 const FB = "'DM Sans', system-ui, sans-serif";
 
 export interface NavItem {
@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, activeId, onNavigate })
             display: 'flex', alignItems: 'center', gap: '10px',
             padding: '10px 14px', borderRadius: '10px', border: 'none',
             cursor: item.locked ? 'not-allowed' : 'pointer',
-            background: isActive ? 'rgba(196,151,58,0.12)' : 'transparent',
+            background: isActive ? 'rgba(189,189,189,0.12)' : 'transparent',
             color: isActive ? G : item.locked ? '#333' : WM,
             fontFamily: FB, fontSize: '13px', fontWeight: isActive ? 700 : 500,
             transition: 'background 0.15s, color 0.15s',

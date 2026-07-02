@@ -10,11 +10,11 @@ interface BadgeProps {
 
 // New status colors based on admin palette
 const STATUS_COLORS = {
-  gold:    { bg: 'rgba(232,168,32,0.15)', text: '#E8A820', border: 'rgba(232,168,32,0.4)' },      // AMBER/GL
+  gold:    { bg: 'rgba(201,191,166,0.15)', text: '#C9BFA6', border: 'rgba(201,191,166,0.4)' },      // AMBER/GL
   success: { bg: 'rgba(74,171,184,0.12)',  text: '#4AABB8', border: 'rgba(74,171,184,0.3)' },    // TEAL
-  warning: { bg: 'rgba(232,168,32,0.12)', text: '#E8A820', border: 'rgba(232,168,32,0.3)' },     // AMBER
+  warning: { bg: 'rgba(201,191,166,0.12)', text: '#C9BFA6', border: 'rgba(201,191,166,0.3)' },     // AMBER
   danger:  { bg: 'rgba(196,97,74,0.12)',  text: '#C4614A', border: 'rgba(196,97,74,0.3)' },      // CORAL
-  neutral: { bg: 'rgba(255,255,255,0.08)', text: '#FAF3E8', border: 'rgba(255,255,255,0.15)' },  // W
+  neutral: { bg: 'rgba(255,255,255,0.08)', text: '#F8F8F8', border: 'rgba(255,255,255,0.15)' },  // W
   info:    { bg: 'rgba(90,158,196,0.12)', text: '#5A9EC4', border: 'rgba(90,158,196,0.3)' },     // SKY
 };
 

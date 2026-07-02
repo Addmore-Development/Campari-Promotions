@@ -2,20 +2,20 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /* ─── TOKENS ─────────────────────────────────────────────────── */
-const B   = '#0C0A07'
-const D1  = '#141008'
-const D2  = '#1A1408'
-const GL  = '#E8A820'
-const G   = '#D4880A'
-const G3  = '#C07818'
-const G5  = '#6B3F10'
-const AB  = '#AB8D3F'
-const W   = '#FAF3E8'
-const W85 = 'rgba(250,243,232,0.85)'
-const W55 = 'rgba(250,243,232,0.55)'
-const W28 = 'rgba(250,243,232,0.28)'
-const W12 = 'rgba(250,243,232,0.12)'
-const BB  = 'rgba(212,136,10,0.16)'
+const B   = '#050504'
+const D1  = '#080807'
+const D2  = '#0D0D0A'
+const GL  = '#C9BFA6'
+const G   = '#8F8A7C'
+const G3  = '#7A756A'
+const G5  = '#443F36'
+const AB  = '#928A76'
+const W   = '#F8F8F8'
+const W85 = 'rgba(248,248,248,0.85)'
+const W55 = 'rgba(248,248,248,0.55)'
+const W28 = 'rgba(248,248,248,0.28)'
+const W12 = 'rgba(248,248,248,0.12)'
+const BB  = 'rgba(170,160,135,0.16)'
 const FD  = "'Work Sans', 'worksans', sans-serif"
 const FI  = "'Bodoni Moda', Georgia, serif"
 
@@ -93,7 +93,7 @@ export default function AboutPage() {
       }}>
         <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer' }}
           onClick={() => navigate('/')}>
-          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}></span>
+          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
         </div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => navigate('/jobs')}
@@ -123,7 +123,7 @@ export default function AboutPage() {
         <div style={{
           position: 'absolute', top: '-0.1em', left: '-0.04em',
           fontSize: 'clamp(200px, 26vw, 320px)', fontWeight: 900, fontFamily: FD,
-          color: 'transparent', WebkitTextStroke: `1px rgba(232,168,32,0.05)`,
+          color: 'transparent', WebkitTextStroke: `1px rgba(201,191,166,0.05)`,
           lineHeight: 1, pointerEvents: 'none', userSelect: 'none', zIndex: 0,
         }}>HG</div>
 
@@ -157,7 +157,7 @@ export default function AboutPage() {
             color: W, marginBottom: 32,
           }}>
             About<br />
-            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>Campari.</span>
+            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>Campari Group.</span>
           </h1>
           <p style={{ fontSize: 16, color: W55, lineHeight: 1.85, maxWidth: 620, fontFamily: FD, marginBottom: 48 }}>
             South Africa's premier promoter management platform. We connect brands with verified, reliable promoters across 12 cities — powered by GPS technology, smart payroll, and real-time operations.
@@ -168,7 +168,7 @@ export default function AboutPage() {
               <div key={i} style={{
                 padding: '28px 32px',
                 borderRight: i < 3 ? `1px solid ${BB}` : 'none',
-                background: i === 1 ? `rgba(232,168,32,0.04)` : 'transparent',
+                background: i === 1 ? `rgba(201,191,166,0.04)` : 'transparent',
               }}>
                 <div style={{ fontFamily: FD, fontSize: 40, fontWeight: 900, color: GL, lineHeight: 1, marginBottom: 6 }}>{s.n}</div>
                 <div style={{ fontSize: 10, color: W28, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: FD }}>{s.l}</div>
@@ -191,7 +191,7 @@ export default function AboutPage() {
             {roles.map((r, i) => (
               <div key={i}
                 style={{
-                  background: `linear-gradient(160deg, #1E1608 0%, #120D03 100%)`,
+                  background: `linear-gradient(160deg, #100F0B 0%, #060605 100%)`,
                   border: `1px solid ${hoveredRole === i ? r.color : BB}`,
                   padding: '44px 40px',
                   position: 'relative', overflow: 'hidden',
@@ -209,7 +209,7 @@ export default function AboutPage() {
                 <div style={{
                   position: 'absolute', bottom: -16, right: -8,
                   fontSize: 120, fontWeight: 900, fontFamily: FD,
-                  color: 'transparent', WebkitTextStroke: `1px rgba(232,168,32,0.05)`,
+                  color: 'transparent', WebkitTextStroke: `1px rgba(201,191,166,0.05)`,
                   lineHeight: 1, pointerEvents: 'none', userSelect: 'none',
                 }}>{r.num}</div>
 
@@ -237,9 +237,9 @@ export default function AboutPage() {
               Join as Promoter →
             </button>
             <button onClick={() => navigate('/jobs')}
-              style={{ fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', color: GL, border: `1px solid rgba(232,168,32,0.35)`, padding: '15px 32px', cursor: 'pointer', transition: 'all 0.3s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = `rgba(232,168,32,0.06)`; e.currentTarget.style.borderColor = GL }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(232,168,32,0.35)` }}>
+              style={{ fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', color: GL, border: `1px solid rgba(201,191,166,0.35)`, padding: '15px 32px', cursor: 'pointer', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = `rgba(201,191,166,0.06)`; e.currentTarget.style.borderColor = GL }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(201,191,166,0.35)` }}>
               Browse Jobs
             </button>
           </div>
@@ -251,7 +251,7 @@ export default function AboutPage() {
         {/* Diagonal texture */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          background: `repeating-linear-gradient(-55deg, transparent, transparent 120px, rgba(232,168,32,0.015) 120px, rgba(232,168,32,0.015) 121px)`,
+          background: `repeating-linear-gradient(-55deg, transparent, transparent 120px, rgba(201,191,166,0.015) 120px, rgba(201,191,166,0.015) 121px)`,
         }} />
         <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 52, paddingBottom: 28, borderBottom: `1px solid ${BB}` }}>
@@ -265,8 +265,8 @@ export default function AboutPage() {
               <div key={i}
                 style={{
                   padding: '28px 30px',
-                  background: hoveredCap === i ? `rgba(171,141,63,0.07)` : 'transparent',
-                  border: `1px solid ${hoveredCap === i ? 'rgba(232,168,32,0.25)' : BB}`,
+                  background: hoveredCap === i ? `rgba(146,139,120,0.07)` : 'transparent',
+                  border: `1px solid ${hoveredCap === i ? 'rgba(201,191,166,0.25)' : BB}`,
                   transition: 'all 0.25s',
                   cursor: 'default',
                   transform: hoveredCap === i ? 'translateX(4px)' : 'translateX(0)',
@@ -304,7 +304,7 @@ export default function AboutPage() {
               <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>SA Promoters.</span>
             </h2>
             <p style={{ fontSize: 15, color: W55, lineHeight: 1.9, fontFamily: FD, marginBottom: 20 }}>
-              We built Campari to fix a broken industry. Promoters were underpaid, under-protected, and invisible. Brands had no reliable way to verify who showed up, or whether anyone showed up at all.
+              We built Campari Group to fix a broken industry. Promoters were underpaid, under-protected, and invisible. Brands had no reliable way to verify who showed up, or whether anyone showed up at all.
             </p>
             <p style={{ fontSize: 15, color: W55, lineHeight: 1.9, fontFamily: FD }}>
               Today we run the only platform in South Africa that combines geo-verified attendance, smart payroll, and full POPIA-compliant document management — giving promoters the protection they deserve, and brands the accountability they need.
@@ -353,9 +353,9 @@ export default function AboutPage() {
               Register Now — Free
             </button>
             <button onClick={() => navigate('/jobs')}
-              style={{ fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', color: GL, border: `1px solid rgba(232,168,32,0.35)`, padding: '16px 32px', cursor: 'pointer', transition: 'all 0.3s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = `rgba(232,168,32,0.06)`; e.currentTarget.style.borderColor = GL }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(232,168,32,0.35)` }}>
+              style={{ fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', color: GL, border: `1px solid rgba(201,191,166,0.35)`, padding: '16px 32px', cursor: 'pointer', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = `rgba(201,191,166,0.06)`; e.currentTarget.style.borderColor = GL }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = `rgba(201,191,166,0.35)` }}>
               Browse Jobs
             </button>
           </div>

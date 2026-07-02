@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const G = '#C4973A'
-const GL = '#DDB55A'
-const B = '#080808'
-const BC = '#161616'
+const G = '#9C9484'
+const GL = '#CFC7B2'
+const B = '#030302'
+const BC = '#0F0F0C'
 const BB = 'rgba(255,255,255,0.07)'
-const W = '#F4EFE6'
-const WM = 'rgba(244,239,230,0.55)'
-const WD = 'rgba(244,239,230,0.22)'
+const W = '#F2F2F2'
+const WM = 'rgba(242,242,242,0.55)'
+const WD = 'rgba(242,242,242,0.22)'
 const FD = "'Playfair Display', Georgia, serif"
 const FB = "'DM Sans', system-ui, sans-serif"
 
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
       <aside style={{ width: 220, background: BC, borderRight: `1px solid ${BB}`, display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 100 }}>
         <div style={{ padding: '28px 24px', borderBottom: `1px solid ${BB}` }}>
           <div style={{ fontFamily: FD, fontSize: 17, fontWeight: 700 }}>
-            <span style={{ color: G }}>CAMPARI</span><span style={{ color: W }}></span>
+            <span style={{ color: G }}>CAMPARI</span><span style={{ color: W }}> GROUP</span>
           </div>
           <div style={{ fontSize: 9, letterSpacing: '0.3em', color: WD, marginTop: 4, textTransform: 'uppercase' }}>Admin Console</div>
         </div>
@@ -74,8 +74,8 @@ export default function AdminDashboard() {
           {NAV_ITEMS.map(n => (
             <button key={n.path} onClick={() => go(n.path)} style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px',
-              background: active === n.path ? 'rgba(196,151,58,0.1)' : 'transparent',
-              border: active === n.path ? `1px solid rgba(196,151,58,0.25)` : '1px solid transparent',
+              background: active === n.path ? 'rgba(189,189,189,0.1)' : 'transparent',
+              border: active === n.path ? `1px solid rgba(189,189,189,0.25)` : '1px solid transparent',
               borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'all 0.2s',
               color: active === n.path ? G : WM, fontFamily: FB, fontSize: 13, fontWeight: active === n.path ? 600 : 400,
             }}

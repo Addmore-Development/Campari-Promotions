@@ -2,23 +2,23 @@ import { useState, useEffect } from 'react'
 import { AdminLayout } from '../AdminLayout'
 // adminMobileStyles not used
 
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G3  = '#C07818'
-const G4  = '#F0C050'
-const G5  = '#6B3F10'
-const B   = '#0C0A07'
-const D1  = '#0E0C06'
-const D2  = '#151209'
-const D3  = '#1C1709'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.06)'
-const W   = '#CEC5B2'
-const W85 = 'rgba(210,198,180,0.95)'
-const W55 = 'rgba(220,208,188,0.90)'
-const W35 = 'rgba(168,152,130,0.55)'
-const W28 = 'rgba(200,185,162,0.80)'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G3  = '#7A756A'
+const G4  = '#D8D8D8'
+const G5  = '#443F36'
+const B   = '#050504'
+const D1  = '#070706'
+const D2  = '#0A0A08'
+const D3  = '#100F0B'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.06)'
+const W   = '#F0F0F0'
+const W85 = 'rgba(204,204,204,0.95)'
+const W55 = 'rgba(214,214,214,0.90)'
+const W35 = 'rgba(189,189,189,0.55)'
+const W28 = 'rgba(187,187,187,0.80)'
 const FD  = "'Playfair Display', Georgia, serif"
 const MONO = "'DM Mono', 'Courier New', monospace"
 
@@ -75,9 +75,9 @@ function mapApiUser(u: any, source: 'api' | 'local'): User {
 }
 
 const ROLE_COLOR: Record<Role, string> = { promoter: GL, client: G3, admin: G4 }
-const STATUS_CLR: Record<Status, string>    = { active: G3, inactive: '#C8B898', suspended: G4, pending: GL }
-const STATUS_BG:  Record<Status, string>    = { active: hex2rgba(G3,0.12), inactive: hex2rgba('#6B4020',0.35), suspended: hex2rgba(G4,0.10), pending: hex2rgba(GL,0.10) }
-const STATUS_BORDER: Record<Status, string> = { active: hex2rgba(G3,0.45), inactive: hex2rgba('#8B6040',0.60), suspended: hex2rgba(G4,0.42), pending: hex2rgba(GL,0.42) }
+const STATUS_CLR: Record<Status, string>    = { active: G3, inactive: '#CBCBCB', suspended: G4, pending: GL }
+const STATUS_BG:  Record<Status, string>    = { active: hex2rgba(G3,0.12), inactive: hex2rgba('#463F35',0.35), suspended: hex2rgba(G4,0.10), pending: hex2rgba(GL,0.10) }
+const STATUS_BORDER: Record<Status, string> = { active: hex2rgba(G3,0.45), inactive: hex2rgba('#666052',0.60), suspended: hex2rgba(G4,0.42), pending: hex2rgba(GL,0.42) }
 
 const EMPTY: Omit<User, 'id' | 'jobs' | 'payouts' | 'source'> = {
   name: '', email: '', phone: '', role: 'promoter', status: 'active', city: '', joined: '',
@@ -94,7 +94,7 @@ function Badge({ label, color, bg, border }: { label: string; color: string; bg:
 function FilterBtn({ label, active, color, onClick }: { label: string; active: boolean; color: string; onClick: () => void }) {
   const safeColor = color.startsWith('#') ? color : GL
   return (
-    <button onClick={onClick} style={{ padding:'7px 14px', border:`1px solid ${active ? safeColor : 'rgba(212,136,10,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(safeColor,0.18):'transparent', color:active?safeColor:W55, transition:'all 0.18s' }}>
+    <button onClick={onClick} style={{ padding:'7px 14px', border:`1px solid ${active ? safeColor : 'rgba(170,160,135,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(safeColor,0.18):'transparent', color:active?safeColor:W55, transition:'all 0.18s' }}>
       {label}
     </button>
   )
@@ -235,7 +235,7 @@ export default function FullCRUDUsers() {
             { label:'Pending Review', value:counts.pending,  color:G4 },
             { label:'Active',         value:counts.active,   color:G3 },
           ].map((s, i) => (
-            <div key={i} style={{ background:'rgba(20,16,5,0.6)', padding:'16px 18px', position:'relative' }}>
+            <div key={i} style={{ background:'rgba(9,9,7,0.6)', padding:'16px 18px', position:'relative' }}>
               <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${s.color},${hex2rgba(s.color,0.3)})` }} />
               <div style={{ fontFamily:FD, fontSize:26, fontWeight:700, color:W, lineHeight:1 }}>{s.value}</div>
               <div style={{ fontSize:9, color:W55, marginTop:5, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:FD }}>{s.label}</div>
@@ -342,9 +342,9 @@ export default function FullCRUDUsers() {
                           ✎ Edit
                         </button>
                         <button onClick={()=>setDeleting(u.id)}
-                          style={{ padding:'4px 8px', fontSize:10, fontWeight:600, color:'rgba(232,180,140,0.85)', background:'rgba(139,90,26,0.12)', border:'1px solid rgba(139,90,26,0.40)', borderRadius:3, cursor:'pointer', fontFamily:FD }}
-                          onMouseEnter={e=>{e.currentTarget.style.background='rgba(139,90,26,0.25)'}}
-                          onMouseLeave={e=>{e.currentTarget.style.background='rgba(139,90,26,0.12)'}}>
+                          style={{ padding:'4px 8px', fontSize:10, fontWeight:600, color:'rgba(195,195,195,0.85)', background:'rgba(112,106,90,0.12)', border:'1px solid rgba(112,106,90,0.40)', borderRadius:3, cursor:'pointer', fontFamily:FD }}
+                          onMouseEnter={e=>{e.currentTarget.style.background='rgba(112,106,90,0.25)'}}
+                          onMouseLeave={e=>{e.currentTarget.style.background='rgba(112,106,90,0.12)'}}>
                           🗑
                         </button>
                       </div>
@@ -355,7 +355,7 @@ export default function FullCRUDUsers() {
                             Approve
                           </button>
                           <button onClick={()=>updateUserStatus(u.id,'inactive')}
-                            style={{ padding:'4px 8px', fontSize:9, fontWeight:700, color:'#C8B898', background:hex2rgba(G2,0.20), border:`1px solid ${hex2rgba(G2,0.55)}`, borderRadius:3, cursor:'pointer', fontFamily:FD, whiteSpace:'nowrap' }}>
+                            style={{ padding:'4px 8px', fontSize:9, fontWeight:700, color:'#CBCBCB', background:hex2rgba(G2,0.20), border:`1px solid ${hex2rgba(G2,0.55)}`, borderRadius:3, cursor:'pointer', fontFamily:FD, whiteSpace:'nowrap' }}>
                             Reject
                           </button>
                         </div>
@@ -389,7 +389,7 @@ export default function FullCRUDUsers() {
               </p>
               <div style={{ display:'flex', gap:12 }}>
                 <button onClick={()=>setDeleting(null)} style={{ flex:1, padding:'12px', background:'transparent', border:`1px solid ${BB}`, color:W55, fontFamily:FD, fontSize:12, cursor:'pointer', borderRadius:3 }}>Cancel</button>
-                <button onClick={()=>deleteUser(deleting)} style={{ flex:1, padding:'12px', background:hex2rgba(G2,0.25), border:`1px solid ${G2}`, color:'#C8B898', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Delete</button>
+                <button onClick={()=>deleteUser(deleting)} style={{ flex:1, padding:'12px', background:hex2rgba(G2,0.25), border:`1px solid ${G2}`, color:'#CBCBCB', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Delete</button>
               </div>
             </div>
           </div>
@@ -481,12 +481,12 @@ export default function FullCRUDUsers() {
                 {editing.status==='pending' && (
                   <div style={{ display:'flex', gap:10, marginTop:20 }}>
                     <button onClick={()=>{updateUserStatus(editing.id,'active');closeModal()}} style={{ flex:1, padding:'11px', background:hex2rgba(G3,0.18), border:`1px solid ${G3}`, color:G3, fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>✓ Approve</button>
-                    <button onClick={()=>{updateUserStatus(editing.id,'inactive');closeModal()}} style={{ flex:1, padding:'11px', background:hex2rgba(G2,0.18), border:`1px solid ${G2}`, color:'#C8A080', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>✗ Reject</button>
+                    <button onClick={()=>{updateUserStatus(editing.id,'inactive');closeModal()}} style={{ flex:1, padding:'11px', background:hex2rgba(G2,0.18), border:`1px solid ${G2}`, color:'#B3AA97', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>✗ Reject</button>
                   </div>
                 )}
                 <div style={{ display:'flex', gap:10, marginTop:editing.status==='pending'?10:24 }}>
                   <button onClick={()=>{closeModal();openEdit(editing)}} style={{ flex:2, padding:'12px', background:`linear-gradient(135deg,${GL},${G3})`, border:'none', color:B, fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Edit User</button>
-                  <button onClick={()=>{closeModal();setDeleting(editing.id)}} style={{ flex:1, padding:'12px', background:hex2rgba(G2,0.18), border:`1px solid ${hex2rgba(G2,0.5)}`, color:'#C8B898', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Delete</button>
+                  <button onClick={()=>{closeModal();setDeleting(editing.id)}} style={{ flex:1, padding:'12px', background:hex2rgba(G2,0.18), border:`1px solid ${hex2rgba(G2,0.5)}`, color:'#CBCBCB', fontFamily:FD, fontSize:12, fontWeight:700, cursor:'pointer', borderRadius:3 }}>Delete</button>
                 </div>
               </div>
             </div>

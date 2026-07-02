@@ -8,14 +8,14 @@ async function main() {
 
   const adminPassword = await bcrypt.hash('Admin@HG2026!', 10);
   const admin = await prisma.user.upsert({
-    where:  { email: 'admin@campari.co.za' },
+    where:  { email: 'admin@honeygroup.co.za' },
     update: {
       password:         adminPassword,
       status:           'approved',
       onboardingStatus: 'complete',
     },
     create: {
-      email:            'admin@campari.co.za',
+      email:            'admin@honeygroup.co.za',
       password:         adminPassword,
       fullName:         'Administrator',
       role:             'ADMIN',
@@ -31,7 +31,7 @@ async function main() {
   console.log('Admin created/updated:', admin.email);
   console.log('');
   console.log('Seeding complete!');
-  console.log('Admin: admin@campari.co.za / Admin@HG2026!');
+  console.log('Admin: admin@honeygroup.co.za / Admin@HG2026!');
   console.log('Promoter and Business accounts are created via the registration flow.');
 }
 

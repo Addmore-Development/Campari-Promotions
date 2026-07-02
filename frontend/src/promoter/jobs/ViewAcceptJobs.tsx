@@ -1,22 +1,23 @@
 // promoter/jobs/ViewAcceptJobs.tsx
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { showToast } from '../../shared/utils/toast';
 import { jobsService } from '../../shared/services/jobsService'; // <-- import the service
 
-const G   = '#D4880A';
-const GL  = '#E8A820';
-const G2  = '#8B5A1A';
-const B   = '#0C0A07';
-const BC  = '#141008';
-const BB  = 'rgba(212,136,10,0.12)';
-const W   = '#FAF3E8';
-const WM  = 'rgba(250,243,232,0.65)';
-const WD  = 'rgba(250,243,232,0.28)';
+const G   = '#8F8A7C';
+const GL  = '#C9BFA6';
+const G2  = '#8A8474';
+const B   = '#050504';
+const BC  = '#080807';
+const BB  = 'rgba(170,160,135,0.12)';
+const W   = '#F8F8F8';
+const WM  = 'rgba(248,248,248,0.65)';
+const WD  = 'rgba(248,248,248,0.28)';
 const FD  = "'Playfair Display', Georgia, serif";
 const FB  = "'DM Sans', system-ui, sans-serif";
 const TEAL   = '#4AABB8';
-const AMBER  = '#E8A820';
+const AMBER  = '#C9BFA6';
 const CORAL  = '#C4614A';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -59,6 +60,7 @@ function jobMatchesPromoterCity(job: any, promoterCityRaw: string): boolean {
 
 export const ViewAcceptJobs: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [jobs, setJobs]                 = useState<any[]>([]);
   const [profile, setProfile]           = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
@@ -194,13 +196,13 @@ export const ViewAcceptJobs: React.FC = () => {
       </div>
 
       {!promoterCityRaw && (
-        <div style={{ padding: '14px 18px', background: 'rgba(212,136,10,0.06)', border: '1px solid rgba(212,136,10,0.3)', borderRadius: 2, marginBottom: 24, fontSize: 13, color: GL }}>
+        <div style={{ padding: '14px 18px', background: 'rgba(170,160,135,0.06)', border: '1px solid rgba(170,160,135,0.3)', borderRadius: 2, marginBottom: 24, fontSize: 13, color: GL }}>
           ⚠️ You haven't set your city yet. <a href="/promoter/?tab=profile" style={{ color: GL, fontWeight: 700 }}>Update your profile →</a>
         </div>
       )}
 
       {profile && profile.status !== 'approved' && (
-        <div style={{ padding: '14px 18px', background: 'rgba(212,136,10,0.06)', border: '1px solid rgba(212,136,10,0.3)', borderRadius: 2, marginBottom: 24, fontSize: 13, color: GL }}>
+        <div style={{ padding: '14px 18px', background: 'rgba(170,160,135,0.06)', border: '1px solid rgba(170,160,135,0.3)', borderRadius: 2, marginBottom: 24, fontSize: 13, color: GL }}>
           ⏳ Your account is pending approval. You can browse jobs but cannot apply until approved.
         </div>
       )}
@@ -214,7 +216,7 @@ export const ViewAcceptJobs: React.FC = () => {
             { key: 'matched', label: '⚡ Profile Match' },
           ].map(f => (
             <button key={f.key} onClick={() => setFilter(f.key as any)}
-              style={{ padding: '7px 16px', borderRadius: 30, border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: filter === f.key ? GL : 'rgba(250,243,232,0.05)', color: filter === f.key ? B : WM, transition: 'all 0.2s' }}>
+              style={{ padding: '7px 16px', borderRadius: 30, border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: filter === f.key ? GL : 'rgba(248,248,248,0.05)', color: filter === f.key ? B : WM, transition: 'all 0.2s' }}>
               {f.label}
             </button>
           ))}
@@ -227,7 +229,7 @@ export const ViewAcceptJobs: React.FC = () => {
           <div style={{ display: 'flex', gap: 4 }}>
             {[{ key: 'date', label: 'Date' }, { key: 'pay', label: 'Pay' }].map(s => (
               <button key={s.key} onClick={() => setSortField(s.key as any)}
-                style={{ padding: '7px 14px', borderRadius: 30, border: `1px solid ${sortField === s.key ? GL : BB}`, background: sortField === s.key ? 'rgba(232,168,32,0.12)' : 'transparent', color: sortField === s.key ? GL : WM, fontSize: 12, cursor: 'pointer' }}>
+                style={{ padding: '7px 14px', borderRadius: 30, border: `1px solid ${sortField === s.key ? GL : BB}`, background: sortField === s.key ? 'rgba(201,191,166,0.12)' : 'transparent', color: sortField === s.key ? GL : WM, fontSize: 12, cursor: 'pointer' }}>
                 {s.label} {sortField === s.key ? '↓' : ''}
               </button>
             ))}
@@ -282,8 +284,8 @@ export const ViewAcceptJobs: React.FC = () => {
                     {app ? (
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 2,
                         color:      app.status === 'ALLOCATED' ? TEAL  : AMBER,
-                        background: app.status === 'ALLOCATED' ? 'rgba(74,171,184,0.1)' : 'rgba(232,168,32,0.1)',
-                        border:    `1px solid ${app.status === 'ALLOCATED' ? 'rgba(74,171,184,0.4)' : 'rgba(232,168,32,0.4)'}` }}>
+                        background: app.status === 'ALLOCATED' ? 'rgba(74,171,184,0.1)' : 'rgba(201,191,166,0.1)',
+                        border:    `1px solid ${app.status === 'ALLOCATED' ? 'rgba(74,171,184,0.4)' : 'rgba(201,191,166,0.4)'}` }}>
                         {app.status === 'ALLOCATED' ? '✓ Confirmed' : '⏳ Interested'}
                       </span>
                     ) : (
@@ -292,7 +294,17 @@ export const ViewAcceptJobs: React.FC = () => {
                   </td>
                   <td style={{ padding: '14px 18px' }} onClick={e => e.stopPropagation()}>
                     {app ? (
-                      <span style={{ fontSize: 11, color: WD }}>Applied</span>
+                      app.status === 'ALLOCATED' && new Date(job.date).getTime() < Date.now() ? (
+                        <button
+                          onClick={() => navigate(`/promoter/?tab=activation-report&jobId=${job.id}`)}
+                          style={{ fontSize: 11, color: GL, background: 'none', border: 'none', cursor: 'pointer', fontFamily: FB, fontWeight: 700, padding: 0 }}
+                          onMouseEnter={e => e.currentTarget.style.color = W}
+                          onMouseLeave={e => e.currentTarget.style.color = GL}>
+                          📋 File Activation Report →
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: 11, color: WD }}>Applied</span>
+                      )
                     ) : !inCity ? (
                       <span style={{ fontSize: 10, color: CORAL }} title="Job is in a different city">🚫 Other city</span>
                     ) : profile?.status !== 'approved' ? (
@@ -378,7 +390,7 @@ export const ViewAcceptJobs: React.FC = () => {
             <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${G2},${GL},${G})` }} />
 
             {/* Icon */}
-            <div style={{ width:72, height:72, borderRadius:'50%', background:`rgba(232,168,32,0.1)`, border:`1px solid rgba(232,168,32,0.35)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', fontSize:30 }}>
+            <div style={{ width:72, height:72, borderRadius:'50%', background:`rgba(201,191,166,0.1)`, border:`1px solid rgba(201,191,166,0.35)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', fontSize:30 }}>
               ✓
             </div>
 
@@ -389,7 +401,7 @@ export const ViewAcceptJobs: React.FC = () => {
               You're on the list!
             </h2>
 
-            <div style={{ background:'rgba(232,168,32,0.06)', border:`1px solid rgba(232,168,32,0.18)`, padding:'16px 20px', marginBottom:24, borderRadius:3, textAlign:'left' }}>
+            <div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.18)`, padding:'16px 20px', marginBottom:24, borderRadius:3, textAlign:'left' }}>
               <div style={{ fontSize:14, fontWeight:700, color:W, fontFamily:FD, marginBottom:4 }}>{appliedJob.title}</div>
               <div style={{ fontSize:12, color:WM, fontFamily:FB }}>{appliedJob.client} · {appliedJob.venue}</div>
               <div style={{ fontSize:11, color:WD, marginTop:6, fontFamily:FB }}>
@@ -399,14 +411,14 @@ export const ViewAcceptJobs: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ background:'rgba(212,136,10,0.04)', border:`1px solid ${BB}`, padding:'14px 18px', marginBottom:28, borderRadius:3 }}>
+            <div style={{ background:'rgba(170,160,135,0.04)', border:`1px solid ${BB}`, padding:'14px 18px', marginBottom:28, borderRadius:3 }}>
               <p style={{ fontFamily:FB, fontSize:12, color:WM, lineHeight:1.8, margin:0 }}>
-                Your interest has been registered. The <span style={{ color:GL, fontWeight:600 }}>business client</span> and <span style={{ color:GL, fontWeight:600 }}>Campari admin</span> have been notified. You'll receive a confirmation once you're allocated to this shift.
+                Your interest has been registered. The <span style={{ color:GL, fontWeight:600 }}>business client</span> and <span style={{ color:GL, fontWeight:600 }}>Honey Group admin</span> have been notified. You'll receive a confirmation once you're allocated to this shift.
               </p>
             </div>
 
             <button onClick={() => setAppliedJob(null)}
-              style={{ width:'100%', padding:'14px 0', background:`linear-gradient(90deg,${G2},${GL},${G})`, border:'none', fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', color:'#080808', cursor:'pointer', borderRadius:2 }}>
+              style={{ width:'100%', padding:'14px 0', background:`linear-gradient(90deg,${G2},${GL},${G})`, border:'none', fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', color:'#030302', cursor:'pointer', borderRadius:2 }}>
               Back to Jobs
             </button>
           </div>

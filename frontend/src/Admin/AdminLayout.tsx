@@ -2,18 +2,18 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useEffect, useState, useRef } from 'react'
 
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G5  = '#6B3F10'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G5  = '#443F36'
 
-const B  = '#0C0A07'
-const BC = '#100D05'
-const BB = 'rgba(212,136,10,0.14)'
+const B  = '#050504'
+const BC = '#060605'
+const BB = 'rgba(170,160,135,0.14)'
 
-const W  = '#FAF3E8'
-const WM = 'rgba(250,243,232,0.65)'
-const WD = 'rgba(250,243,232,0.28)'
+const W  = '#F8F8F8'
+const WM = 'rgba(248,248,248,0.65)'
+const WD = 'rgba(248,248,248,0.28)'
 
 const FD = "'Playfair Display', Georgia, serif"
 
@@ -30,6 +30,10 @@ const NAV_GROUPS = [
   { label: 'Operations', items: [
     { label: 'Jobs',                   icon: '◎', path: '/admin/jobs',       tab: 'jobs',          external: true  },
     { label: 'Live Map',               icon: '⊙', path: '/admin/map',        tab: 'map',           external: true  },
+    { label: 'Activation Reports',     icon: '▤', path: '/admin/activation-reports', tab: 'activation-reports', external: true },
+  ]},
+  { label: 'Finance', items: [
+    { label: 'Budget Tracking',        icon: '◈', path: '/admin/budget',     tab: 'budget',        external: true  },
   ]},
   { label: 'Comms', items: [
     { label: 'Messages',               icon: '◆', path: '/admin',            tab: 'messages',      external: false },
@@ -53,7 +57,7 @@ function injectStyles() {
   el.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    select option { background: #100D05; color: #FAF3E8; }
+    select option { background: #060605; color: #F8F8F8; }
 
     @keyframes fadeIn       { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
     @keyframes slideInLeft  { from { transform:translateX(-100%) } to { transform:translateX(0) } }
@@ -61,10 +65,10 @@ function injectStyles() {
     @keyframes overlayIn    { from { opacity:0 } to { opacity:1 } }
 
     .hg-nav::-webkit-scrollbar        { width: 4px; }
-    .hg-nav::-webkit-scrollbar-track  { background: rgba(212,136,10,0.04); }
-    .hg-nav::-webkit-scrollbar-thumb  { background: linear-gradient(180deg, #E8A820, #8B5A1A); border-radius: 4px; min-height: 36px; }
-    .hg-nav::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #F0C050, #D4880A); }
-    .hg-nav { scrollbar-width: thin; scrollbar-color: #D4880A rgba(212,136,10,0.04); }
+    .hg-nav::-webkit-scrollbar-track  { background: rgba(170,160,135,0.04); }
+    .hg-nav::-webkit-scrollbar-thumb  { background: linear-gradient(180deg, #C9BFA6, #8A8474); border-radius: 4px; min-height: 36px; }
+    .hg-nav::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #D8D8D8, #8F8A7C); }
+    .hg-nav { scrollbar-width: thin; scrollbar-color: #8F8A7C rgba(170,160,135,0.04); }
 
     /* Sidebar transition */
     .hg-sidebar {
@@ -92,9 +96,9 @@ function injectStyles() {
       left: calc(100% + 10px);
       top: 50%;
       transform: translateY(-50%);
-      background: #1C1709;
-      border: 1px solid rgba(212,136,10,0.35);
-      color: #FAF3E8;
+      background: #100F0B;
+      border: 1px solid rgba(170,160,135,0.35);
+      color: #F8F8F8;
       font-size: 11px;
       font-family: 'Playfair Display', Georgia, serif;
       font-weight: 600;
@@ -114,18 +118,18 @@ function injectStyles() {
       top: 50%;
       transform: translateY(-50%);
       border: 5px solid transparent;
-      border-right-color: rgba(212,136,10,0.35);
+      border-right-color: rgba(170,160,135,0.35);
     }
     .hg-nav-item:hover .hg-tooltip { opacity: 1; }
 
     /* ── Mobile sidebar — force readable contrast ── */
     @media (max-width: 900px) {
       .hg-mobile-sidebar button {
-        -webkit-tap-highlight-color: rgba(232,168,32,0.15);
+        -webkit-tap-highlight-color: rgba(201,191,166,0.15);
       }
       /* Ensure nav item text is never invisible on small dark screens */
       .hg-mobile-sidebar .hg-nav button span:not([class]) {
-        color: #E8DFC8 !important;
+        color: #E4E4E4 !important;
       }
     }
 
@@ -148,7 +152,7 @@ function injectStyles() {
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, #6B3F10, #E8A820, #F5C842, #E8A820, #6B3F10);
+      background: linear-gradient(90deg, #443F36, #C9BFA6, #F0F0F0, #C9BFA6, #443F36);
     }
 
     /* Collapse toggle button */
@@ -159,15 +163,15 @@ function injectStyles() {
       width: 28px;
       height: 28px;
       border-radius: 6px;
-      border: 1px solid rgba(212,136,10,0.28);
-      background: rgba(212,136,10,0.08);
+      border: 1px solid rgba(170,160,135,0.28);
+      background: rgba(170,160,135,0.08);
       cursor: pointer;
       transition: all 0.2s;
       flex-shrink: 0;
     }
     .hg-collapse-btn:hover {
-      background: rgba(212,136,10,0.18);
-      border-color: rgba(212,136,10,0.5);
+      background: rgba(170,160,135,0.18);
+      border-color: rgba(170,160,135,0.5);
     }
     .hg-collapse-btn svg {
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
@@ -279,8 +283,8 @@ function SidebarContent({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      background: isMobile ? '#1C1608' : `linear-gradient(180deg, ${BC} 0%, #0A0805 100%)`,
-      borderRight: isMobile ? `1px solid rgba(212,136,10,0.20)` : `1px solid ${BB}`,
+      background: isMobile ? '#0F0F0C' : `linear-gradient(180deg, ${BC} 0%, #030302 100%)`,
+      borderRight: isMobile ? `1px solid rgba(170,160,135,0.20)` : `1px solid ${BB}`,
       /* Solid background — prevents any blur from showing through */
       isolation: 'isolate',
     }}>
@@ -363,7 +367,7 @@ function SidebarContent({
                     fontWeight: 700,
                     letterSpacing: '0.28em',
                     textTransform: 'uppercase' as const,
-                    color: 'rgba(232,168,32,0.55)',   /* gold-tinted, clearly readable */
+                    color: 'rgba(201,191,166,0.55)',   /* gold-tinted, clearly readable */
                     fontFamily: FD,
                     opacity: collapsed && !isMobile ? 0 : 1,
                     maxHeight: collapsed && !isMobile ? 0 : 20,
@@ -380,7 +384,7 @@ function SidebarContent({
                       width="10" height="10" viewBox="0 0 10 10" fill="none"
                       style={{ transform: groupOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.22s' }}
                     >
-                      <path d="M7.5 3.5L5 6L2.5 3.5" stroke="rgba(232,168,32,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M7.5 3.5L5 6L2.5 3.5" stroke="rgba(201,191,166,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
                 ) : null}
@@ -409,12 +413,12 @@ function SidebarContent({
                           borderRadius: 6,
                           cursor: 'pointer',
                           background: active
-                            ? 'linear-gradient(135deg, rgba(232,168,32,0.18), rgba(196,151,58,0.10))'
+                            ? 'linear-gradient(135deg, rgba(201,191,166,0.18), rgba(189,189,189,0.10))'
                             : 'transparent',
                           border: active
-                            ? '1px solid rgba(232,168,32,0.45)'
+                            ? '1px solid rgba(201,191,166,0.45)'
                             : '1px solid transparent',
-                          color: active ? GL : '#E8DFC8',   /* warm near-white — always readable */
+                          color: active ? GL : '#E4E4E4',   /* warm near-white — always readable */
                           fontFamily: FD,
                           fontSize: 13,
                           fontWeight: active ? 700 : 500,
@@ -424,15 +428,15 @@ function SidebarContent({
                         }}
                         onMouseEnter={e => {
                           if (!active) {
-                            e.currentTarget.style.background = 'rgba(232,168,32,0.10)'
+                            e.currentTarget.style.background = 'rgba(201,191,166,0.10)'
                             e.currentTarget.style.color = W
-                            e.currentTarget.style.borderColor = 'rgba(232,168,32,0.22)'
+                            e.currentTarget.style.borderColor = 'rgba(201,191,166,0.22)'
                           }
                         }}
                         onMouseLeave={e => {
                           if (!active) {
                             e.currentTarget.style.background = 'transparent'
-                            e.currentTarget.style.color = '#E8DFC8'
+                            e.currentTarget.style.color = '#E4E4E4'
                             e.currentTarget.style.borderColor = 'transparent'
                           }
                         }}
@@ -451,7 +455,7 @@ function SidebarContent({
                         {/* Icon */}
                         <span style={{
                           fontSize: 14,
-                          color: active ? GL : 'rgba(232,168,32,0.75)',  /* gold tint — visible on dark */
+                          color: active ? GL : 'rgba(201,191,166,0.75)',  /* gold tint — visible on dark */
                           transition: 'color 0.18s',
                           flexShrink: 0,
                           lineHeight: 1,
@@ -521,8 +525,8 @@ function SidebarContent({
             transition: 'opacity 0.18s, max-width 0.24s',
             whiteSpace: 'nowrap',
           }}>
-            <div style={{ fontSize: 12, color: '#E8DFC8', fontWeight: 700, fontFamily: FD }}>Administrator</div>
-            <div style={{ fontSize: 10, color: 'rgba(232,168,32,0.55)', marginTop: 1, fontFamily: FD }}>Super Admin</div>
+            <div style={{ fontSize: 12, color: '#E4E4E4', fontWeight: 700, fontFamily: FD }}>Administrator</div>
+            <div style={{ fontSize: 10, color: 'rgba(201,191,166,0.55)', marginTop: 1, fontFamily: FD }}>Super Admin</div>
           </div>
         </div>
 
@@ -607,9 +611,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             alignItems: 'center',
             gap: 8,
             background: mobileOpen
-              ? `rgba(232,168,32,0.18)`
-              : `rgba(232,168,32,0.08)`,
-            border: `1px solid ${mobileOpen ? GL : 'rgba(232,168,32,0.45)'}`,
+              ? `rgba(201,191,166,0.18)`
+              : `rgba(201,191,166,0.08)`,
+            border: `1px solid ${mobileOpen ? GL : 'rgba(201,191,166,0.45)'}`,
             borderRadius: 6,
             cursor: 'pointer',
             padding: '7px 13px 7px 10px',
@@ -617,12 +621,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             flexShrink: 0,
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(232,168,32,0.22)'
+            e.currentTarget.style.background = 'rgba(201,191,166,0.22)'
             e.currentTarget.style.borderColor = GL
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = mobileOpen ? 'rgba(232,168,32,0.18)' : 'rgba(232,168,32,0.08)'
-            e.currentTarget.style.borderColor = mobileOpen ? GL : 'rgba(232,168,32,0.45)'
+            e.currentTarget.style.background = mobileOpen ? 'rgba(201,191,166,0.18)' : 'rgba(201,191,166,0.08)'
+            e.currentTarget.style.borderColor = mobileOpen ? GL : 'rgba(201,191,166,0.45)'
           }}
         >
           {/* Animated icon — three lines → X */}
@@ -657,7 +661,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: mobileOpen ? GL : 'rgba(232,168,32,0.90)',
+            color: mobileOpen ? GL : 'rgba(201,191,166,0.90)',
             lineHeight: 1,
             transition: 'color 0.22s',
           }}>
@@ -667,23 +671,23 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Logo — centred */}
         <div style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, letterSpacing: '0.02em', position: 'absolute', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-          <span style={{ color: GL }}>CAMPARI</span>
-          <span style={{ color: W }}></span>
+          <span style={{ color: GL }}>HONEY</span>
+          <span style={{ color: W }}> GROUP</span>
         </div>
 
         {/* Back to site */}
         <button
           onClick={() => navigate('/')}
           style={{
-            background: 'none', border: `1px solid rgba(250,243,232,0.18)`,
+            background: 'none', border: `1px solid rgba(248,248,248,0.18)`,
             color: WM, fontFamily: FD, fontSize: 10,
             padding: '6px 10px', cursor: 'pointer',
             borderRadius: 4, letterSpacing: '0.08em',
             flexShrink: 0,
             transition: 'all 0.2s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(232,168,32,0.45)`; e.currentTarget.style.color = GL }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(250,243,232,0.18)'; e.currentTarget.style.color = WM }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(201,191,166,0.45)`; e.currentTarget.style.color = GL }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(248,248,248,0.18)'; e.currentTarget.style.color = WM }}
         >
           ← Site
         </button>

@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 // Admin‑style tokens
-const G = '#C4973A';
-const B = '#080808';
+const G = '#9C9484';
+const B = '#030302';
 const BB = 'rgba(255,255,255,0.07)';
-const W = '#F4EFE6';
-const WM = 'rgba(244,239,230,0.55)';
+const W = '#F2F2F2';
+const WM = 'rgba(242,242,242,0.55)';
 const FB = "'DM Sans', system-ui, sans-serif";
 
 interface TopBarProps {
@@ -31,7 +31,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title = 'Campari Promotions' }) 
       height: '56px', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 28px',
-      background: 'rgba(10,10,10,0.95)',
+      background: 'rgba(5,5,4,0.95)',
       borderBottom: `1px solid ${BB}`,
       backdropFilter: 'blur(8px)',
       position: 'sticky', top: 0, zIndex: 100,
@@ -40,9 +40,9 @@ export const TopBar: React.FC<TopBarProps> = ({ title = 'Campari Promotions' }) 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{
           width: '28px', height: '28px', borderRadius: '6px',
-          background: 'linear-gradient(135deg, #C4973A, #DDB55A)',
+          background: 'linear-gradient(135deg, #9C9484, #CFC7B2)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '14px', fontWeight: 900, color: '#0A0A0A',
+          fontSize: '14px', fontWeight: 900, color: '#050504',
         }}>
           H
         </div>

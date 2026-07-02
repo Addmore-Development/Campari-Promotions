@@ -2,21 +2,21 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // ─── Strict Brown/Gold/Yellow Palette ────────────────────────────────────────
-const BLK  = '#050402'
-const BLK1 = '#0A0804'
-const BLK2 = '#100C05'
-const BLK3 = '#181206'
-const BLK4 = '#201608'
-const GL   = '#E8A820'
-const GD   = '#C07818'
-const GD2  = '#8B5A1A'
-const GD3  = '#6B3F10'
-const BB   = 'rgba(212,136,10,0.16)'
-const BB2  = 'rgba(212,136,10,0.08)'
-const W    = '#FAF3E8'
-const W7   = 'rgba(250,243,232,0.70)'
-const W4   = 'rgba(250,243,232,0.40)'
-const W2   = 'rgba(250,243,232,0.20)'
+const BLK  = '#020201'
+const BLK1 = '#030302'
+const BLK2 = '#070706'
+const BLK3 = '#0A0A08'
+const BLK4 = '#100F0B'
+const GL   = '#C9BFA6'
+const GD   = '#7A756A'
+const GD2  = '#8A8474'
+const GD3  = '#443F36'
+const BB   = 'rgba(170,160,135,0.16)'
+const BB2  = 'rgba(170,160,135,0.08)'
+const W    = '#F8F8F8'
+const W7   = 'rgba(248,248,248,0.70)'
+const W4   = 'rgba(248,248,248,0.40)'
+const W2   = 'rgba(248,248,248,0.20)'
 const FD   = "'Playfair Display', Georgia, serif"
 const FB   = "'DM Sans', system-ui, sans-serif"
 
@@ -48,14 +48,14 @@ function StatusBanner({ status, prevStatus }: { status: string; prevStatus: stri
   return (
     <div style={{
       marginBottom: 24, padding: '14px 20px',
-      background: isApproved ? 'rgba(192,120,24,0.12)' : isRejected ? 'rgba(139,90,26,0.18)' : 'rgba(232,168,32,0.08)',
-      border: `1px solid ${isApproved ? 'rgba(192,120,24,0.45)' : isRejected ? 'rgba(139,90,26,0.5)' : BB}`,
+      background: isApproved ? 'rgba(127,121,105,0.12)' : isRejected ? 'rgba(112,106,90,0.18)' : 'rgba(201,191,166,0.08)',
+      border: `1px solid ${isApproved ? 'rgba(127,121,105,0.45)' : isRejected ? 'rgba(112,106,90,0.5)' : BB}`,
       borderRadius: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 16 }}>{isApproved ? '✓' : isRejected ? '✗' : 'ℹ'}</span>
         <div>
-          <div style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: isApproved ? GL : isRejected ? '#C8A080' : W4 }}>
+          <div style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: isApproved ? GL : isRejected ? '#B3AA97' : W4 }}>
             {isApproved ? 'Your account has been approved!' : isRejected ? 'Your account was not approved.' : 'Account status updated.'}
           </div>
           <div style={{ fontFamily: FB, fontSize: 11, color: W4, marginTop: 2 }}>
@@ -233,9 +233,9 @@ export default function BusinessDashboard() {
               {time.toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' })}
             </div>
             {/* Live account status pill */}
-            <div style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: accountStatus === 'approved' ? 'rgba(192,120,24,0.12)' : accountStatus === 'rejected' ? 'rgba(139,90,26,0.18)' : 'rgba(232,168,32,0.08)', border: `1px solid ${accountStatus === 'approved' ? 'rgba(192,120,24,0.4)' : accountStatus === 'rejected' ? 'rgba(139,90,26,0.45)' : BB}`, borderRadius: 3 }}>
+            <div style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: accountStatus === 'approved' ? 'rgba(127,121,105,0.12)' : accountStatus === 'rejected' ? 'rgba(112,106,90,0.18)' : 'rgba(201,191,166,0.08)', border: `1px solid ${accountStatus === 'approved' ? 'rgba(127,121,105,0.4)' : accountStatus === 'rejected' ? 'rgba(112,106,90,0.45)' : BB}`, borderRadius: 3 }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: accountStatus === 'approved' ? GD : accountStatus === 'rejected' ? GD2 : GL }} />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: FD, color: accountStatus === 'approved' ? GD : accountStatus === 'rejected' ? '#C8A080' : GL }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: FD, color: accountStatus === 'approved' ? GD : accountStatus === 'rejected' ? '#B3AA97' : GL }}>
                 {accountStatus === 'approved' ? 'Approved' : accountStatus === 'rejected' ? 'Not Approved' : 'Pending Review'}
               </span>
             </div>
@@ -248,7 +248,7 @@ export default function BusinessDashboard() {
 
       {/* Pending approval notice */}
       {accountStatus !== 'approved' && accountStatus !== 'active' && (
-        <div style={{ marginBottom: 24, padding: '16px 20px', background: 'rgba(212,136,10,0.06)', border: `1px solid ${BB}`, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ marginBottom: 24, padding: '16px 20px', background: 'rgba(170,160,135,0.06)', border: `1px solid ${BB}`, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: GL, animation: 'pulse 2s ease-in-out infinite', flexShrink: 0 }} />
           <div>
             <div style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: GL }}>Account pending admin approval</div>
@@ -363,7 +363,7 @@ export default function BusinessDashboard() {
                   return (
                     <div key={app.id} style={{ background: BLK2, padding: '16px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: `rgba(232,168,32,0.1)`, border: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>👤</div>
+                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: `rgba(201,191,166,0.1)`, border: `1px solid ${BB}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>👤</div>
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: W, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {app.promoter?.fullName || app.promoter?.name || 'Promoter'}
@@ -372,7 +372,7 @@ export default function BusinessDashboard() {
                         </div>
                       </div>
                       {job && (
-                        <div style={{ fontSize: 11, color: W4, fontFamily: FB, padding: '8px 10px', background: 'rgba(232,168,32,0.04)', border: `1px solid ${BB}`, borderRadius: 2 }}>
+                        <div style={{ fontSize: 11, color: W4, fontFamily: FB, padding: '8px 10px', background: 'rgba(201,191,166,0.04)', border: `1px solid ${BB}`, borderRadius: 2 }}>
                           <div style={{ color: W, fontWeight: 600, marginBottom: 2 }}>{job.title}</div>
                           <div>{job.venue} · {job.startTime}–{job.endTime}</div>
                         </div>

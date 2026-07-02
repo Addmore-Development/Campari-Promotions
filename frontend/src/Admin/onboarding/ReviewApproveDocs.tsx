@@ -3,22 +3,22 @@ import { AdminLayout } from '../AdminLayout'
 import { injectAdminMobileStyles } from '../adminMobileStyles'
 import { useEffect } from 'react'
 
-const G   = '#D4880A'
-const GL  = '#E8A820'
-const G2  = '#8B5A1A'
-const G3  = '#C07818'
-const G4  = '#F0C050'
-const G5  = '#6B3F10'
-const B   = '#0C0A07'
-const D1  = '#0E0C06'
-const D2  = '#151209'
-const D3  = '#1C1709'
-const BB  = 'rgba(212,136,10,0.16)'
-const BB2 = 'rgba(212,136,10,0.06)'
-const W   = '#CEC5B2'
-const W85 = 'rgba(210,198,180,0.95)'
-const W55 = 'rgba(220,208,188,0.90)'
-const W28 = 'rgba(200,185,162,0.80)'
+const G   = '#8F8A7C'
+const GL  = '#C9BFA6'
+const G2  = '#8A8474'
+const G3  = '#7A756A'
+const G4  = '#D8D8D8'
+const G5  = '#443F36'
+const B   = '#050504'
+const D1  = '#070706'
+const D2  = '#0A0A08'
+const D3  = '#100F0B'
+const BB  = 'rgba(170,160,135,0.16)'
+const BB2 = 'rgba(170,160,135,0.06)'
+const W   = '#F0F0F0'
+const W85 = 'rgba(204,204,204,0.95)'
+const W55 = 'rgba(214,214,214,0.90)'
+const W28 = 'rgba(187,187,187,0.80)'
 const FD  = "'Playfair Display', Georgia, serif"
 
 function hex2rgba(hex: string, alpha: number): string {
@@ -46,9 +46,9 @@ const MOCK: Applicant[] = [
   { id:'A005', name:'Nomsa Zulu',      email:'nomsa@email.com',   phone:'+27 83 678 9012', role:'Promoter',   joined:'2026-03-04', status:'pending',  docs:{ id:'approved', bankDetails:'approved', contract:'pending',  selfie:'pending'  }, notes:'' },
 ]
 
-const STATUS_CLR: Record<DocStatus, string>    = { pending: GL,             approved: G3,             rejected: '#C8B898' }
-const STATUS_BG:  Record<DocStatus, string>    = { pending: hex2rgba(GL,0.12), approved: hex2rgba(G3,0.12), rejected: hex2rgba('#8B5A1A',0.25) }
-const STATUS_BORDER: Record<DocStatus, string> = { pending: hex2rgba(GL,0.45), approved: hex2rgba(G3,0.45), rejected: hex2rgba('#8B5A1A',0.55) }
+const STATUS_CLR: Record<DocStatus, string>    = { pending: GL,             approved: G3,             rejected: '#CBCBCB' }
+const STATUS_BG:  Record<DocStatus, string>    = { pending: hex2rgba(GL,0.12), approved: hex2rgba(G3,0.12), rejected: hex2rgba('#8A8474',0.25) }
+const STATUS_BORDER: Record<DocStatus, string> = { pending: hex2rgba(GL,0.45), approved: hex2rgba(G3,0.45), rejected: hex2rgba('#8A8474',0.55) }
 
 function StatusBadge({ status }: { status: DocStatus }) {
   return (
@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: DocStatus }) {
 
 function FilterBtn({ label, active, color, onClick }: { label: string; active: boolean; color: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} style={{ padding:'7px 16px', border:`1px solid ${active?color:'rgba(212,136,10,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(color,0.18):'transparent', color:active?color:W55, transition:'all 0.18s' }}>{label}</button>
+    <button onClick={onClick} style={{ padding:'7px 16px', border:`1px solid ${active?color:'rgba(170,160,135,0.22)'}`, cursor:'pointer', fontFamily:FD, fontSize:10, fontWeight:active?700:400, textTransform:'capitalize' as const, borderRadius:3, background:active?hex2rgba(color,0.18):'transparent', color:active?color:W55, transition:'all 0.18s' }}>{label}</button>
   )
 }
 
@@ -221,7 +221,7 @@ export default function ReviewApproveDocs() {
 
               <div style={{ display:'flex', gap:10 }}>
                 <Btn onClick={() => updateStatus(selected.id, 'approved')} color={G3}>✓ Approve</Btn>
-                <Btn onClick={() => updateStatus(selected.id, 'rejected')} color='#C8B898'>✗ Reject</Btn>
+                <Btn onClick={() => updateStatus(selected.id, 'rejected')} color='#CBCBCB'>✗ Reject</Btn>
               </div>
             </div>
           )}

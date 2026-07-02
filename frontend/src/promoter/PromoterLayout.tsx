@@ -3,15 +3,15 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { FloatingChat } from '../Admin/ChatSystem'
 
-const BLK   = '#050402'
-const BLK1  = '#0A0804'
-const GL    = '#E8A820'
-const GD    = '#C07818'
-const GD2   = '#8B5A1A'
-const BB    = 'rgba(212,136,10,0.14)'
-const W     = '#FAF3E8'
-const WM    = 'rgba(250,243,232,0.65)'
-const WD    = 'rgba(250,243,232,0.28)'
+const BLK   = '#020201'
+const BLK1  = '#030302'
+const GL    = '#C9BFA6'
+const GD    = '#7A756A'
+const GD2   = '#8A8474'
+const BB    = 'rgba(170,160,135,0.14)'
+const W     = '#F8F8F8'
+const WM    = 'rgba(248,248,248,0.65)'
+const WD    = 'rgba(248,248,248,0.28)'
 const FD    = "'Playfair Display', Georgia, serif"
 const FB    = "'DM Sans', system-ui, sans-serif"
 
@@ -97,8 +97,8 @@ export const PromoterLayout: React.FC<{ children: ReactNode }> = ({ children }) 
         <div style={{ padding:collapsed?'24px 0':'24px 20px', borderBottom:`1px solid ${BB}`, display:'flex', alignItems:'center', justifyContent:collapsed?'center':'space-between' }}>
           {!collapsed && (
             <div style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}>
-              <span style={{ color:GL }}>CAMPARI</span>
-              <span style={{ color:W }}></span>
+              <span style={{ color:GL }}>HONEY</span>
+              <span style={{ color:W }}> GROUP</span>
             </div>
           )}
           <button onClick={()=>setCollapsed(c=>!c)} style={{ background:'none', border:'none', cursor:'pointer', color:WD, fontSize:12, padding:4, transition:'color 0.2s' }}
@@ -114,8 +114,8 @@ export const PromoterLayout: React.FC<{ children: ReactNode }> = ({ children }) 
             const badge  = item.path==='shifts'&&unreadShifts>0 ? unreadShifts : 0
             return (
               <button key={item.path} onClick={()=>navigate(`/promoter/?tab=${item.path}`)} title={collapsed?item.label:undefined}
-                style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:collapsed?'12px 0':'11px 20px', justifyContent:collapsed?'center':'flex-start', background:active?'rgba(232,168,32,0.08)':'transparent', borderLeft:active?`3px solid ${GL}`:'3px solid transparent', border:'none', cursor:'pointer', transition:'all 0.2s', color:active?GL:WM, position:'relative' }}
-                onMouseEnter={e=>{ if(!active){e.currentTarget.style.background='rgba(212,136,10,0.06)';e.currentTarget.style.color=W} }}
+                style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:collapsed?'12px 0':'11px 20px', justifyContent:collapsed?'center':'flex-start', background:active?'rgba(201,191,166,0.08)':'transparent', borderLeft:active?`3px solid ${GL}`:'3px solid transparent', border:'none', cursor:'pointer', transition:'all 0.2s', color:active?GL:WM, position:'relative' }}
+                onMouseEnter={e=>{ if(!active){e.currentTarget.style.background='rgba(170,160,135,0.06)';e.currentTarget.style.color=W} }}
                 onMouseLeave={e=>{ if(!active){e.currentTarget.style.background='transparent';e.currentTarget.style.color=WM} }}>
                 <span style={{ fontSize:14, flexShrink:0 }}>{item.icon}</span>
                 {!collapsed&&<span style={{ fontFamily:FD, fontSize:12, fontWeight:active?700:400, letterSpacing:'0.04em' }}>{item.label}</span>}
@@ -126,7 +126,7 @@ export const PromoterLayout: React.FC<{ children: ReactNode }> = ({ children }) 
 
           <button onClick={()=>navigate('/')} title={collapsed?'Browse Site':undefined}
             style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:collapsed?'12px 0':'11px 20px', justifyContent:collapsed?'center':'flex-start', background:'transparent', borderLeft:'3px solid transparent', border:'none', cursor:'pointer', transition:'all 0.2s', color:WD, marginTop:8, borderTop:`1px solid ${BB}` }}
-            onMouseEnter={e=>{e.currentTarget.style.background='rgba(212,136,10,0.06)';e.currentTarget.style.color=GL}}
+            onMouseEnter={e=>{e.currentTarget.style.background='rgba(170,160,135,0.06)';e.currentTarget.style.color=GL}}
             onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color=WD}}>
             <span style={{ fontSize:14, flexShrink:0 }}>⊹</span>
             {!collapsed&&<span style={{ fontFamily:FD, fontSize:12, fontWeight:400 }}>Browse Site</span>}
@@ -163,7 +163,7 @@ export const PromoterLayout: React.FC<{ children: ReactNode }> = ({ children }) 
       {/* MAIN */}
       <main style={{ flex:1, overflow:'auto', minWidth:0, background:BLK }}>
         {/* Top bar */}
-        <div style={{ position:'sticky', top:0, zIndex:100, background:'rgba(5,4,2,0.96)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'0 36px', height:58, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ position:'sticky', top:0, zIndex:100, background:'rgba(2,2,2,0.96)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'0 36px', height:58, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <div style={{ width:2, height:18, background:`linear-gradient(${GL},${GD})` }} />
             <p style={{ fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.28em', textTransform:'uppercase', color:GL }}>

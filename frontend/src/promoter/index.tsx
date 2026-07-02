@@ -11,11 +11,12 @@ import { ViewAcceptJobs } from './jobs/ViewAcceptJobs'
 import { GeoCheckInOut }  from './shifts/GeoCheckInOut'
 import { ViewEarnings }   from './payments/ViewEarnings'
 import { EditOwnProfile } from './users/EditOwnProfile'
+import { SubmitActivationReport } from './activation/SubmitActivationReport'
 import { useAuth }        from '../shared/hooks/useAuth'
 
 const CORAL = '#C4614A'
-const GL    = '#E8A820'
-const G     = '#D4880A'
+const GL    = '#C9BFA6'
+const G     = '#8F8A7C'
 
 function getSessionStatus(): string {
   try {
@@ -71,8 +72,8 @@ export const PromoterApp: React.FC = () => {
       {banner && (
         <div style={{
           padding: '12px 48px',
-          background: `rgba(212,136,10,0.06)`,
-          borderBottom: `1px solid rgba(212,136,10,0.2)`,
+          background: `rgba(170,160,135,0.06)`,
+          borderBottom: `1px solid rgba(170,160,135,0.2)`,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
         }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: banner.color }}>
@@ -80,7 +81,7 @@ export const PromoterApp: React.FC = () => {
           </span>
           <span
             onClick={() => navigate('/promoter/?tab=profile')}
-            style={{ color: 'rgba(250,243,232,0.28)', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}
+            style={{ color: 'rgba(248,248,248,0.28)', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}
           >
             View profile →
           </span>
@@ -98,7 +99,7 @@ export const PromoterApp: React.FC = () => {
           textAlign: 'center',
         }}>
           <p style={{ color: CORAL, fontSize: 15, fontWeight: 700, margin: 0 }}>
-            🚫 Your account has been suspended. Please contact support at support@campari.co.za
+            🚫 Your account has been suspended. Please contact support at support@honeygroup.co.za
           </p>
         </div>
       )}
@@ -108,6 +109,7 @@ export const PromoterApp: React.FC = () => {
       {tab === 'shifts'    && <GeoCheckInOut />}
       {tab === 'earnings'  && <ViewEarnings />}
       {tab === 'profile'   && <EditOwnProfile />}
+      {tab === 'activation-report' && <SubmitActivationReport />}
     </PromoterLayout>
   )
 }
