@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AdminLayout } from '../AdminLayout'
-import { injectAdminMobileStyles } from '../adminMobileStyles'
+import { AdminLayout } from '../../AdminLayout'
+import { injectAdminMobileStyles } from '../../adminMobileStyles'
 
 const G   = '#8F8A7C'
 const GL  = '#C9BFA6'
