@@ -449,7 +449,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
           {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard CampariS Promoter Terms & Conditions apply.'}</div>
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -499,8 +499,8 @@ function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; 
                 {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(189,189,189,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
               </div>
               {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Promotions Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`CP-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
-              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>CP Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
+              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Honey Group Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`HG-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
+              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>HG Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
               <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
               <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
             </div>
@@ -797,7 +797,7 @@ export default function LandingPage() {
       {/* ── NAV ── */}
       <nav className="nav-root" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200, padding: '0 48px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
         <div className="nav-logo" style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.01em', flexShrink: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}> GROUP</span>
+          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
         </div>
 
         {/* Desktop nav links — hidden on mobile */}
@@ -886,7 +886,7 @@ export default function LandingPage() {
           secJobsRef.current = el
         }}
         className="reveal jobs-section-root"
-        style={{ padding: '48px 80px 56px', background: '#928A76', borderBottom: `1px solid rgba(78,74,64,0.4)`, position: 'relative', overflow: 'hidden' }}
+        style={{ padding: '48px 80px 56px', background: '#FFFFFF', borderBottom: `1px solid rgba(78,74,64,0.4)`, position: 'relative', overflow: 'hidden' }}
       >
         {/* Ambient glow */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: 'radial-gradient(ellipse at 15% 40%, rgba(212,212,212,0.22) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(50,47,40,0.18) 0%, transparent 50%)' }} />
@@ -894,12 +894,12 @@ export default function LandingPage() {
         {/* Corner star decorations */}
         <div style={{ position: 'absolute', top: 0, left: 0, width: 340, height: 340, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
           {[{top:12,left:16,size:28,opacity:0.55,delay:'0s',dur:'2.6s'},{top:10,left:64,size:16,opacity:0.40,delay:'0.5s',dur:'3.2s'},{top:38,left:36,size:12,opacity:0.35,delay:'1.0s',dur:'2.9s'},{top:8,left:108,size:10,opacity:0.28,delay:'0.3s',dur:'3.7s'},{top:60,left:14,size:20,opacity:0.45,delay:'1.4s',dur:'2.4s'},{top:52,left:72,size:8,opacity:0.25,delay:'0.8s',dur:'4.0s'},{top:80,left:44,size:14,opacity:0.32,delay:'2.0s',dur:'3.0s'},{top:28,left:148,size:7,opacity:0.22,delay:'1.7s',dur:'3.5s'}].map((s,i) => (
-            <div key={i} style={{ position:'absolute', top:s.top, left:s.left, fontSize:s.size, color:W, opacity:s.opacity, animation:`twinkle ${s.dur} ${s.delay} ease-in-out infinite`, lineHeight:1 }}>✦</div>
+            <div key={i} style={{ position:'absolute', top:s.top, left:s.left, fontSize:s.size, color:GL, opacity:s.opacity, animation:`twinkle ${s.dur} ${s.delay} ease-in-out infinite`, lineHeight:1 }}>✦</div>
           ))}
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0, width: 340, height: 340, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
           {[{bottom:12,right:16,size:28,opacity:0.55,delay:'0.2s',dur:'2.6s'},{bottom:10,right:64,size:16,opacity:0.40,delay:'0.7s',dur:'3.2s'},{bottom:38,right:36,size:12,opacity:0.35,delay:'1.2s',dur:'2.9s'},{bottom:60,right:14,size:20,opacity:0.45,delay:'1.6s',dur:'2.4s'},{bottom:80,right:44,size:14,opacity:0.32,delay:'2.1s',dur:'3.0s'}].map((s,i) => (
-            <div key={i} style={{ position:'absolute', bottom:s.bottom, right:s.right, fontSize:s.size, color:W, opacity:s.opacity, animation:`twinkle ${s.dur} ${s.delay} ease-in-out infinite`, lineHeight:1 }}>✦</div>
+            <div key={i} style={{ position:'absolute', bottom:s.bottom, right:s.right, fontSize:s.size, color:GL, opacity:s.opacity, animation:`twinkle ${s.dur} ${s.delay} ease-in-out infinite`, lineHeight:1 }}>✦</div>
           ))}
         </div>
 
@@ -1036,7 +1036,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ borderTop: `1px solid ${BB}`, paddingTop: 24 }}>
-                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Campari Promotions. All rights reserved.</p>
+                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Honey Group Promotions. All rights reserved.</p>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                   {['Privacy Policy', 'POPIA Compliant', 'Terms of Use'].map(t => (
                     <span key={t} style={{ fontSize: 10, color: WD, letterSpacing: '0.06em', fontFamily: FD, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = GL} onMouseLeave={e => e.currentTarget.style.color = WD}>{t}</span>
