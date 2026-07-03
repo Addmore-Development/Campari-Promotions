@@ -8,7 +8,8 @@ import { SupervisorLayout } from './SupervisorLayout'
 import { SupervisorDashboard } from './dashboard/supervisorDashboard'
 import { SupervisorActivations } from './activations/SupervisorActivations'
 import { SupervisorFileReport } from './reports/SupervisorFileReport'
-import { EditOwnProfile } from '../promoter/users/EditOwnProfile'
+import { SupervisorReportsTab } from './reports/SupervisorReportsTab'
+import { SupervisorProfile } from './profile/SupervisorProfile'
 import { useAuth } from '../shared/hooks/useAuth'
 
 export const SupervisorApp: React.FC = () => {
@@ -29,7 +30,8 @@ export const SupervisorApp: React.FC = () => {
       {tab === 'dashboard'         && <SupervisorDashboard onNavigate={goTo} />}
       {tab === 'activations'       && <SupervisorActivations onNavigate={goTo} />}
       {tab === 'activation-report' && <SupervisorFileReport />}
-      {tab === 'profile'           && <EditOwnProfile />}
+      {tab === 'reports'           && <SupervisorReportsTab />}
+      {tab === 'profile'           && <SupervisorProfile />}
     </SupervisorLayout>
   )
 }

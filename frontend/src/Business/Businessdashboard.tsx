@@ -243,6 +243,47 @@ export default function BusinessDashboard() {
         </div>
       </div>
 
+      {/* ── Campaign Funding Balance — clear, obvious, impossible to miss ── */}
+      {(() => {
+        const balance = profile?.creditBalance ?? 0
+        const isCritical = balance <= 0
+        const isLow      = !isCritical && balance < 2000
+        const stateColor = isCritical ? '#C4614A' : isLow ? '#D8B26A' : GL
+        const stateLabel = isCritical ? 'No funds available' : isLow ? 'Running low' : 'Healthy'
+        return (
+          <div style={{
+            marginBottom: 28, background: BLK2, border: `1px solid ${hex2rgba(stateColor, 0.4)}`,
+            borderRadius: 4, padding: '26px 30px', position: 'relative', overflow: 'hidden',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GD3}, ${stateColor}, ${GD3})` }} />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: W4, fontFamily: FD, fontWeight: 700 }}>Campaign Funding Balance</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 9px', borderRadius: 20, background: hex2rgba(stateColor, 0.12), border: `1px solid ${hex2rgba(stateColor, 0.4)}` }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: stateColor }} />
+                  <span style={{ fontSize: 9, fontWeight: 700, color: stateColor, fontFamily: FD, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{stateLabel}</span>
+                </span>
+              </div>
+              <div style={{ fontFamily: FD, fontSize: 44, fontWeight: 700, color: W, lineHeight: 1 }}>
+                R {balance.toLocaleString('en-ZA')}
+              </div>
+              <p style={{ fontSize: 12, color: W4, marginTop: 8, fontFamily: FB }}>
+                {isCritical
+                  ? "You're out of funds — top up before posting your next campaign."
+                  : isLow
+                  ? 'Your balance is getting low. Top up to avoid interruptions when booking new campaigns.'
+                  : 'Available to fund new campaigns. Every job you post draws from this balance automatically.'}
+              </p>
+            </div>
+            <button onClick={() => navigate('/business/payroll')}
+              style={{ padding: '13px 26px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', cursor: 'pointer', borderRadius: 3, whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {isLow || isCritical ? '+ Top Up Now' : '+ Add Funds'}
+            </button>
+          </div>
+        )
+      })()}
+
       {/* Status change notification banner */}
       <StatusBanner status={accountStatus} prevStatus={prevStatus} />
 

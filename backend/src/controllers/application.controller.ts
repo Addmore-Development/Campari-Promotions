@@ -49,8 +49,17 @@ export const applyToJob = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const getApplicationsForJob = async (req: Request, res: Response): Promise<void> => {
+export const getApplicationsForJob = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    // Supervisors may only view applications for campaigns they're assigned to.
+    if (req.user?.role === 'SUPERVISOR') {
+      const job = await prisma.job.findUnique({ where: { id: req.params.jobId }, select: { supervisorId: true } });
+      if (!job || job.supervisorId !== req.user.id) {
+        res.status(403).json({ error: 'You may only view applications for campaigns you supervise' });
+        return;
+      }
+    }
+
     const applications = await prisma.application.findMany({
       where: { jobId: req.params.jobId },
       include: {
@@ -94,6 +103,11 @@ export const updateApplicationStatus = async (req: AuthRequest, res: Response): 
       include: { job: true },
     });
     if (!app) { res.status(404).json({ error: 'Application not found' }); return; }
+
+    if (req.user!.role === 'SUPERVISOR' && app.job.supervisorId !== req.user!.id) {
+      res.status(403).json({ error: 'You may only manage applications for campaigns you supervise' });
+      return;
+    }
 
     const updated = await prisma.application.update({
       where: { id: req.params.id },
@@ -165,6 +179,11 @@ export const bulkAllocate = async (req: AuthRequest, res: Response): Promise<voi
 
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) { res.status(404).json({ error: 'Job not found' }); return; }
+
+    if (req.user!.role === 'SUPERVISOR' && job.supervisorId !== req.user!.id) {
+      res.status(403).json({ error: 'You may only allocate promoters for campaigns you supervise' });
+      return;
+    }
 
     const results = [];
 

@@ -131,4 +131,39 @@ export const jobsService = {
       return []
     }
   },
+
+  // ── Application management (supervisor allocate / approve / decline) ──────
+  async getApplicationsForJob(jobId: string): Promise<any[]> {
+    try {
+      return await apiFetch<any[]>(`/applications/job/${jobId}`)
+    } catch (err) {
+      console.error('[jobsService] getApplicationsForJob error:', err)
+      return []
+    }
+  },
+
+  async updateApplicationStatus(applicationId: string, status: 'ALLOCATED' | 'DECLINED' | 'STANDBY'): Promise<any> {
+    return apiFetch(`/applications/${applicationId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    })
+  },
+
+  async bulkAllocate(jobId: string, promoterIds: string[]): Promise<any> {
+    return apiFetch('/applications/bulk-allocate', {
+      method: 'POST',
+      body: JSON.stringify({ jobId, promoterIds }),
+    })
+  },
+
+  // Every promoter not yet allocated to this job (used for the "Allocate
+  // Promoters" picker on the supervisor's campaign view).
+  async getEligiblePromoters(jobId: string): Promise<any[]> {
+    try {
+      return await apiFetch<any[]>(`/users/eligible?jobId=${jobId}`)
+    } catch (err) {
+      console.error('[jobsService] getEligiblePromoters error:', err)
+      return []
+    }
+  },
 }

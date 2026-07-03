@@ -24,9 +24,22 @@ interface Props { onNavigate: (view: string, jobId?: string) => void }
 export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
   const [jobs, setJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [pendingCounts, setPendingCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
-    jobsService.getSupervisorJobs().then(j => { setJobs(j); setLoading(false) })
+    jobsService.getSupervisorJobs().then(async j => {
+      setJobs(j)
+      setLoading(false)
+      // Pull pending (STANDBY) application counts per job so the dashboard
+      // can surface "needs your attention" instead of sitting empty.
+      const entries = await Promise.all(j.map(async (job: any) => {
+        try {
+          const apps = await jobsService.getApplicationsForJob(job.id)
+          return [job.id, apps.filter((a: any) => a.status === 'STANDBY').length] as const
+        } catch { return [job.id, 0] as const }
+      }))
+      setPendingCounts(Object.fromEntries(entries))
+    })
   }, [])
 
   const totalActivations = jobs.length
@@ -34,6 +47,9 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
   const reportsDraft      = jobs.filter(j => j.activationReport?.status === 'draft').length
   const reportsMissing    = totalActivations - reportsFiled - reportsDraft
   const totalPromoters    = new Set(jobs.flatMap(j => (j.shifts || []).map((s: any) => s.promoterId))).size
+  const totalPending      = Object.values(pendingCounts).reduce((a, b) => a + b, 0)
+  const uniqueClients     = new Set(jobs.map(j => j.client || j.brand).filter(Boolean)).size
+  const jobsNeedingAction = jobs.filter(j => (pendingCounts[j.id] || 0) > 0)
 
   const stat = (label: string, value: number | string, color: string) => (
     <div style={{ background:BC, border:`1px solid ${BB}`, borderRadius:6, padding:'18px 20px', position:'relative', overflow:'hidden' }}>
@@ -59,12 +75,59 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
         </p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:32 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:14, marginBottom:24 }}>
         {stat('Total Activations', totalActivations, GL)}
+        {stat('Clients',           uniqueClients,     GL)}
         {stat('Reports Filed',     reportsFiled,      GREEN)}
         {stat('Drafts Pending',    reportsDraft,       AMBER)}
         {stat('Promoters On Team', totalPromoters,     G)}
       </div>
+
+      {/* Quick Actions */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:28 }}>
+        {[
+          { label:'All Campaigns & Clients', icon:'◎', desc:'Browse every campaign across every client', action:() => onNavigate('activations') },
+          { label:'File Activation Report',  icon:'▤', desc:'Log serves, conversions, and insights',       action:() => onNavigate('activation-report') },
+          { label:'Reports & Exports',       icon:'▦', desc:'Download CSV / PDF campaign & roster data',   action:() => onNavigate('reports') },
+          { label:'My Profile',              icon:'⬡', desc:'Update your contact details',                 action:() => onNavigate('profile') },
+        ].map(a => (
+          <button key={a.label} onClick={a.action}
+            style={{ textAlign:'left', background:BC, border:`1px solid ${BB}`, borderRadius:6, padding:'16px 18px', cursor:'pointer', transition:'all 0.2s' }}
+            onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.borderColor=hex2rgba(GL,0.4) }}
+            onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.borderColor=BB }}>
+            <span style={{ fontSize:16, color:GL }}>{a.icon}</span>
+            <div style={{ fontFamily:FD, fontSize:12.5, fontWeight:700, color:W, marginTop:8 }}>{a.label}</div>
+            <div style={{ fontSize:10.5, color:WD, fontFamily:FB, marginTop:3 }}>{a.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Needs Your Attention — pending promoter applications across all campaigns */}
+      {totalPending > 0 && (
+        <div style={{ marginBottom:28, background:BC, border:`1px solid ${hex2rgba(AMBER,0.35)}`, borderRadius:6, overflow:'hidden' }}>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${BB}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ fontSize:14 }}>⚠</span>
+              <span style={{ fontSize:9, letterSpacing:'0.24em', textTransform:'uppercase', color:AMBER, fontWeight:700, fontFamily:FD }}>Needs Your Attention</span>
+              <span style={{ fontSize:11, color:WM, fontFamily:FB }}>{totalPending} promoter application{totalPending!==1?'s':''} awaiting approval</span>
+            </div>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:1, background:BB }}>
+            {jobsNeedingAction.map(j => (
+              <div key={j.id} style={{ background:BC, padding:'12px 20px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+                <div>
+                  <span style={{ fontFamily:FD, fontSize:13, fontWeight:700, color:W }}>{j.title}</span>
+                  <span style={{ fontSize:11, color:WD, fontFamily:FB, marginLeft:8 }}>{j.client || j.brand}</span>
+                </div>
+                <button onClick={() => onNavigate('activations')}
+                  style={{ padding:'6px 14px', borderRadius:4, border:`1px solid ${hex2rgba(AMBER,0.5)}`, background:hex2rgba(AMBER,0.1), color:AMBER, fontFamily:FD, fontWeight:700, fontSize:11, cursor:'pointer' }}>
+                  {pendingCounts[j.id]} Pending — Review
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {totalActivations === 0 ? (
         <div style={{ padding:'48px 24px', textAlign:'center', color:WD, fontFamily:FB, border:`1px dashed ${BB}`, borderRadius:6 }}>

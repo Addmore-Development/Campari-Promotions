@@ -68,3 +68,14 @@ export const adminOrSupervisor = (req: AuthRequest, res: Response, next: NextFun
   }
   next();
 };
+
+// Admin, Business, or Supervisor — used for application management (allocating
+// promoters, approving/declining applications) since supervisors run day-to-day
+// staffing on the campaigns they've been assigned to.
+export const adminBusinessOrSupervisor = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (!['ADMIN', 'BUSINESS', 'SUPERVISOR'].includes(req.user?.role || '')) {
+    res.status(403).json({ error: 'Admin, Business, or Supervisor access required' });
+    return;
+  }
+  next();
+};

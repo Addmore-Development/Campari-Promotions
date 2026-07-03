@@ -463,6 +463,69 @@ export const topUpCredit = async (req: AuthRequest, res: Response): Promise<void
   }
 };
 
+// ── Business: full ledger of their credit balance — every top-up and every
+//    campaign spend, newest first, plus the current balance. Powers the
+//    Payroll tab's "where the money went" reporting (CSV/PDF export).
+export const getMyCreditLedger = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'BUSINESS') {
+      res.status(403).json({ error: 'Only business accounts have a credit balance' });
+      return;
+    }
+
+    const me = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { creditBalance: true },
+    });
+
+    const logs = await prisma.auditLog.findMany({
+      where: {
+        userId: req.user.id,
+        action: { in: ['CREATE_JOB', 'CREDIT_TOPUP', 'CREDIT_REFUND'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 500,
+    });
+
+    // Only CREATE_JOB entries that actually deducted credit are spend events.
+    const spendLogs = logs.filter(l => l.action !== 'CREATE_JOB' || (l.meta as any)?.creditDeducted);
+    const jobIds = spendLogs.filter(l => l.action === 'CREATE_JOB').map(l => l.entityId).filter(Boolean) as string[];
+    const jobs = jobIds.length
+      ? await prisma.job.findMany({ where: { id: { in: jobIds } }, select: { id: true, title: true, client: true, brand: true } })
+      : [];
+    const jobById = new Map(jobs.map(j => [j.id, j]));
+
+    const entries = spendLogs.map(l => {
+      if (l.action === 'CREDIT_TOPUP') {
+        return {
+          id: l.id, type: 'topup' as const, createdAt: l.createdAt,
+          amount: (l.meta as any)?.amount || 0,
+          description: 'Balance top-up',
+        };
+      }
+      if (l.action === 'CREDIT_REFUND') {
+        return {
+          id: l.id, type: 'refund' as const, createdAt: l.createdAt,
+          amount: (l.meta as any)?.amount || 0,
+          description: 'Refund — job creation failed',
+        };
+      }
+      const job = l.entityId ? jobById.get(l.entityId) : undefined;
+      return {
+        id: l.id, type: 'spend' as const, createdAt: l.createdAt,
+        amount: (l.meta as any)?.creditDeducted || 0,
+        description: job ? `${job.title} — ${job.client || job.brand}` : 'Campaign booked',
+        jobId: l.entityId || undefined,
+      };
+    });
+
+    res.json({ creditBalance: me?.creditBalance ?? 0, entries });
+  } catch (err) {
+    console.error('[User] getMyCreditLedger error:', err);
+    res.status(500).json({ error: 'Failed to fetch credit ledger' });
+  }
+};
+
 // ── Eligible promoters for a job ────────────────────────────────────────────
 export const getEligiblePromoters = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
