@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { path: 'dashboard',          icon: '◈', label: 'Dashboard'   },
   { path: 'activations',        icon: '◎', label: 'Activations' },
   { path: 'activation-report',  icon: '▤', label: 'File Report' },
+  { path: 'reports',            icon: '▦', label: 'Reports'     },
   { path: 'profile',            icon: '⬡', label: 'My Profile'  },
 ]
 

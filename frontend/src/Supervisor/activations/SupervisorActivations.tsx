@@ -57,10 +57,79 @@ export const SupervisorActivations: React.FC<Props> = ({ onNavigate }) => {
   const [selected, setSelected] = useState<any>(null)
   const myId = useMemo(authUserId, [])
 
+  // ── Team management: allocate promoters + approve/decline applications
+  //    for campaigns this supervisor owns ─────────────────────────────────
+  const [applications,   setApplications]   = useState<any[]>([])
+  const [eligible,       setEligible]       = useState<any[]>([])
+  const [teamLoading,    setTeamLoading]    = useState(false)
+  const [promoSearch,    setPromoSearch]    = useState('')
+  const [toAllocate,     setToAllocate]     = useState<Set<string>>(new Set())
+  const [allocating,     setAllocating]     = useState(false)
+  const [appBusyId,      setAppBusyId]      = useState<string | null>(null)
+  const [teamMsg,        setTeamMsg]        = useState('')
+
   useEffect(() => {
     injectAdminMobileStyles()
     jobsService.getAllActivations().then(j => { setJobs(j); setLoading(false) })
   }, [])
+
+  const isMine = (job: any) => job?.supervisorId && job.supervisorId === myId
+
+  const loadTeamData = async (job: any) => {
+    if (!isMine(job)) return
+    setTeamLoading(true)
+    try {
+      const [apps, elig] = await Promise.all([
+        jobsService.getApplicationsForJob(job.id),
+        jobsService.getEligiblePromoters(job.id),
+      ])
+      setApplications(apps)
+      setEligible(elig)
+    } catch (e) { console.error('[SupervisorActivations] loadTeamData error:', e) }
+    setTeamLoading(false)
+  }
+
+  const refreshSelected = async () => {
+    const jobs2 = await jobsService.getAllActivations()
+    setJobs(jobs2)
+    const updated = jobs2.find((j: any) => j.id === selected?.id)
+    if (updated) setSelected(updated)
+    if (updated) await loadTeamData(updated)
+  }
+
+  const handleApplicationAction = async (appId: string, status: 'ALLOCATED' | 'DECLINED') => {
+    setAppBusyId(appId)
+    try {
+      await jobsService.updateApplicationStatus(appId, status)
+      setTeamMsg(status === 'ALLOCATED' ? 'Promoter approved and allocated' : 'Application declined')
+      await refreshSelected()
+      setTimeout(() => setTeamMsg(''), 2500)
+    } catch (e: any) {
+      setTeamMsg(e?.message || 'Action failed')
+    }
+    setAppBusyId(null)
+  }
+
+  const handleAllocatePromoters = async () => {
+    if (!selected || toAllocate.size === 0) return
+    setAllocating(true)
+    try {
+      await jobsService.bulkAllocate(selected.id, Array.from(toAllocate))
+      setTeamMsg(`${toAllocate.size} promoter${toAllocate.size !== 1 ? 's' : ''} allocated`)
+      setToAllocate(new Set())
+      await refreshSelected()
+      setTimeout(() => setTeamMsg(''), 2500)
+    } catch (e: any) {
+      setTeamMsg(e?.message || 'Allocation failed')
+    }
+    setAllocating(false)
+  }
+
+  const toggleAllocate = (id: string) => setToAllocate(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
+  })
 
   const filtered = jobs.filter(j =>
     (statusF === 'all' || j.status === statusF) &&
@@ -140,7 +209,7 @@ export const SupervisorActivations: React.FC<Props> = ({ onNavigate }) => {
                     style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${BB}` : 'none', cursor: 'pointer' }}
                     onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)')}
                     onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
-                    onClick={() => setSelected(job)}>
+                    onClick={() => { setSelected(job); setApplications([]); setEligible([]); setToAllocate(new Set()); setTeamMsg(''); loadTeamData(job) }}>
                     <td data-label="Campaign" style={{ padding: '12px 14px' }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: W }}>{job.title}</div>
                       <div style={{ fontSize: 11, color: WM }}>{job.client}</div>
@@ -227,9 +296,88 @@ export const SupervisorActivations: React.FC<Props> = ({ onNavigate }) => {
               )}
 
               <button onClick={() => onNavigate('activation-report', selected.id)}
-                style={{ width: '100%', padding: '12px', borderRadius: 3, border: 'none', background: `linear-gradient(135deg,${GL},${G})`, color: B, fontFamily: FD, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                style={{ width: '100%', padding: '12px', borderRadius: 3, border: 'none', background: `linear-gradient(135deg,${GL},${G})`, color: B, fontFamily: FD, fontWeight: 700, fontSize: 13, cursor: 'pointer', marginBottom: isMine(selected) ? 24 : 0 }}>
                 {selected.activationReport?.status === 'submitted' ? 'View / Update Report' : 'File Report'}
               </button>
+
+              {/* ── Team management — only for campaigns this supervisor owns ── */}
+              {isMine(selected) && (
+                <div style={{ borderTop: `1px solid ${BB}`, paddingTop: 20 }}>
+                  <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: GL, fontWeight: 700, marginBottom: 12 }}>Manage Your Team</div>
+
+                  {teamMsg && (
+                    <div style={{ marginBottom: 14, padding: '9px 12px', background: hexA(GREEN, 0.1), border: `1px solid ${hexA(GREEN, 0.35)}`, borderRadius: 3, fontSize: 11.5, color: GREEN, fontWeight: 600 }}>
+                      ✓ {teamMsg}
+                    </div>
+                  )}
+
+                  {teamLoading ? (
+                    <div style={{ padding: '16px 0', color: WD, fontSize: 12, textAlign: 'center' }}>Loading applications…</div>
+                  ) : (
+                    <>
+                      {/* Pending applications needing approval */}
+                      <div style={{ marginBottom: 20 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: W, marginBottom: 8 }}>
+                          Pending Applications {applications.filter(a => a.status === 'STANDBY').length > 0 && `(${applications.filter(a => a.status === 'STANDBY').length})`}
+                        </div>
+                        {applications.filter(a => a.status === 'STANDBY').length === 0 ? (
+                          <p style={{ fontSize: 11.5, color: WD }}>No pending applications right now.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {applications.filter(a => a.status === 'STANDBY').map(a => (
+                              <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 10px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${BB}`, borderRadius: 3, flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                  <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: `linear-gradient(135deg,${G2},${GL})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: B }}>
+                                    {avatarUrl(a.promoter?.headshotUrl || a.promoter?.profilePhotoUrl)
+                                      ? <img src={avatarUrl(a.promoter?.headshotUrl || a.promoter?.profilePhotoUrl) as string} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      : (a.promoter?.fullName || '?').charAt(0).toUpperCase()}
+                                  </div>
+                                  <span style={{ fontSize: 12, color: W }}>{a.promoter?.fullName || 'Promoter'}</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <button disabled={appBusyId === a.id} onClick={() => handleApplicationAction(a.id, 'ALLOCATED')}
+                                    style={{ padding: '5px 12px', background: hexA(GREEN, 0.12), border: `1px solid ${hexA(GREEN, 0.4)}`, color: GREEN, fontSize: 10, fontWeight: 700, borderRadius: 3, cursor: appBusyId === a.id ? 'wait' : 'pointer' }}>
+                                    ✓ Approve
+                                  </button>
+                                  <button disabled={appBusyId === a.id} onClick={() => handleApplicationAction(a.id, 'DECLINED')}
+                                    style={{ padding: '5px 12px', background: hexA(CORAL, 0.12), border: `1px solid ${hexA(CORAL, 0.4)}`, color: CORAL, fontSize: 10, fontWeight: 700, borderRadius: 3, cursor: appBusyId === a.id ? 'wait' : 'pointer' }}>
+                                    ✕ Decline
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Allocate additional promoters directly */}
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: W, marginBottom: 8 }}>Allocate Promoters</div>
+                        <input placeholder="Search eligible promoters…" value={promoSearch} onChange={e => setPromoSearch(e.target.value)}
+                          style={{ ...inp, width: '100%', marginBottom: 8, boxSizing: 'border-box' }}
+                          onFocus={e => (e.currentTarget.style.borderColor = GL)} onBlur={e => (e.currentTarget.style.borderColor = BB)} />
+                        <div style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+                          {eligible.filter(p => !promoSearch || p.fullName?.toLowerCase().includes(promoSearch.toLowerCase())).slice(0, 30).map(p => {
+                            const checked = toAllocate.has(p.id)
+                            return (
+                              <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: checked ? hexA(GL, 0.08) : 'rgba(255,255,255,0.02)', border: `1px solid ${checked ? hexA(GL, 0.4) : BB}`, borderRadius: 3, cursor: 'pointer' }}>
+                                <input type="checkbox" checked={checked} onChange={() => toggleAllocate(p.id)} />
+                                <span style={{ fontSize: 12, color: W, flex: 1 }}>{p.fullName}</span>
+                                <span style={{ fontSize: 10, color: WD }}>{p.city || ''}</span>
+                              </label>
+                            )
+                          })}
+                          {eligible.length === 0 && <p style={{ fontSize: 11.5, color: WD }}>No eligible promoters found.</p>}
+                        </div>
+                        <button disabled={toAllocate.size === 0 || allocating} onClick={handleAllocatePromoters}
+                          style={{ width: '100%', padding: '10px', borderRadius: 3, border: 'none', background: toAllocate.size === 0 ? BB : `linear-gradient(135deg,${GL},${G})`, color: toAllocate.size === 0 ? WD : B, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: toAllocate.size === 0 || allocating ? 'not-allowed' : 'pointer' }}>
+                          {allocating ? 'Allocating…' : toAllocate.size > 0 ? `Allocate ${toAllocate.size} Promoter${toAllocate.size !== 1 ? 's' : ''}` : 'Select promoters to allocate'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

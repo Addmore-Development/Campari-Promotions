@@ -254,6 +254,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         createdAt:        true,
         rejectionReason:  true,
         creditBalance:    true,
+        // Supervisor fields
+        workField:  true,
+        businessId: true,
+        business:   { select: { id: true, fullName: true, email: true } },
         // Business fields
         contactName:  true,
         vatNumber:    true,

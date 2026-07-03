@@ -389,6 +389,7 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
       // Refund the deducted credit if job creation failed after payment
       if (jobCost > 0) {
         await prisma.user.update({ where: { id: req.user!.id }, data: { creditBalance: { increment: jobCost } } }).catch(() => {});
+        await auditLog({ userId: req.user!.id, action: 'CREDIT_REFUND', entity: 'User', entityId: req.user!.id, meta: { amount: jobCost } }).catch(() => {});
       }
       throw createErr;
     }

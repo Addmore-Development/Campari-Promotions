@@ -351,7 +351,7 @@ export default function LoginPage() {
 
           {/* Footer links */}
           <div style={{ marginTop: 24, textAlign: 'center' }}>
-            {role !== 'admin' && (
+            {role !== 'admin' && role !== 'supervisor' && (
               <p style={{ fontFamily: FB, fontSize: 12, color: GOLD_DIM, marginBottom: 0 }}>
                 Don't have an account?{' '}
                 <button
@@ -360,6 +360,11 @@ export default function LoginPage() {
                 >
                   Register
                 </button>
+              </p>
+            )}
+            {role === 'supervisor' && (
+              <p style={{ fontFamily: FB, fontSize: 11, color: GOLD_PALE, letterSpacing: '0.1em' }}>
+                Supervisor accounts are created by admin, not self-registered.
               </p>
             )}
             {role === 'admin' && (

@@ -27,6 +27,59 @@ function authHdr() {
   const t = localStorage.getItem('hg_token')
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
+function authHdrJson() {
+  const t = localStorage.getItem('hg_token')
+  return t ? { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+}
+const fmtZAR = (n: number) => `R ${(n || 0).toLocaleString('en-ZA')}`
+
+// ── Generic CSV + printable-PDF export helpers ────────────────────────────────
+function downloadCSV(filename: string, headers: string[], rows: (string | number)[][]) {
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`
+  const lines = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))]
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+function downloadPDF(title: string, subtitle: string, headers: string[], rows: (string | number)[][], totalsLabel?: string, totalsValue?: string) {
+  const rowsHtml = rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+  <style>
+    body{font-family:Georgia,serif;color:#12120D;background:#fff;padding:40px;max-width:900px;margin:0 auto;}
+    h1{font-size:22px;border-bottom:2px solid #8F8A7C;padding-bottom:12px;margin-bottom:6px;color:#050504;}
+    .meta{font-size:11px;color:#888;margin-bottom:26px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th{background:#8F8A7C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;}
+    td{padding:7px 10px;border-bottom:1px solid #DBDBDB;font-size:11.5px;}
+    tr:nth-child(even) td{background:#F9F9F9;}
+    tfoot td{font-weight:700;border-top:2px solid #8F8A7C;background:#F4F1EA;}
+    @media print{body{padding:16px;}}
+  </style></head><body>
+  <h1>${title}</h1>
+  <div class="meta">${subtitle} · Generated ${new Date().toLocaleString('en-ZA')}</div>
+  <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rowsHtml}</tbody>
+  ${totalsLabel ? `<tfoot><tr><td colspan="${headers.length - 1}">${totalsLabel}</td><td>${totalsValue}</td></tr></tfoot>` : ''}
+  </table>
+  </body></html>`
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const w = window.open(url, '_blank')
+  if (w) { w.onload = () => { w.print(); URL.revokeObjectURL(url) } }
+  else { URL.revokeObjectURL(url) }
+}
+
+interface LedgerEntry {
+  id:          string
+  type:        'topup' | 'spend' | 'refund'
+  createdAt:   string
+  amount:      number
+  description: string
+  jobId?:      string
+}
 
 interface PayRow {
   id:              string
@@ -133,6 +186,58 @@ function MarkPaidModal({ row, onConfirm, onClose, saving }: {
   )
 }
 
+// ── Add Funds modal — top up the campaign funding balance ───────────────────
+function AddFundsModal({ balance, onConfirm, onClose, saving, message }: {
+  balance:   number
+  onConfirm: (amount: number) => void
+  onClose:   () => void
+  saving:    boolean
+  message:   string
+}) {
+  const [amount, setAmount] = useState('')
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: BLK2, border: `1px solid ${BB}`, padding: '36px 40px', width: '100%', maxWidth: 420, position: 'relative', borderRadius: 4 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 18 }}>✕</button>
+
+        <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD, marginBottom: 6 }}>Campaign Funding</div>
+        <h3 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 4 }}>Current balance: {fmtZAR(balance)}</h3>
+        <p style={{ fontSize: 12, color: W4, fontFamily: FB, marginBottom: 20 }}>Every job you post draws down this balance automatically. Top up below.</p>
+
+        <label style={{ display: 'block', fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: W4, marginBottom: 7, fontFamily: FD }}>Amount (ZAR)</label>
+        <input type="number" min={1} placeholder="e.g. 20000" value={amount} onChange={e => setAmount(e.target.value)}
+          style={{ width: '100%', background: hex2rgba(GL, 0.04), border: `1px solid ${BB}`, padding: '12px 14px', color: W, fontFamily: FB, fontSize: 14, outline: 'none', borderRadius: 3, marginBottom: 14, boxSizing: 'border-box' }}
+          onFocus={e => e.currentTarget.style.borderColor = GL} onBlur={e => e.currentTarget.style.borderColor = BB} />
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+          {[5000, 20000, 50000, 100000].map(v => (
+            <button key={v} onClick={() => setAmount(String(v))}
+              style={{ flex: 1, padding: '8px 4px', background: hex2rgba(GL, 0.08), border: `1px solid ${BB}`, color: GL, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
+              R{v / 1000}k
+            </button>
+          ))}
+        </div>
+
+        {message && (
+          <div style={{ padding: '10px 14px', background: hex2rgba(GL, 0.1), border: `1px solid ${hex2rgba(GL, 0.4)}`, borderRadius: 3, fontSize: 12, color: GL, fontFamily: FD, marginBottom: 16 }}>
+            {message}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${BB}`, color: W4, fontFamily: FD, fontSize: 11, cursor: 'pointer', borderRadius: 3 }}>Cancel</button>
+          <button onClick={() => { const n = parseInt(amount, 10); if (n > 0) onConfirm(n) }} disabled={saving}
+            style={{ flex: 2, padding: '12px', background: saving ? BB : `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: saving ? W4 : BLK1, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', cursor: saving ? 'not-allowed' : 'pointer', borderRadius: 3 }}>
+            {saving ? 'Adding…' : 'Add Funds'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function BusinessPayroll() {
   const [rows,        setRows       ] = useState<PayRow[]>([])
   const [loading,     setLoading    ] = useState(true)
@@ -141,6 +246,14 @@ export default function BusinessPayroll() {
   const [markingRow,  setMarkingRow ] = useState<PayRow | null>(null)
   const [saving,      setSaving     ] = useState(false)
   const [toast,       setToast      ] = useState('')
+
+  // ── Campaign funding balance + ledger ("where the money goes") ────────────
+  const [balance,       setBalance      ] = useState(0)
+  const [ledger,        setLedger       ] = useState<LedgerEntry[]>([])
+  const [ledgerLoading, setLedgerLoading] = useState(true)
+  const [fundsModalOpen,setFundsModalOpen] = useState(false)
+  const [topUpBusy,     setTopUpBusy    ] = useState(false)
+  const [topUpMsg,      setTopUpMsg     ] = useState('')
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -184,6 +297,48 @@ export default function BusinessPayroll() {
     window.addEventListener('payment-updated', onUpdate)
     return () => window.removeEventListener('payment-updated', onUpdate)
   }, [load])
+
+  const loadLedger = useCallback(async () => {
+    setLedgerLoading(true)
+    try {
+      const res = await fetch(`${API}/users/me/credit/ledger`, { headers: authHdr() as any })
+      if (res.ok) {
+        const data = await res.json()
+        setBalance(data.creditBalance ?? 0)
+        setLedger(data.entries || [])
+      }
+    } catch (e) { console.error('[BusinessPayroll] ledger load error:', e) }
+    setLedgerLoading(false)
+  }, [])
+
+  useEffect(() => {
+    loadLedger()
+    const onCreditUpdate = () => loadLedger()
+    window.addEventListener('hg_credit_updated', onCreditUpdate)
+    return () => window.removeEventListener('hg_credit_updated', onCreditUpdate)
+  }, [loadLedger])
+
+  const handleTopUp = async (amount: number) => {
+    setTopUpBusy(true); setTopUpMsg('')
+    try {
+      const res = await fetch(`${API}/users/me/credit/topup`, {
+        method: 'POST', headers: authHdrJson() as any, body: JSON.stringify({ amount }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setBalance(data.creditBalance ?? 0)
+        setTopUpMsg(`Added ${fmtZAR(amount)} — new balance ${fmtZAR(data.creditBalance)}`)
+        await loadLedger()
+        window.dispatchEvent(new Event('hg_credit_updated'))
+        setTimeout(() => { setFundsModalOpen(false); setTopUpMsg('') }, 1600)
+      } else {
+        setTopUpMsg(data.error || 'Failed to add funds')
+      }
+    } catch {
+      setTopUpMsg('Network error — please try again')
+    }
+    setTopUpBusy(false)
+  }
 
   const handleMarkPaid = async (ref: string) => {
     if (!markingRow) return
@@ -239,6 +394,44 @@ export default function BusinessPayroll() {
         <h1 style={{ fontFamily: FD, fontSize: 'clamp(22px,3vw,34px)', fontWeight: 700, color: W }}>Earnings Summary</h1>
         <p style={{ fontSize: 13, color: W4, marginTop: 6, fontFamily: FB }}>Promoter payout overview for your campaigns.</p>
       </div>
+
+      {/* ── Campaign Funding Balance — clear, obvious, top up right here ── */}
+      {(() => {
+        const isCritical = balance <= 0
+        const isLow      = !isCritical && balance < 2000
+        const stateColor = isCritical ? CORAL : isLow ? '#D8B26A' : GL
+        const stateLabel = isCritical ? 'No funds available' : isLow ? 'Running low' : 'Healthy'
+        return (
+          <div style={{
+            marginBottom: 28, background: BLK2, border: `1px solid ${hex2rgba(stateColor, 0.4)}`,
+            borderRadius: 4, padding: '24px 28px', position: 'relative', overflow: 'hidden',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${stateColor},${GD3})` }} />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: W4, fontFamily: FD, fontWeight: 700 }}>Campaign Funding Balance</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 9px', borderRadius: 20, background: hex2rgba(stateColor, 0.12), border: `1px solid ${hex2rgba(stateColor, 0.4)}` }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: stateColor }} />
+                  <span style={{ fontSize: 9, fontWeight: 700, color: stateColor, fontFamily: FD, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{stateLabel}</span>
+                </span>
+              </div>
+              <div style={{ fontFamily: FD, fontSize: 40, fontWeight: 700, color: W, lineHeight: 1 }}>{fmtZAR(balance)}</div>
+              <p style={{ fontSize: 12, color: W4, marginTop: 8, fontFamily: FB }}>
+                {isCritical
+                  ? "You're out of funds — top up before your next campaign draws on this balance."
+                  : isLow
+                  ? 'Your balance is getting low. Top up to avoid interruptions when booking new campaigns.'
+                  : 'Every job you post, and every promoter you pay out, draws from this balance.'}
+              </p>
+            </div>
+            <button onClick={() => setFundsModalOpen(true)}
+              style={{ padding: '13px 26px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK1, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', cursor: 'pointer', borderRadius: 3, whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {isLow || isCritical ? '+ Top Up Now' : '+ Add Funds'}
+            </button>
+          </div>
+        )
+      })()}
 
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: BB, marginBottom: 28 }}>
@@ -431,7 +624,120 @@ export default function BusinessPayroll() {
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
             Export CSV
           </button>
+          <button
+            onClick={() => downloadPDF(
+              'Payroll Report', 'Campari Promotions · Promoter Payout Overview',
+              ['Promoter','Job','Date','Rate','Hours','Gross','Net','Status'],
+              sorted.map(r => [
+                r.promoterName, r.jobTitle,
+                r.jobDate ? new Date(r.jobDate).toLocaleDateString('en-ZA') : '',
+                r.hourlyRate ? `R${r.hourlyRate}/hr` : '—', r.hoursWorked.toFixed(2),
+                `R${r.grossAmount.toLocaleString('en-ZA')}`, `R${r.netAmount.toLocaleString('en-ZA')}`,
+                statusLabel(r.status),
+              ]),
+              'Grand Total', `R ${grandTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`,
+            )}
+            style={{ marginLeft: 8, fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${hex2rgba(GL, 0.4)}`, color: GL, padding: '8px 18px', cursor: 'pointer', borderRadius: 2, flexShrink: 0 }}
+            onMouseEnter={e => e.currentTarget.style.background = hex2rgba(GL, 0.1)}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            Export PDF
+          </button>
         </div>
+      )}
+
+      {/* ── Balance Activity — top-ups + campaign spend, so businesses can see
+           exactly where their money goes ── */}
+      <div style={{ marginTop: 36, background: BLK2, border: `1px solid ${BB}`, borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{ padding: '18px 22px', borderBottom: `1px solid ${BB}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD }}>Balance Activity</div>
+            <p style={{ fontSize: 11.5, color: W4, fontFamily: FB, marginTop: 4 }}>Every top-up and every campaign spend against your funding balance.</p>
+          </div>
+          {ledger.length > 0 && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => downloadCSV('campari-promotions-balance-activity.csv',
+                  ['Date','Type','Description','Amount'],
+                  ledger.map(e => [
+                    new Date(e.createdAt).toLocaleString('en-ZA'),
+                    e.type === 'topup' ? 'Top-Up' : e.type === 'refund' ? 'Refund' : 'Campaign Spend',
+                    e.description,
+                    e.type === 'spend' ? -e.amount : e.amount,
+                  ]))}
+                style={{ fontFamily: FD, fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${hex2rgba(GL, 0.4)}`, color: GL, padding: '6px 14px', cursor: 'pointer', borderRadius: 2 }}>
+                Export CSV
+              </button>
+              <button
+                onClick={() => downloadPDF(
+                  'Balance Activity Report', 'Campari Promotions · Campaign Funding Ledger',
+                  ['Date', 'Type', 'Description', 'Amount'],
+                  ledger.map(e => [
+                    new Date(e.createdAt).toLocaleDateString('en-ZA'),
+                    e.type === 'topup' ? 'Top-Up' : e.type === 'refund' ? 'Refund' : 'Campaign Spend',
+                    e.description,
+                    `${e.type === 'spend' ? '-' : '+'}${fmtZAR(e.amount)}`,
+                  ]),
+                  'Current Balance', fmtZAR(balance),
+                )}
+                style={{ fontFamily: FD, fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${hex2rgba(GL, 0.4)}`, color: GL, padding: '6px 14px', cursor: 'pointer', borderRadius: 2 }}>
+                Export PDF
+              </button>
+            </div>
+          )}
+        </div>
+
+        {ledgerLoading ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: W4, fontFamily: FD }}>Loading balance activity…</div>
+        ) : ledger.length === 0 ? (
+          <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+            <p style={{ fontFamily: FD, fontSize: 14, color: W4 }}>No activity yet.</p>
+            <p style={{ fontFamily: FB, fontSize: 11.5, color: W2, marginTop: 4 }}>Top-ups and campaign spend will appear here as they happen.</p>
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${BB}`, background: BLK1 }}>
+                {['Date', 'Type', 'Description', 'Amount'].map(h => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: W2, fontFamily: FD }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {ledger.slice(0, 100).map((e, i) => {
+                const isSpend = e.type === 'spend'
+                const color   = isSpend ? CORAL : GREEN
+                const label   = e.type === 'topup' ? 'Top-Up' : e.type === 'refund' ? 'Refund' : 'Campaign Spend'
+                return (
+                  <tr key={e.id} style={{ borderBottom: i < ledger.length - 1 ? `1px solid ${BB}` : 'none' }}
+                    onMouseEnter={ev => (ev.currentTarget.style.background = BLK3)}
+                    onMouseLeave={ev => (ev.currentTarget.style.background = 'transparent')}>
+                    <td style={{ padding: '12px 14px', fontSize: 11, color: W4, fontFamily: FB, whiteSpace: 'nowrap' }}>
+                      {new Date(e.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td style={{ padding: '12px 14px' }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, color, background: hex2rgba(color, 0.1), border: `1px solid ${hex2rgba(color, 0.35)}`, padding: '3px 9px', borderRadius: 2, fontFamily: FD, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
+                    </td>
+                    <td style={{ padding: '12px 14px', fontSize: 12, color: W7, fontFamily: FB }}>{e.description}</td>
+                    <td style={{ padding: '12px 14px', fontFamily: FD, fontSize: 13, fontWeight: 700, color }}>
+                      {isSpend ? '-' : '+'}{fmtZAR(e.amount)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Add Funds modal */}
+      {fundsModalOpen && (
+        <AddFundsModal
+          balance={balance}
+          onConfirm={handleTopUp}
+          onClose={() => { setFundsModalOpen(false); setTopUpMsg('') }}
+          saving={topUpBusy}
+          message={topUpMsg}
+        />
       )}
 
       {/* Mark as Paid modal */}
