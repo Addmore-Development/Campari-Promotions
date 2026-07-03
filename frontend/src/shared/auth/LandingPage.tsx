@@ -792,7 +792,7 @@ export default function LandingPage() {
             </div>
           ))}
           <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: '#111' }} />
-          <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.1) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.1) 100%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: 20, left: 24, zIndex: 10, display: 'flex', gap: 6 }}>
             {heroMedia.map((_, idx) => (
               <button key={idx} onClick={() => { if (heroSlideRef.current) clearInterval(heroSlideRef.current); setHeroSlide(idx) }}
