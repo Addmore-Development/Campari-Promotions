@@ -48,6 +48,12 @@ model User {
   fullBodyPhotoUrl String?
   profilePhotoUrl  String?
   cvUrl            String?
+  // Supervisor-specific: field/category supervised + business they work under
+  workField    String?
+  businessId   String?
+  business     User?         @relation("SupervisorBusiness", fields: [businessId], references: [id], onDelete: SetNull)
+  supervisors  User[]        @relation("SupervisorBusiness")
+
   createdJobs  Job[]         @relation("JobCreator")
   supervisedJobs Job[]       @relation("JobSupervisor")
   shifts       Shift[]       @relation("PromoterShifts")
@@ -85,13 +91,13 @@ model Job {
   termsAndConditions String?
   brand              String
   venue              String
-  // ── SA address fields ─────────────────────────────────────────────────
+  // â”€â”€ SA address fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   streetNumber       String?
   streetName         String?
   suburb             String?
   city               String?
   postalCode         String?
-  // ─────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   address            String
   lat                Float
   lng                Float
@@ -105,7 +111,7 @@ model Job {
   filters            Json
   createdAt          DateTime  @default(now())
   createdBy          String
-  // ── Supervisor assignment ──────────────────────────────────────────────
+  // â”€â”€ Supervisor assignment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   supervisorId       String?
   createdByUser User          @relation("JobCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   supervisor    User?         @relation("JobSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
@@ -123,30 +129,30 @@ model Shift {
   status           ShiftStatus @default(SCHEDULED)
   checkInTime      DateTime?
   checkOutTime     DateTime?
-  // ── Geo coordinates ───────────────────────────────────────────────────
+  // â”€â”€ Geo coordinates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   checkInLat        Float?
   checkInLng        Float?
   checkOutLat       Float?
   checkOutLng       Float?
-  // ── Selfie URLs ───────────────────────────────────────────────────────
+  // â”€â”€ Selfie URLs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   checkInSelfieUrl  String?
   checkOutSelfieUrl String?
   selfieInUrl       String?
   selfieOutUrl      String?
-  // ── Hours & payment ───────────────────────────────────────────────────
+  // â”€â”€ Hours & payment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   totalHours        Float?
   hoursWorked       Float?
   paymentStatus     String?
-  // ── Live location ─────────────────────────────────────────────────────
+  // â”€â”€ Live location â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   liveLat           Float?
   liveLng           Float?
   liveUpdatedAt     DateTime?
-  // ── Issue reporting ───────────────────────────────────────────────────
+  // â”€â”€ Issue reporting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   issueReport       String?
   issues            Json[]
-  // ── Late arrival tracking (drives automatic payment deduction) ────────
+  // â”€â”€ Late arrival tracking (drives automatic payment deduction) â”€â”€â”€â”€â”€â”€â”€â”€
   lateMinutes       Int        @default(0)
-  // ── Other ─────────────────────────────────────────────────────────────
+  // â”€â”€ Other â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   supervisorRating  Int?
   createdAt         DateTime   @default(now())
   job      Job      @relation("JobShifts", fields: [jobId], references: [id], onDelete: Cascade)
@@ -249,7 +255,7 @@ enum PaymentStatus {
   FAILED
 }
 
-// ── Activation Reporting ─────────────────────────────────────────────────────
+// â”€â”€ Activation Reporting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // One report per Job ("activation"), filed by the on-site supervisor/promoter,
 // so admins can auto-generate client-facing reports: serves/conversions,
 // insights, feedback, and a required 3-shot photo set.
@@ -275,7 +281,7 @@ model ActivationReport {
   @@map("activation_reports")
 }
 
-// ── Purchase Order / Commitment Entry budget tracking ────────────────────────
+// â”€â”€ Purchase Order / Commitment Entry budget tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // A Client releases a PO for a set amount over a period (e.g. a quarter).
 // Each time a job/activation is booked against that PO, a Commitment Entry
 // (CE) is logged so admins can track pending/approved/cancelled spend and

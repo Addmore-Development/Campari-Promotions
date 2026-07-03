@@ -17,7 +17,9 @@ const WHITE_MUTED  = 'rgba(242,242,242,0.55)'
 const FD           = "'Playfair Display', Georgia, serif"
 const FB           = "'DM Sans', system-ui, sans-serif"
 
-type Role = 'promoter' | 'business'
+type Role = 'promoter' | 'business' | 'supervisor'
+
+interface BusinessOption { id: string; fullName: string }
 
 /* ─── OPTION LISTS ────────────────────────────────────────────── */
 const INDUSTRY_OPTIONS = [
@@ -39,6 +41,11 @@ const SA_LANGUAGES = [
   'Venda', 'Tsonga', 'Swati', 'Ndebele', 'Pedi',
 ]
 
+const WORK_FIELD_OPTIONS = [
+  'Formal On Trade', 'Main Market', 'Off Trade / Retail', 'Activations & Events',
+  'Roadshows', 'Corporate / Office Promotions', 'Other',
+]
+
 const EXPERIENCE_OPTIONS = [
   'No experience — willing to learn',
   '6 months – 1 year',
@@ -48,8 +55,9 @@ const EXPERIENCE_OPTIONS = [
 ]
 
 const DASHBOARD_ROUTE: Record<Role, string> = {
-  promoter: '/promoter/dashboard',
-  business: '/business/dashboard',
+  promoter:   '/promoter/dashboard',
+  business:   '/business/dashboard',
+  supervisor: '/supervisor/',
 }
 
 /* ─── SA VALIDATION ───────────────────────────────────────────── */
@@ -474,10 +482,37 @@ export default function RegisterPage() {
   const toggleBizCategory = (cat: string) => setBizCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])
   const toggleBizLanguage = (lang: string) => setBizLanguages(prev => prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang])
 
-  const isPromoter  = role === 'promoter'
-  const TOTAL_STEPS = 3
+  // ── Supervisor
+  const [supFirstName, setSupFirstName] = useState('')
+  const [supLastName,  setSupLastName]  = useState('')
+  const [supPhone,     setSupPhone]     = useState('')
+  const [supWorkField, setSupWorkField] = useState('')
+  const [supBusinessId, setSupBusinessId] = useState('')
+  const [supEmail,     setSupEmail]     = useState('')
+  const [supPassword,  setSupPassword]  = useState('')
+  const [supConfirmPw, setSupConfirmPw] = useState('')
+  const [businessOptions, setBusinessOptions] = useState<BusinessOption[]>([])
+  const [businessOptionsLoading, setBusinessOptionsLoading] = useState(false)
 
-  const switchRole = (r: Role) => { setRole(r); setStep(0); setErrors({}); setPromoCategories([]); setPromoLanguages([]); setBizCategories([]); setBizLanguages([]); setBizOtherCategory(''); setBizOtherLanguage('') }
+  const isPromoter   = role === 'promoter'
+  const isBusiness   = role === 'business'
+  const isSupervisor = role === 'supervisor'
+  const TOTAL_STEPS  = isSupervisor ? 2 : 3
+
+  const switchRole = (r: Role) => {
+    setRole(r); setStep(0); setErrors({})
+    setPromoCategories([]); setPromoLanguages([])
+    setBizCategories([]); setBizLanguages([]); setBizOtherCategory(''); setBizOtherLanguage('')
+    if (r === 'supervisor' && businessOptions.length === 0 && !businessOptionsLoading) {
+      setBusinessOptionsLoading(true)
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      fetch(`${API}/auth/businesses`)
+        .then(res => res.ok ? res.json() : [])
+        .then((list: BusinessOption[]) => setBusinessOptions(list))
+        .catch(() => setBusinessOptions([]))
+        .finally(() => setBusinessOptionsLoading(false))
+    }
+  }
 
 
 
@@ -509,6 +544,20 @@ export default function RegisterPage() {
         const pwCheck = validatePassword(password)
         if (!Object.values(pwCheck).every(Boolean)) errs.password = 'Password does not meet all requirements'
         if (password !== confirmPw) errs.confirmPw = 'Passwords do not match'
+      }
+    } else if (isSupervisor) {
+      if (step === 0) {
+        if (!supFirstName.trim()) errs.supFirstName = 'Required'
+        if (!supLastName.trim()) errs.supLastName = 'Required'
+        if (!validateSAPhone(supPhone)) errs.supPhone = 'Enter a valid SA phone number e.g. +27 71 000 0000'
+        if (!supWorkField.trim()) errs.supWorkField = 'Please select the field you\'ll be working in'
+        if (!supBusinessId.trim()) errs.supBusinessId = 'Please select the business you\'re associated with'
+      }
+      if (step === 1) {
+        if (!validateEmail(supEmail)) errs.supEmail = 'Enter a valid email address'
+        const pwCheck = validatePassword(supPassword)
+        if (!Object.values(pwCheck).every(Boolean)) errs.supPassword = 'Password does not meet all requirements'
+        if (supPassword !== supConfirmPw) errs.supConfirmPw = 'Passwords do not match'
       }
     } else {
       if (step === 0) {
@@ -550,7 +599,25 @@ export default function RegisterPage() {
       let authToken = ''
 
       try {
-        if (isPromoter) {
+        if (isSupervisor) {
+          const res = await fetch(`${API}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: `${supFirstName} ${supLastName}`, email: supEmail.toLowerCase(), password: supPassword,
+              role: 'SUPERVISOR', phone: supPhone.replace(/\s/g, ''), consentPopia: true,
+              workField: supWorkField, businessId: supBusinessId,
+            }),
+          })
+          if (res.ok) {
+            const d = await res.json()
+            userId    = d.userId || ''
+            authToken = d.token  || ''
+          } else {
+            const d = await res.json().catch(() => ({}))
+            throw new Error(d.error || 'Registration failed')
+          }
+        } else if (isPromoter) {
           const res = await fetch(`${API}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -588,33 +655,37 @@ export default function RegisterPage() {
           }
         }
 
-        // Upload documents if we got a userId
+        // Upload documents if we got a userId (supervisors have none to upload)
         if (userId) {
-          const fd = new FormData()
-          if (isPromoter) {
-            if (headshotFile) fd.append('headshot',      headshotFile)
-            if (fullBodyFile) fd.append('fullBodyPhoto', fullBodyFile)
-            if (cvFile)       fd.append('cv',            cvFile)        // ← CV upload
-            if (bankProof)    fd.append('bankProof',     bankProof)
-          } else {
-            if (cipcDoc)      fd.append('cipcDoc',      cipcDoc)
-            if (taxPin)       fd.append('taxPin',       taxPin)
-            if (bizBankProof) fd.append('bizBankProof', bizBankProof)
-          }
-          if ([...fd.entries()].length > 0) {
-            const headers: Record<string, string> = {}
-            if (authToken) headers['Authorization'] = `Bearer ${authToken}`
-            await fetch(`${API}/users/register-documents/${userId}`, { method: 'POST', headers, body: fd })
+          if (!isSupervisor) {
+            const fd = new FormData()
+            if (isPromoter) {
+              if (headshotFile) fd.append('headshot',      headshotFile)
+              if (fullBodyFile) fd.append('fullBodyPhoto', fullBodyFile)
+              if (cvFile)       fd.append('cv',            cvFile)        // ← CV upload
+              if (bankProof)    fd.append('bankProof',     bankProof)
+            } else {
+              if (cipcDoc)      fd.append('cipcDoc',      cipcDoc)
+              if (taxPin)       fd.append('taxPin',       taxPin)
+              if (bizBankProof) fd.append('bizBankProof', bizBankProof)
+            }
+            if ([...fd.entries()].length > 0) {
+              const headers: Record<string, string> = {}
+              if (authToken) headers['Authorization'] = `Bearer ${authToken}`
+              await fetch(`${API}/users/register-documents/${userId}`, { method: 'POST', headers, body: fd })
+            }
           }
 
           // Store token so dashboard can use it immediately
           if (authToken) {
+            const sessionName = isSupervisor ? `${supFirstName} ${supLastName}` : isPromoter ? `${firstName} ${lastName}` : companyName
+            const sessionEmail = isSupervisor ? supEmail.toLowerCase() : isPromoter ? email.toLowerCase() : bizEmail.toLowerCase()
             localStorage.setItem('hg_token', authToken)
             localStorage.setItem('hg_session', JSON.stringify({
               id:               userId,
-              name:             isPromoter ? `${firstName} ${lastName}` : companyName,
-              email:            isPromoter ? email.toLowerCase() : bizEmail.toLowerCase(),
-              role:             isPromoter ? 'promoter' : 'business',
+              name:             sessionName,
+              email:            sessionEmail,
+              role:             role,
               status:           'pending_review',
               onboardingStatus: 'pending_review',
             }))
@@ -635,7 +706,7 @@ export default function RegisterPage() {
   }
 
   /* ─── STYLES ──────────────────────────────────────────────── */
-  const stepLabels = isPromoter ? ['Profile', 'Photos & Banking', 'Account'] : ['Company', 'Documents', 'Account']
+  const stepLabels = isPromoter ? ['Profile', 'Photos & Banking', 'Account'] : isSupervisor ? ['Assignment', 'Account'] : ['Company', 'Documents', 'Account']
   const selectStyle: React.CSSProperties = { width: '100%', background: 'rgba(189,189,189,0.03)', border: `1px solid ${BLACK_BORDER}`, padding: '13px 16px', fontFamily: FB, fontSize: 14, color: WHITE, outline: 'none', appearance: 'none', cursor: 'pointer' }
   const chipSectionLabel = (text: string, count: number) => (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
@@ -660,7 +731,7 @@ export default function RegisterPage() {
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.025, backgroundImage: `linear-gradient(${GOLD} 1px,transparent 1px),linear-gradient(90deg,${GOLD} 1px,transparent 1px)`, backgroundSize: '72px 72px' }} />
 
-      {done && <SuccessModal isPromoter={isPromoter} onDashboard={() => navigate(DASHBOARD_ROUTE[role])} onHome={() => navigate('/')} />}
+      {done && <SuccessModal isPromoter={role !== 'business'} onDashboard={() => navigate(DASHBOARD_ROUTE[role])} onHome={() => navigate('/')} />}
 
       <div className="hg-reg" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 560 }}>
 
@@ -675,10 +746,10 @@ export default function RegisterPage() {
 
         {/* Role toggle */}
         <div style={{ display: 'flex', background: '#060605', border: `1px solid ${BLACK_BORDER}`, padding: 4, marginBottom: 24, gap: 4 }}>
-          {(['promoter', 'business'] as Role[]).map(r => (
+          {(['promoter', 'business', 'supervisor'] as Role[]).map(r => (
             <button key={r} onClick={() => switchRole(r)}
               style={{ flex: 1, padding: '11px 8px', background: role === r ? GOLD_FAINT : 'transparent', border: role === r ? `1px solid ${GOLD}44` : '1px solid transparent', color: role === r ? GOLD : GOLD_PALE, fontFamily: FB, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s' }}>
-              {r === 'promoter' ? '◉ Promoter' : '◈ Business'}
+              {r === 'promoter' ? '◉ Promoter' : r === 'business' ? '◈ Business' : '◆ Supervisor'}
             </button>
           ))}
         </div>
@@ -844,7 +915,7 @@ export default function RegisterPage() {
           )}
 
           {/* BUSINESS STEP 0 */}
-          {!isPromoter && step === 0 && (
+          {isBusiness && step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <SectionDivider label="Company Information" />
               <Field label="Company Name" placeholder="Acme Promotions (Pty) Ltd" value={companyName} onChange={setCompanyName} focused={focused === 'companyName'} onFocus={() => setFocused('companyName')} onBlur={() => setFocused(null)} error={errors.companyName} />
@@ -933,7 +1004,7 @@ export default function RegisterPage() {
           )}
 
           {/* BUSINESS STEP 1 */}
-          {!isPromoter && step === 1 && (
+          {isBusiness && step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
               <SectionDivider label="Business Documents" />
               <FileUploadZone label="CIPC Registration Certificate" accept=".pdf,.jpg,.jpeg,.png" file={cipcDoc} onChange={setCipcDoc} hint="Official CIPC CoR14.3 or equivalent · PDF preferred" required />
@@ -946,7 +1017,7 @@ export default function RegisterPage() {
           )}
 
           {/* BUSINESS STEP 2 */}
-          {!isPromoter && step === 2 && (
+          {isBusiness && step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <SectionDivider label="Login Credentials" />
               <Field label="Business Email" type="email" placeholder="contact@company.co.za" value={bizEmail} onChange={setBizEmail} focused={focused === 'bizEmail'} onFocus={() => setFocused('bizEmail')} onBlur={() => setFocused(null)} error={errors.bizEmail} />
@@ -963,7 +1034,61 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Submit error */}
+          {/* SUPERVISOR STEP 0 — Personal + Assignment */}
+          {isSupervisor && step === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+              <SectionDivider label="Personal Details" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Field label="First Name" placeholder="Lerato" value={supFirstName} onChange={setSupFirstName} focused={focused === 'supFirstName'} onFocus={() => setFocused('supFirstName')} onBlur={() => setFocused(null)} error={errors.supFirstName} />
+                <Field label="Last Name" placeholder="Mokoena" value={supLastName} onChange={setSupLastName} focused={focused === 'supLastName'} onFocus={() => setFocused('supLastName')} onBlur={() => setFocused(null)} error={errors.supLastName} />
+              </div>
+              <Field label="SA Phone Number" placeholder="+27 71 000 0000" value={supPhone} onChange={v => setSupPhone(formatSAPhone(v))} focused={focused === 'supPhone'} onFocus={() => setFocused('supPhone')} onBlur={() => setFocused(null)} error={errors.supPhone} hint="South African mobile number" />
+
+              <SectionDivider label="Work Assignment" />
+              <div>
+                <label style={{ display: 'block', fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD_DIM, marginBottom: 8 }}>Field You'll Be Working In</label>
+                <select value={supWorkField} onChange={e => setSupWorkField(e.target.value)} style={selectStyle}>
+                  <option value="">— Select —</option>
+                  {WORK_FIELD_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                {errors.supWorkField && <p style={{ fontFamily: FB, fontSize: 11, color: AMBER, marginTop: 5 }}>{errors.supWorkField}</p>}
+                <p style={{ fontFamily: FB, fontSize: 11, color: GOLD_PALE, marginTop: 6, lineHeight: 1.5 }}>e.g. Formal On Trade, Main Market — the campaign area you'll be overseeing promoters in.</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD_DIM, marginBottom: 8 }}>Business You're Associated With</label>
+                <select value={supBusinessId} onChange={e => setSupBusinessId(e.target.value)} style={selectStyle} disabled={businessOptionsLoading}>
+                  <option value="">{businessOptionsLoading ? 'Loading businesses…' : '— Select —'}</option>
+                  {businessOptions.map(b => <option key={b.id} value={b.id}>{b.fullName}</option>)}
+                </select>
+                {errors.supBusinessId && <p style={{ fontFamily: FB, fontSize: 11, color: AMBER, marginTop: 5 }}>{errors.supBusinessId}</p>}
+                {!businessOptionsLoading && businessOptions.length === 0 && (
+                  <p style={{ fontFamily: FB, fontSize: 11, color: AMBER, marginTop: 6, lineHeight: 1.5 }}>
+                    No approved businesses found yet — a business must register and be approved by admin before a supervisor can be linked to it.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* SUPERVISOR STEP 1 — Account */}
+          {isSupervisor && step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <SectionDivider label="Login Credentials" />
+              <Field label="Email Address" type="email" placeholder="lerato@email.com" value={supEmail} onChange={setSupEmail} focused={focused === 'supEmail'} onFocus={() => setFocused('supEmail')} onBlur={() => setFocused(null)} error={errors.supEmail} />
+              <div>
+                <Field label="Password" type="password" placeholder="Min. 8 characters" value={supPassword} onChange={setSupPassword} focused={focused === 'supPassword'} onFocus={() => setFocused('supPassword')} onBlur={() => setFocused(null)} error={errors.supPassword} />
+                <PasswordStrength password={supPassword} />
+              </div>
+              <Field label="Confirm Password" type="password" placeholder="••••••••" value={supConfirmPw} onChange={setSupConfirmPw} focused={focused === 'supConfirmPw'} onFocus={() => setFocused('supConfirmPw')} onBlur={() => setFocused(null)} error={errors.supConfirmPw} />
+              <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
+                <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
+                  You're registering to supervise <span style={{ color: GOLD }}>{supWorkField || 'your assigned field'}</span> for{' '}
+                  <span style={{ color: GOLD }}>{businessOptions.find(b => b.id === supBusinessId)?.fullName || 'the selected business'}</span>.
+                  Your account will be <span style={{ color: GOLD }}>pending review</span> until approved by admin.
+                </p>
+              </div>
+            </div>
+          )}
           {errors.submit && (
             <div style={{ marginTop: 16, padding: '12px 16px', background: `${AMBER}18`, border: `1px solid ${AMBER}44` }}>
               <p style={{ fontFamily: FB, fontSize: 12, color: AMBER }}>{errors.submit}</p>
