@@ -49,6 +49,7 @@ model User {
   profilePhotoUrl  String?
   cvUrl            String?
   createdJobs  Job[]         @relation("JobCreator")
+  supervisedJobs Job[]       @relation("JobSupervisor")
   shifts       Shift[]       @relation("PromoterShifts")
   payments     Payment[]     @relation("PromoterPayments")
   applications Application[] @relation("PromoterApplications")
@@ -104,7 +105,10 @@ model Job {
   filters            Json
   createdAt          DateTime  @default(now())
   createdBy          String
+  // ── Supervisor assignment ──────────────────────────────────────────────
+  supervisorId       String?
   createdByUser User          @relation("JobCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  supervisor    User?         @relation("JobSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
   shifts        Shift[]       @relation("JobShifts")
   applications  Application[] @relation("JobApplications")
   activationReport   ActivationReport?   @relation("JobActivationReport")
@@ -140,6 +144,8 @@ model Shift {
   // ── Issue reporting ───────────────────────────────────────────────────
   issueReport       String?
   issues            Json[]
+  // ── Late arrival tracking (drives automatic payment deduction) ────────
+  lateMinutes       Int        @default(0)
   // ── Other ─────────────────────────────────────────────────────────────
   supervisorRating  Int?
   createdAt         DateTime   @default(now())
@@ -208,6 +214,7 @@ enum Role {
   PROMOTER
   BUSINESS
   ADMIN
+  SUPERVISOR
 }
 
 enum JobStatus {

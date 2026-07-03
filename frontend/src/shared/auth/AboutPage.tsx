@@ -125,7 +125,7 @@ export default function AboutPage() {
           fontSize: 'clamp(200px, 26vw, 320px)', fontWeight: 900, fontFamily: FD,
           color: 'transparent', WebkitTextStroke: `1px rgba(201,191,166,0.05)`,
           lineHeight: 1, pointerEvents: 'none', userSelect: 'none', zIndex: 0,
-        }}>HG</div>
+        }}>CP</div>
 
         {/* Stars top-right */}
         <div style={{ position: 'absolute', top: 0, right: 0, width: 260, height: 220, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>

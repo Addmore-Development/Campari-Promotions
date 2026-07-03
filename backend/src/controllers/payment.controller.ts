@@ -10,7 +10,8 @@ export const getMyPayments = async (req: AuthRequest, res: Response): Promise<vo
       where: { promoterId: req.user!.id },
       include: {
         shift: {
-          include: {
+          select: {
+            lateMinutes: true, checkInTime: true, checkOutTime: true,
             job: { select: { title: true, client: true, date: true, hourlyRate: true, venue: true } },
           },
         },
@@ -138,26 +139,44 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
   }
 };
 
+// ── Late-arrival deduction policy ───────────────────────────────────────────
+// R2 is deducted for every minute late, capped at 50% of the shift's gross
+// pay so a very late arrival can't wipe out the whole payment. Adjust these
+// two constants to match the actual company policy.
+const LATE_DEDUCTION_PER_MINUTE = 2;   // Rand per minute late
+const LATE_DEDUCTION_MAX_PCT    = 0.5; // Never deduct more than 50% of gross
+
+export function calculateLateDeduction(grossAmount: number, lateMinutes: number): number {
+  if (!lateMinutes || lateMinutes <= 0) return 0;
+  const rawDeduction = Math.round(lateMinutes * LATE_DEDUCTION_PER_MINUTE);
+  const cap          = Math.round(grossAmount * LATE_DEDUCTION_MAX_PCT);
+  return Math.min(rawDeduction, cap);
+}
+
 // ── POST auto-create payment for shift on checkout ──────────────────────────
 export const createPaymentForShift = async (
   shiftId:     string,
   promoterId:  string,
   hoursWorked: number,
   hourlyRate:  number,
+  lateMinutes: number = 0,
 ): Promise<void> => {
   try {
     const existing = await prisma.payment.findUnique({ where: { shiftId } });
     if (existing) return;
 
     const grossAmount = Math.round(hoursWorked * hourlyRate * 100) / 100;
+    const roundedGross = Math.round(grossAmount);
+    const deductions   = calculateLateDeduction(roundedGross, lateMinutes);
+    const netAmount    = roundedGross - deductions;
 
     await prisma.payment.create({
       data: {
         shiftId,
         promoterId,
-        grossAmount: Math.round(grossAmount),
-        deductions:  0,
-        netAmount:   Math.round(grossAmount),
+        grossAmount: roundedGross,
+        deductions,
+        netAmount,
         status:      'PENDING',
       },
     });

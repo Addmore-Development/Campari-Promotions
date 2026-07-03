@@ -18,6 +18,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
       const jobs = await prisma.job.findMany({
         where,
         include: {
+          supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
           applications: {
             include: {
               promoter: {
@@ -84,6 +85,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
           OR: orConditions,
         },
         include: {
+          supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
           applications: {
             include: {
               promoter: {
@@ -115,6 +117,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
       const jobs = await prisma.job.findMany({
         where,
         include: {
+          supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
           applications: {
             include: {
               promoter: {
@@ -147,6 +150,7 @@ export const getJobById = async (req: AuthRequest, res: Response): Promise<void>
     const job = await prisma.job.findUnique({
       where: { id: req.params.id },
       include: {
+        supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
         applications: {
           include: {
             promoter: {
@@ -181,10 +185,43 @@ export const getMyJobs = async (req: AuthRequest, res: Response): Promise<void> 
   }
 };
 
+/**
+ * GET /api/jobs/supervisor
+ * Dedicated endpoint for supervisor users — returns every job/activation
+ * they've been assigned to oversee, so they can pull shifts, file the
+ * activation report, and chat with the promoters/client on that job.
+ */
+export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
+
+    const jobs = await prisma.job.findMany({
+      where: { supervisorId: userId },
+      include: {
+        shifts: {
+          include: {
+            promoter: {
+              select: { id: true, fullName: true, phone: true, email: true, profilePhotoUrl: true, headshotUrl: true },
+            },
+          },
+        },
+        activationReport: true,
+      },
+      orderBy: { date: 'desc' },
+    });
+
+    res.json(jobs);
+  } catch (err) {
+    console.error('[Job] getSupervisorJobs error:', err);
+    res.status(500).json({ error: 'Failed to fetch supervised jobs' });
+  }
+};
+
 export const createJob = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
-      title, client, clientId, brand, venue, address, lat, lng,
+      title, client, clientId, supervisorId, brand, venue, address, lat, lng,
       date, startTime, endTime, hourlyRate, totalSlots,
       filledSlots, status, filters, termsAndConditions,
     } = req.body;
@@ -207,6 +244,21 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
         }
       } catch {
         // clientId column may not exist yet — continue without it
+      }
+    }
+
+    // Validate supervisorId belongs to a real SUPERVISOR user
+    let resolvedSupervisorId: string | null = null;
+    if (supervisorId) {
+      const supUser = await prisma.user.findUnique({
+        where: { id: supervisorId },
+        select: { id: true, role: true },
+      });
+      if (supUser && supUser.role === 'SUPERVISOR') {
+        resolvedSupervisorId = supUser.id;
+      } else {
+        res.status(400).json({ error: 'supervisorId must belong to a SUPERVISOR user' });
+        return;
       }
     }
 
@@ -233,6 +285,10 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
       createData.clientId = resolvedClientId;
     }
 
+    if (resolvedSupervisorId) {
+      createData.supervisorId = resolvedSupervisorId;
+    }
+
     if (termsAndConditions !== undefined) {
       createData.termsAndConditions = termsAndConditions;
     }
@@ -250,7 +306,7 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
 export const updateJob = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
-      title, client, clientId, brand, venue, address, lat, lng,
+      title, client, clientId, supervisorId, brand, venue, address, lat, lng,
       date, startTime, endTime, hourlyRate, totalSlots,
       filledSlots, status, filters, termsAndConditions,
     } = req.body;
@@ -276,6 +332,24 @@ export const updateJob = async (req: AuthRequest, res: Response): Promise<void> 
       }
     }
 
+    // Validate supervisorId if being updated
+    let resolvedSupervisorId: string | null | undefined = undefined;
+    if (supervisorId !== undefined) {
+      if (!supervisorId) {
+        resolvedSupervisorId = null;
+      } else {
+        const supUser = await prisma.user.findUnique({
+          where: { id: supervisorId },
+          select: { id: true, role: true },
+        });
+        if (!supUser || supUser.role !== 'SUPERVISOR') {
+          res.status(400).json({ error: 'supervisorId must belong to a SUPERVISOR user' });
+          return;
+        }
+        resolvedSupervisorId = supUser.id;
+      }
+    }
+
     const updateData: any = {
       ...(title       !== undefined && { title }),
       ...(client      !== undefined && { client }),
@@ -297,6 +371,10 @@ export const updateJob = async (req: AuthRequest, res: Response): Promise<void> 
 
     if (resolvedClientId !== undefined) {
       updateData.clientId = resolvedClientId;
+    }
+
+    if (resolvedSupervisorId !== undefined) {
+      updateData.supervisorId = resolvedSupervisorId;
     }
 
     const job = await prisma.job.update({
@@ -369,6 +447,7 @@ export const getBusinessJobs = async (req: AuthRequest, res: Response): Promise<
     const jobs = await prisma.job.findMany({
       where: { OR: orConditions },
       include: {
+        supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
         applications: {
           include: {
             promoter: {

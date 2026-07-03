@@ -106,4 +106,16 @@ export const jobsService = {
     await delay(300)
     await apiFetch(`/jobs/${jobId}`, { method: 'DELETE' })
   },
+
+  // Supervisor portal — every job/activation this supervisor has been assigned
+  // to oversee, with shifts + activation report attached (raw shape, not the
+  // flattened Job type, since the supervisor dashboard needs the nested data).
+  async getSupervisorJobs(): Promise<any[]> {
+    try {
+      return await apiFetch<any[]>('/jobs/supervisor')
+    } catch (err) {
+      console.error('[jobsService] getSupervisorJobs error:', err)
+      return []
+    }
+  },
 }

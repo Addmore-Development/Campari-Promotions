@@ -145,6 +145,7 @@ export const checkIn = async (req: AuthRequest, res: Response): Promise<void> =>
         checkInLng:       lng ? parseFloat(lng) : undefined,
         selfieInUrl:      selfiePath,
         checkInSelfieUrl: selfiePath,
+        lateMinutes,
         ...(lateMinutes > 0 && { issueReport: `LATE_CHECK_IN:${lateMinutes}` }),
       },
     });
@@ -166,7 +167,8 @@ export const checkOut = async (req: AuthRequest, res: Response): Promise<void> =
     // Fetch shift with job so we have hourlyRate for payment creation
     const shift = await prisma.shift.findUnique({
       where: { id: req.params.id },
-      include: {
+      select: {
+        id: true, promoterId: true, status: true, checkInTime: true, lateMinutes: true,
         job: { select: { hourlyRate: true, title: true } },
       },
     });
@@ -208,6 +210,7 @@ export const checkOut = async (req: AuthRequest, res: Response): Promise<void> =
         shift.promoterId,
         hoursWorked,
         hourlyRate,
+        shift.lateMinutes ?? 0,
       );
     }
 

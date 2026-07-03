@@ -8,6 +8,7 @@ export const getDashboardStats = async (_req: Request, res: Response): Promise<v
   try {
     const [
       totalPromoters,
+      totalSupervisors,
       pendingReview,
       activeJobs,
       totalShiftsToday,
@@ -15,6 +16,7 @@ export const getDashboardStats = async (_req: Request, res: Response): Promise<v
       totalClients,
     ] = await Promise.all([
       prisma.user.count({ where: { role: 'PROMOTER', status: 'approved' } }),
+      prisma.user.count({ where: { role: 'SUPERVISOR', status: 'approved' } }),
       prisma.user.count({ where: { status: 'pending_review' } }),
       prisma.job.count({ where: { status: { in: ['OPEN', 'FILLED', 'IN_PROGRESS'] } } }),
       prisma.shift.count({
@@ -29,6 +31,7 @@ export const getDashboardStats = async (_req: Request, res: Response): Promise<v
 
     res.json({
       totalPromoters,
+      totalSupervisors,
       pendingReview,
       activeJobs,
       totalShiftsToday,
@@ -44,11 +47,11 @@ export const getDashboardStats = async (_req: Request, res: Response): Promise<v
 
 export const getPendingRegistrations = async (_req: Request, res: Response): Promise<void> => {
   try {
-    // Return ALL promoters and businesses — not just pending — so the admin
-    // registrations tab shows the full history (pending, approved, rejected)
+    // Return ALL promoters, businesses, and supervisors — not just pending —
+    // so the admin registrations tab shows the full history (pending, approved, rejected)
     const users = await prisma.user.findMany({
       where: {
-        role: { in: ['PROMOTER', 'BUSINESS'] },
+        role: { in: ['PROMOTER', 'BUSINESS', 'SUPERVISOR'] },
       },
       select: {
         id: true, fullName: true, email: true, phone: true, city: true,

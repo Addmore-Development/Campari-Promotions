@@ -4,6 +4,9 @@ import { AuthRequest } from '../middleware/auth';
 import multer from 'multer';
 import path   from 'path';
 import fs     from 'fs';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { auditLog } from '../utils/auditLogger';
 
 // ── Multer setup ────────────────────────────────────────────────────────────
 const docDir = path.join(process.cwd(), 'uploads', 'documents');
@@ -47,6 +50,75 @@ function extractFileUrls(files: { [fieldname: string]: Express.Multer.File[] }):
   if (files?.bankProof?.[0])     data.bizBankProofUrl  = `/uploads/documents/${files.bankProof[0].filename}`;
   return data;
 }
+
+// ── Admin: create a user directly (used for staff accounts like Supervisors,
+// where there's no self-registration flow) ─────────────────────────────────
+export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { fullName, email, phone, city, role, password } = req.body;
+
+    if (!fullName || !email || !role) {
+      res.status(400).json({ error: 'fullName, email and role are required' });
+      return;
+    }
+
+    const normalizedRole = (role as string).toUpperCase();
+    if (!['PROMOTER', 'BUSINESS', 'ADMIN', 'SUPERVISOR'].includes(normalizedRole)) {
+      res.status(400).json({ error: 'Invalid role' });
+      return;
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) {
+      res.status(409).json({ error: 'Email already registered' });
+      return;
+    }
+
+    // Admin-created accounts (e.g. Supervisors) skip the onboarding queue —
+    // they're staff being provisioned directly, not applicants.
+    const usedGeneratedPassword = !password || String(password).length < 6;
+    const plainPassword = usedGeneratedPassword ? crypto.randomBytes(6).toString('hex') : password;
+    const hashed = await bcrypt.hash(plainPassword, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        fullName,
+        email: normalizedEmail,
+        password: hashed,
+        role: normalizedRole as any,
+        phone: phone || null,
+        city: city || null,
+        status: 'approved',
+        onboardingStatus: 'approved',
+      },
+    });
+
+    await auditLog({
+      userId: req.user!.id,
+      action: 'ADMIN_CREATE_USER',
+      entity: 'User',
+      entityId: user.id,
+      meta: { role: normalizedRole },
+    });
+
+    res.status(201).json({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      phone: user.phone,
+      city: user.city,
+      createdAt: user.createdAt,
+      // Only returned when we generated it — the admin needs to hand it to the new user
+      temporaryPassword: usedGeneratedPassword ? plainPassword : undefined,
+    });
+  } catch (err) {
+    console.error('[User] adminCreateUser error:', err);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+};
 
 // ── GET all users (admin) ───────────────────────────────────────────────────
 export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {

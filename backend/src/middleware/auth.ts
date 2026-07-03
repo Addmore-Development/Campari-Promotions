@@ -52,3 +52,19 @@ export const adminOrBusiness = (req: AuthRequest, res: Response, next: NextFunct
   }
   next();
 };
+
+export const supervisorOnly = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.user?.role !== 'SUPERVISOR') {
+    res.status(403).json({ error: 'Supervisor access required' });
+    return;
+  }
+  next();
+};
+
+export const adminOrSupervisor = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (!['ADMIN', 'SUPERVISOR'].includes(req.user?.role || '')) {
+    res.status(403).json({ error: 'Admin or Supervisor access required' });
+    return;
+  }
+  next();
+};

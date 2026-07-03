@@ -1,5 +1,5 @@
 import { apiFetch } from './api'
-import type { PurchaseOrder, CommitmentEntry, POStatus, CEStatus } from '../types/purchaseOrder.types'
+import type { PurchaseOrder, CommitmentEntry, POStatus, CEStatus, MyBudgetSummary } from '../types/purchaseOrder.types'
 
 export interface CreatePOPayload {
   clientId: string
@@ -20,6 +20,13 @@ export interface CreateCEPayload {
 }
 
 export const purchaseOrdersService = {
+  // Client (BUSINESS) sees their own remaining budget; admin can pass a clientId
+  // to check budget on a client's behalf.
+  getMyBudget: (clientId?: string): Promise<MyBudgetSummary> => {
+    const suffix = clientId ? `?clientId=${clientId}` : ''
+    return apiFetch<MyBudgetSummary>(`/purchase-orders/my-budget${suffix}`)
+  },
+
   getAll: (filters?: { clientId?: string; status?: POStatus | 'all' }): Promise<PurchaseOrder[]> => {
     const qs = new URLSearchParams()
     if (filters?.clientId) qs.set('clientId', filters.clientId)

@@ -21,7 +21,7 @@ const FD           = "'Playfair Display', Georgia, serif"
 const FB           = "'DM Sans', system-ui, sans-serif"
 
 /* ─── ROLE CONFIG — all gold shades ─────────────────────────── */
-type Role = 'promoter' | 'business' | 'admin'
+type Role = 'promoter' | 'business' | 'admin' | 'supervisor'
 
 const ROLE_CONFIG: Record<Role, { label: string; icon: string; accentColor: string; borderColor: string; description: string }> = {
   promoter: {
@@ -38,6 +38,13 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: string; accentColor: stri
     borderColor: `rgba(196,189,171,0.55)`,
     description: 'Manage your promoter teams, monitor attendance, and view reports.',
   },
+  supervisor: {
+    label:       'Supervisor',
+    icon:        '◐',
+    accentColor: BROWN,
+    borderColor: `rgba(90,85,72,0.55)`,
+    description: 'Oversee your assigned activations, file reports, and chat with your team.',
+  },
   admin: {
     label:       'Admin',
     icon:        '◆',
@@ -48,9 +55,10 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: string; accentColor: stri
 }
 
 const DASHBOARD_ROUTE: Record<Role, string> = {
-  promoter: '/promoter/',
-  business: '/business/dashboard',
-  admin:    '/admin',
+  promoter:   '/promoter/',
+  business:   '/business/dashboard',
+  admin:      '/admin',
+  supervisor: '/supervisor/',
 }
 
 const GLOBAL_CSS = `

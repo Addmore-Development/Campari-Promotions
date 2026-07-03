@@ -17,6 +17,7 @@ import ReviewsAndComplaintsPage     from './Admin/reviews/ReviewsandComplaintsPa
 import ActivationReports            from './Admin/reports/ActivationReports'
 import BudgetTracking                from './Admin/finance/BudgetTracking'
 import { PromoterApp }              from './promoter/index'
+import { SupervisorApp }            from './Supervisor/index'
 import PendingApprovalPage          from './promoter/PendingApprovalPage'
 import JobDetailPage                from './shared/jobs/JobdetailPage'
 import BusinessLayout               from './Business/BusinessLayout'
@@ -48,6 +49,12 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={['promoter']} />}>
             <Route path="/promoter/"  element={<PromoterApp />} />
             <Route path="/promoter"   element={<Navigate to="/promoter/" replace />} />
+          </Route>
+
+          {/* ── Supervisor — protected ── */}
+          <Route element={<ProtectedRoute allowedRoles={['supervisor']} />}>
+            <Route path="/supervisor/"  element={<SupervisorApp />} />
+            <Route path="/supervisor"   element={<Navigate to="/supervisor/" replace />} />
           </Route>
 
           {/* ── Admin — protected ── */}

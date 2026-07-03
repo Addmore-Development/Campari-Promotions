@@ -4,9 +4,11 @@ import {
   saveReportForJob,
   getAllReports,
   getClientReport,
+  getCampaignInsights,
+  getMyClientReport,
   activationShotUpload,
 } from "../controllers/activationReport.controller";
-import { protect, adminOnly } from "../middleware/auth";
+import { protect, adminOnly, adminOrBusiness } from "../middleware/auth";
 
 const router = Router();
 
@@ -14,7 +16,12 @@ const router = Router();
 router.get("/",               protect, adminOnly, getAllReports);
 router.get("/client-report",  protect, adminOnly, getClientReport);
 
-// Promoter/supervisor + Admin: single job's report
+// Admin + Business: campaign insights (successful vs failed vs pending) and
+// the business's own self-serve activation report
+router.get("/insights",          protect, adminOrBusiness, getCampaignInsights);
+router.get("/my-client-report",  protect, adminOrBusiness, getMyClientReport);
+
+// Promoter/supervisor + Business + Admin: single job's report
 router.get("/job/:jobId",  protect, getReportForJob);
 router.post("/job/:jobId", protect, activationShotUpload, saveReportForJob);
 

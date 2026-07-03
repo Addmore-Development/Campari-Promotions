@@ -7,6 +7,7 @@ import {
   uploadDocumentsByUserId,
   documentUpload,
   adminUpdateUser,
+  adminCreateUser,
   deleteUser,
   getEligiblePromoters,
 } from '../controllers/user.controller';
@@ -30,6 +31,7 @@ router.get('/promoters/eligible', protect, adminOrBusiness, getEligiblePromoters
 
 // ── Admin: all users ─────────────────────────────────────────────────────────
 router.get('/',       protect, adminOnly, getAllUsers);
+router.post('/',      protect, adminOnly, adminCreateUser);
 router.get('/:id',    protect, adminOnly, getUserById);
 router.put('/:id',    protect, adminOnly, adminUpdateUser);
 router.delete('/:id', protect, adminOnly, deleteUser);

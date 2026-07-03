@@ -41,6 +41,83 @@ const PO_INCLUDE = {
   },
 };
 
+// ── Budget visibility for clients ───────────────────────────────────────────
+// The CRM "Client" record (used by PurchaseOrder) is a separate entity from
+// the BUSINESS user account that logs in. We link the two by matching email
+// (falling back to name) so a client can see their own remaining budget
+// without needing to know their internal Client record id.
+async function resolveClientRecordForRequest(req: AuthRequest) {
+  const role = req.user!.role;
+
+  if (role === 'ADMIN') {
+    const clientId = req.query.clientId as string | undefined;
+    if (!clientId) return { error: 'clientId is required for admin requests' };
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    return { client };
+  }
+
+  if (role === 'BUSINESS') {
+    const bizUser = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { email: true, fullName: true },
+    });
+    const client = await prisma.client.findFirst({
+      where: {
+        OR: [
+          ...(bizUser?.email ? [{ email: { equals: bizUser.email, mode: 'insensitive' as const } }] : []),
+          ...(bizUser?.fullName ? [{ name: { equals: bizUser.fullName, mode: 'insensitive' as const } }] : []),
+        ],
+      },
+    });
+    return { client };
+  }
+
+  return { error: 'Not authorised' };
+}
+
+// ── GET the requesting client's (or admin-specified client's) budget summary ─
+export const getMyBudget = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { client, error } = await resolveClientRecordForRequest(req);
+    if (error) { res.status(400).json({ error }); return; }
+
+    if (!client) {
+      res.json({
+        hasClientRecord: false,
+        message: 'No matching client record found — budget cannot be resolved yet. Contact your account manager.',
+        purchaseOrders: [],
+        totalBudget: 0,
+        totalCommitted: 0,
+        totalRemaining: 0,
+      });
+      return;
+    }
+
+    const pos = await prisma.purchaseOrder.findMany({
+      where: { clientId: client.id, status: 'active' },
+      include: PO_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const summarized = pos.map(summarizePO);
+    const totalBudget    = summarized.reduce((sum, po) => sum + po.amount, 0);
+    const totalCommitted = summarized.reduce((sum, po) => sum + po.committedAmount, 0);
+    const totalRemaining = summarized.reduce((sum, po) => sum + po.remainingAmount, 0);
+
+    res.json({
+      hasClientRecord: true,
+      client: { id: client.id, name: client.name },
+      purchaseOrders: summarized,
+      totalBudget,
+      totalCommitted,
+      totalRemaining,
+    });
+  } catch (err) {
+    console.error('[PurchaseOrder] getMyBudget error:', err);
+    res.status(500).json({ error: 'Failed to fetch budget' });
+  }
+};
+
 // ── Purchase Orders ───────────────────────────────────────────────────────────
 
 export const getAllPurchaseOrders = async (req: AuthRequest, res: Response): Promise<void> => {

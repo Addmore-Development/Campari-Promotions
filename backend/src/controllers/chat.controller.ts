@@ -147,18 +147,22 @@ export const getAdminUser = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // ── GET chatable users — ROLE AWARE ─────────────────────────────────────────
-// ADMIN      → ALL promoters + ALL businesses (no filter needed)
+// ADMIN      → ALL promoters + ALL businesses + ALL supervisors (no filter needed)
 // BUSINESS   → admin + promoters who have ANY shift on ANY of their jobs
+//              + supervisors assigned to ANY of their jobs
 // PROMOTER   → admin + businesses whose jobs they have ANY shift on
+//              + supervisors assigned to the jobs they have a shift on
+// SUPERVISOR → admin + promoters with a shift on a job they supervise
+//              + businesses (clients) of the jobs they supervise
 export const getChatableUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
-    const role   = req.user!.role; // 'ADMIN' | 'BUSINESS' | 'PROMOTER'
+    const role   = req.user!.role; // 'ADMIN' | 'BUSINESS' | 'PROMOTER' | 'SUPERVISOR'
 
     // ── ADMIN: return every non-admin user ───────────────────────────────────
     if (role === 'ADMIN') {
       const users = await prisma.user.findMany({
-        where:   { role: { in: ['PROMOTER', 'BUSINESS'] } },
+        where:   { role: { in: ['PROMOTER', 'BUSINESS', 'SUPERVISOR'] } },
         select:  { id: true, fullName: true, role: true, status: true },
         orderBy: [{ role: 'asc' }, { fullName: 'asc' }],
       });
@@ -172,14 +176,18 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
       select: { id: true, fullName: true, role: true, status: true },
     });
 
-    // ── BUSINESS: admin + promoters who have shifts on their jobs ────────────
+    // ── BUSINESS: admin + promoters who have shifts on their jobs
+    //             + supervisors assigned to their jobs ──────────────────────
     if (role === 'BUSINESS') {
       // Find all jobs where this user is the client
       const myJobs = await prisma.job.findMany({
         where:  { clientId: userId },
-        select: { id: true },
+        select: { id: true, supervisorId: true },
       });
       const myJobIds = myJobs.map(j => j.id);
+      const supervisorIds = [
+        ...new Set(myJobs.map(j => j.supervisorId).filter((id): id is string => Boolean(id))),
+      ];
 
       let promoters: any[] = [];
       if (myJobIds.length > 0) {
@@ -199,21 +207,31 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
         }
       }
 
+      const supervisors = supervisorIds.length > 0
+        ? await prisma.user.findMany({
+            where:   { id: { in: supervisorIds } },
+            select:  { id: true, fullName: true, role: true, status: true },
+            orderBy: { fullName: 'asc' },
+          })
+        : [];
+
       res.json([
         ...(adminUser ? [adminUser] : []),
+        ...supervisors,
         ...promoters,
       ]);
       return;
     }
 
-    // ── PROMOTER: admin + businesses whose jobs they have shifts on ──────────
+    // ── PROMOTER: admin + businesses whose jobs they have shifts on
+    //             + supervisors of the jobs they have shifts on ─────────────
     if (role === 'PROMOTER') {
       const myShifts = await prisma.shift.findMany({
         where:  { promoterId: userId },
-        select: { job: { select: { clientId: true } } },
+        select: { job: { select: { clientId: true, supervisorId: true } } },
       });
 
-      // Collect unique non-null clientIds
+      // Collect unique non-null clientIds and supervisorIds
       const clientIds = [
         ...new Set(
           myShifts
@@ -221,19 +239,81 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
             .filter((id): id is string => Boolean(id))
         ),
       ];
+      const supervisorIds = [
+        ...new Set(
+          myShifts
+            .map(s => s.job?.supervisorId)
+            .filter((id): id is string => Boolean(id))
+        ),
+      ];
 
-      let businesses: any[] = [];
-      if (clientIds.length > 0) {
-        businesses = await prisma.user.findMany({
-          where:   { id: { in: clientIds }, role: 'BUSINESS' },
-          select:  { id: true, fullName: true, role: true, status: true },
-          orderBy: { fullName: 'asc' },
-        });
-      }
+      const [businesses, supervisors] = await Promise.all([
+        clientIds.length > 0
+          ? prisma.user.findMany({
+              where:   { id: { in: clientIds }, role: 'BUSINESS' },
+              select:  { id: true, fullName: true, role: true, status: true },
+              orderBy: { fullName: 'asc' },
+            })
+          : Promise.resolve([]),
+        supervisorIds.length > 0
+          ? prisma.user.findMany({
+              where:   { id: { in: supervisorIds }, role: 'SUPERVISOR' },
+              select:  { id: true, fullName: true, role: true, status: true },
+              orderBy: { fullName: 'asc' },
+            })
+          : Promise.resolve([]),
+      ]);
+
+      res.json([
+        ...(adminUser ? [adminUser] : []),
+        ...supervisors,
+        ...businesses,
+      ]);
+      return;
+    }
+
+    // ── SUPERVISOR: admin + promoters with a shift on a job they supervise
+    //               + businesses (clients) of the jobs they supervise ───────
+    if (role === 'SUPERVISOR') {
+      const myJobs = await prisma.job.findMany({
+        where:  { supervisorId: userId },
+        select: { id: true, clientId: true },
+      });
+      const myJobIds  = myJobs.map(j => j.id);
+      const clientIds = [
+        ...new Set(myJobs.map(j => j.clientId).filter((id): id is string => Boolean(id))),
+      ];
+
+      const [promoters, businesses] = await Promise.all([
+        myJobIds.length > 0
+          ? prisma.shift.findMany({
+              where:    { jobId: { in: myJobIds } },
+              select:   { promoterId: true },
+              distinct: ['promoterId'],
+            }).then(shifts => {
+              const pIds = shifts.map(s => s.promoterId);
+              return pIds.length > 0
+                ? prisma.user.findMany({
+                    where:   { id: { in: pIds } },
+                    select:  { id: true, fullName: true, role: true, status: true },
+                    orderBy: { fullName: 'asc' },
+                  })
+                : [];
+            })
+          : Promise.resolve([]),
+        clientIds.length > 0
+          ? prisma.user.findMany({
+              where:   { id: { in: clientIds }, role: 'BUSINESS' },
+              select:  { id: true, fullName: true, role: true, status: true },
+              orderBy: { fullName: 'asc' },
+            })
+          : Promise.resolve([]),
+      ]);
 
       res.json([
         ...(adminUser ? [adminUser] : []),
         ...businesses,
+        ...promoters,
       ]);
       return;
     }

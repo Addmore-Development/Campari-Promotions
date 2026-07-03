@@ -28,6 +28,16 @@ export interface PurchaseOrder {
   percentCommitted: number
 }
 
+export interface MyBudgetSummary {
+  hasClientRecord: boolean
+  message?: string
+  client?: { id: string; name: string }
+  purchaseOrders: PurchaseOrder[]
+  totalBudget: number
+  totalCommitted: number
+  totalRemaining: number
+}
+
 export interface CommitmentEntry {
   id: string
   purchaseOrderId: string

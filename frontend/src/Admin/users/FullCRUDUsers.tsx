@@ -34,7 +34,7 @@ function hex2rgba(hex: string, alpha: number): string {
 
 // broadcastUserUpdate removed — status changes go directly through the API
 
-type Role   = 'promoter' | 'client' | 'admin'
+type Role   = 'promoter' | 'client' | 'admin' | 'supervisor'
 type Status = 'active' | 'inactive' | 'suspended' | 'pending'
 
 interface User {
@@ -56,7 +56,10 @@ const MOCK_USERS: User[] = [
 
 function mapApiUser(u: any, source: 'api' | 'local'): User {
   const roleRaw = (u.role || '').toUpperCase()
-  const role: Role = roleRaw === 'BUSINESS' ? 'client' : roleRaw === 'ADMIN' ? 'admin' : 'promoter'
+  const role: Role =
+    roleRaw === 'BUSINESS'   ? 'client'     :
+    roleRaw === 'ADMIN'      ? 'admin'      :
+    roleRaw === 'SUPERVISOR' ? 'supervisor' : 'promoter'
   const statusRaw = (u.status || '').toLowerCase()
   const status: Status =
     statusRaw === 'approved'       ? 'active'    :
@@ -74,7 +77,7 @@ function mapApiUser(u: any, source: 'api' | 'local'): User {
   }
 }
 
-const ROLE_COLOR: Record<Role, string> = { promoter: GL, client: G3, admin: G4 }
+const ROLE_COLOR: Record<Role, string> = { promoter: GL, client: G3, admin: G4, supervisor: '#B08B5A' }
 const STATUS_CLR: Record<Status, string>    = { active: G3, inactive: '#CBCBCB', suspended: G4, pending: GL }
 const STATUS_BG:  Record<Status, string>    = { active: hex2rgba(G3,0.12), inactive: hex2rgba('#463F35',0.35), suspended: hex2rgba(G4,0.10), pending: hex2rgba(GL,0.10) }
 const STATUS_BORDER: Record<Status, string> = { active: hex2rgba(G3,0.45), inactive: hex2rgba('#666052',0.60), suspended: hex2rgba(G4,0.42), pending: hex2rgba(GL,0.42) }
@@ -122,6 +125,8 @@ export default function FullCRUDUsers() {
   const [roleF,    setRoleF   ] = useState<Role | 'all'>('all')
   const [statusF,  setStatusF ] = useState<Status | 'all'>('all')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [createPassword, setCreatePassword] = useState('')
+  const [createdCreds,   setCreatedCreds]   = useState<{ email: string; password: string } | null>(null)
 
   // mobile styles removed — using inline styles throughout
 
@@ -150,7 +155,7 @@ export default function FullCRUDUsers() {
       .finally(() => setSyncing(false))
   }, [])
 
-  const openCreate = () => { setForm(EMPTY); setEditing(null); setModal('create') }
+  const openCreate = () => { setForm(EMPTY); setEditing(null); setCreatePassword(''); setModal('create') }
   const openEdit   = (u: User) => { setForm({ name:u.name, email:u.email, phone:u.phone, role:u.role, status:u.status, city:u.city, joined:u.joined }); setEditing(u); setModal('edit') }
   const openView   = (u: User) => { setEditing(u); setModal('view') }
   const closeModal = () => { setModal(null); setEditing(null) }
@@ -160,7 +165,24 @@ export default function FullCRUDUsers() {
       const newUser: User = { ...form, id:`U${Date.now()}`, jobs:0, payouts:0, source:'mock' }
       setUsers(prev => [newUser, ...prev])
       const token = localStorage.getItem('hg_token')
-      if (token) fetch(`${API_URL}/users`, { method:'POST', headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' }, body:JSON.stringify({ fullName:form.name, email:form.email, phone:form.phone, city:form.city, role:form.role.toUpperCase(), status:form.status }) }).catch(()=>{})
+      if (token) {
+        try {
+          const res = await fetch(`${API_URL}/users`, {
+            method:  'POST',
+            headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
+            body: JSON.stringify({
+              fullName: form.name, email: form.email, phone: form.phone, city: form.city,
+              role: form.role.toUpperCase(), password: createPassword || undefined,
+            }),
+          })
+          if (res.ok) {
+            const created = await res.json()
+            if (created.temporaryPassword) {
+              setCreatedCreds({ email: created.email, password: created.temporaryPassword })
+            }
+          }
+        } catch { /* non-fatal — the optimistic row above still shows */ }
+      }
     } else if (editing) {
       setUsers(prev => prev.map(u => u.id === editing.id ? { ...u, ...form } : u))
       const token = localStorage.getItem('hg_token')
@@ -199,7 +221,7 @@ export default function FullCRUDUsers() {
     all: users.length, promoter: users.filter(u=>u.role==='promoter').length,
     client: users.filter(u=>u.role==='client').length, pending: users.filter(u=>u.status==='pending').length,
     active: users.filter(u=>u.status==='active').length, api: users.filter(u=>u.source==='api').length,
-    local: users.filter(u=>u.source==='local').length,
+    local: users.filter(u=>u.source==='local').length, supervisor: users.filter(u=>u.role==='supervisor').length,
   }
 
   const inputStyle: React.CSSProperties = { width:'100%', background:BB2, border:`1px solid ${BB}`, padding:'12px 16px', fontFamily:FD, fontSize:13, color:W, outline:'none', borderRadius:3 }
@@ -252,7 +274,7 @@ export default function FullCRUDUsers() {
               onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
           </div>
           <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-            {(['all','promoter','client','admin'] as const).map(r => (
+            {(['all','promoter','client','supervisor','admin'] as const).map(r => (
               <FilterBtn key={r} label={r==='all'?`All (${counts.all})`:r} active={roleF===r} color={r==='all'?GL:ROLE_COLOR[r]} onClick={()=>setRoleF(r)} />
             ))}
           </div>
@@ -419,12 +441,22 @@ export default function FullCRUDUsers() {
                         onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
                     </div>
                   ))}
+                  {modal === 'create' && (
+                    <div>
+                      <label style={labelStyle}>Password (optional)</label>
+                      <input type="text" placeholder="Leave blank to auto-generate" value={createPassword} onChange={e=>setCreatePassword(e.target.value)}
+                        style={inputStyle}
+                        onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
+                      <p style={{ fontSize:10.5, color:W35, fontFamily:FD, marginTop:6 }}>If left blank, a temporary password is generated and shown to you once — pass it on to the new user.</p>
+                    </div>
+                  )}
                   <div className="hg-form-grid-2" style={{ gap:16 }}>
                     <div>
                       <label style={labelStyle}>Role</label>
                       <select value={form.role} onChange={e=>F('role',e.target.value)} style={{ ...inputStyle, background:D3, cursor:'pointer' }}>
                         <option value="promoter">Promoter</option>
                         <option value="client">Client</option>
+                        <option value="supervisor">Supervisor</option>
                         <option value="admin">Admin</option>
                       </select>
                     </div>
@@ -441,6 +473,28 @@ export default function FullCRUDUsers() {
                   <Btn onClick={save}>{modal==='create'?'Create User':'Save Changes'}</Btn>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── NEW-USER CREDENTIALS REVEAL ── */}
+        {createdCreds && (
+          <div className="hg-modal-overlay" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:320, padding:24 }}
+            onClick={e=>e.target===e.currentTarget&&setCreatedCreds(null)}>
+            <div style={{ background:D2, border:`1px solid ${BB}`, width:'100%', maxWidth:420, position:'relative', borderRadius:4, padding:32 }}>
+              <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${GL},${G5})`, borderRadius:'4px 4px 0 0' }} />
+              <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>User Created</div>
+              <h2 style={{ fontFamily:FD, fontSize:20, fontWeight:700, color:W, marginBottom:14 }}>Share these credentials</h2>
+              <p style={{ fontSize:12.5, color:W35, fontFamily:FD, marginBottom:18, lineHeight:1.5 }}>
+                This temporary password is shown once and isn't stored anywhere retrievable — copy it now and send it to the new user securely.
+              </p>
+              <div style={{ background:D3, border:`1px solid ${BB}`, borderRadius:3, padding:'14px 16px', marginBottom:20 }}>
+                <div style={{ fontSize:10, color:W35, fontFamily:FD, marginBottom:4 }}>EMAIL</div>
+                <div style={{ fontSize:14, color:W, fontFamily:MONO, marginBottom:12 }}>{createdCreds.email}</div>
+                <div style={{ fontSize:10, color:W35, fontFamily:FD, marginBottom:4 }}>TEMPORARY PASSWORD</div>
+                <div style={{ fontSize:14, color:GL, fontFamily:MONO }}>{createdCreds.password}</div>
+              </div>
+              <Btn onClick={()=>setCreatedCreds(null)}>Done</Btn>
             </div>
           </div>
         )}

@@ -36,7 +36,50 @@ export interface ClientActivationSummary {
   }>
 }
 
+export type CampaignOutcome = 'successful' | 'failed' | 'pending'
+
+export interface CampaignInsights {
+  totalActivations: number
+  successful: number
+  failed: number
+  pending: number
+  successRate: number
+  activations: Array<{
+    jobId: string
+    title: string
+    brand: string
+    client: string
+    date: string
+    status: string
+    outcome: CampaignOutcome
+    unitsServed: number
+    conversions: number
+  }>
+}
+
 export const activationReportsService = {
+  // Admin: all activations, or scoped to one client via ?clientId=
+  // Business: automatically scoped to their own activations.
+  getInsights: (opts?: { clientId?: string; dateFrom?: string; dateTo?: string }): Promise<CampaignInsights> => {
+    const qs = new URLSearchParams()
+    if (opts?.clientId) qs.set('clientId', opts.clientId)
+    if (opts?.dateFrom) qs.set('dateFrom', opts.dateFrom)
+    if (opts?.dateTo) qs.set('dateTo', opts.dateTo)
+    const suffix = qs.toString() ? `?${qs.toString()}` : ''
+    return apiFetch<CampaignInsights>(`/activation-reports/insights${suffix}`)
+  },
+
+  // Business: self-serve version of the admin client report, scoped to their
+  // own jobs — number of activations, serves/conversions, insights, feedback
+  // and the 3-shot image set per activation.
+  getMyClientReport: (dateFrom?: string, dateTo?: string): Promise<ClientActivationSummary> => {
+    const qs = new URLSearchParams()
+    if (dateFrom) qs.set('dateFrom', dateFrom)
+    if (dateTo) qs.set('dateTo', dateTo)
+    const suffix = qs.toString() ? `?${qs.toString()}` : ''
+    return apiFetch<ClientActivationSummary>(`/activation-reports/my-client-report${suffix}`)
+  },
+
   // Promoter/supervisor: fetch the current report for a job (404 → none yet)
   getForJob: (jobId: string): Promise<ActivationReport> =>
     apiFetch<ActivationReport>(`/activation-reports/job/${jobId}`),

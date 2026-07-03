@@ -7,9 +7,10 @@ interface Props {
 
 // Maps role -> their home dashboard (used for wrong-role redirects)
 const ROLE_HOME: Record<string, string> = {
-  promoter: '/promoter/',
-  business: '/business/dashboard',
-  admin:    '/admin',
+  promoter:   '/promoter/',
+  business:   '/business/dashboard',
+  admin:      '/admin',
+  supervisor: '/supervisor/',
 }
 
 export default function ProtectedRoute({ allowedRoles }: Props) {

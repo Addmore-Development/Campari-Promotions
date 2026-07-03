@@ -304,7 +304,7 @@ function SidebarContent({
         <div style={{ overflow: 'hidden', minWidth: 0 }}>
           <div style={{ height: 2, background: `linear-gradient(90deg, ${GL}, ${G}, ${G2})`, marginBottom: 10, borderRadius: 1, transition: 'opacity 0.18s', opacity: collapsed && !isMobile ? 0 : 1 }} />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, overflow: 'hidden' }}>
-            <span style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, color: GL, whiteSpace: 'nowrap', letterSpacing: '0.02em', flexShrink: 0 }}>HG</span>
+            <span style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, color: GL, whiteSpace: 'nowrap', letterSpacing: '0.02em', flexShrink: 0 }}>CP</span>
             <span className="hg-logo-text" style={{
               fontFamily: FD, fontSize: 13, fontWeight: 500, color: W,
               opacity: collapsed && !isMobile ? 0 : 1,
