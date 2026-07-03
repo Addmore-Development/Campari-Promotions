@@ -79,7 +79,13 @@ const ShotSlot: React.FC<ShotSlotProps> = ({ shotKey, label, hint, previewUrl, o
   )
 }
 
-export const SubmitActivationReport: React.FC = () => {
+interface Props {
+  // Where to send the user after a successful submit. Defaults to the
+  // promoter jobs tab; the supervisor portal passes its own campaigns tab.
+  redirectPath?: string
+}
+
+export const SubmitActivationReport: React.FC<Props> = ({ redirectPath = '/promoter/?tab=jobs' }) => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const jobId = searchParams.get('jobId') || ''
@@ -144,7 +150,7 @@ export const SubmitActivationReport: React.FC = () => {
         setError(result.error)
       } else {
         showToast(status === 'submitted' ? '✓ Activation report submitted' : '✓ Draft saved', 'success')
-        if (status === 'submitted') navigate('/promoter/?tab=jobs')
+        if (status === 'submitted') navigate(redirectPath)
       }
     } catch (err: any) {
       setError(err?.message || 'Failed to save the report. Please try again.')

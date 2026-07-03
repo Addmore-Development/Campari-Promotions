@@ -61,6 +61,10 @@ export default function BusinessLayout() {
   const [docTax,       setDocTax]      = useState<File | null>(null)
   const [docBank,      setDocBank]     = useState<File | null>(null)
   const [docUploading, setDocUploading]= useState(false)
+  const [creditModalOpen, setCreditModalOpen] = useState(false)
+  const [topUpAmount,     setTopUpAmount]     = useState('')
+  const [topUpBusy,       setTopUpBusy]       = useState(false)
+  const [topUpMsg,        setTopUpMsg]        = useState('')
 
   const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
   function authHdr() {
@@ -82,6 +86,20 @@ export default function BusinessLayout() {
         .catch(() => {})
     }
   }, [navigate])
+
+  // Refresh credit balance whenever a job is posted elsewhere in the portal
+  useEffect(() => {
+    const refreshCredit = () => {
+      const token = localStorage.getItem('hg_token')
+      if (!token) return
+      fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) setProfile((prev: any) => ({ ...prev, creditBalance: data.creditBalance })) })
+        .catch(() => {})
+    }
+    window.addEventListener('hg_credit_updated', refreshCredit)
+    return () => window.removeEventListener('hg_credit_updated', refreshCredit)
+  }, [])
 
   const handleUploadDocuments = async () => {
     if (!docCipc && !docTax && !docBank) return
@@ -154,6 +172,33 @@ export default function BusinessLayout() {
       }
     } catch { setSaveMsg('Network error') }
     setSaving(false)
+  }
+
+  const fmtZAR = (n: number) => `R${(n || 0).toLocaleString('en-ZA')}`
+
+  const handleTopUp = async () => {
+    const amount = parseInt(topUpAmount, 10)
+    if (!amount || amount <= 0) { setTopUpMsg('Enter a valid amount'); return }
+    setTopUpBusy(true); setTopUpMsg('')
+    try {
+      const res = await fetch(`${API}/users/me/credit/topup`, {
+        method: 'POST',
+        headers: authHdr() as any,
+        body: JSON.stringify({ amount }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setProfile((prev: any) => ({ ...prev, creditBalance: data.creditBalance }))
+        setTopUpMsg(`Added ${fmtZAR(amount)} — new balance ${fmtZAR(data.creditBalance)}`)
+        setTopUpAmount('')
+        setTimeout(() => { setCreditModalOpen(false); setTopUpMsg('') }, 1800)
+      } else {
+        setTopUpMsg(data.error || 'Failed to add credit')
+      }
+    } catch {
+      setTopUpMsg('Network error')
+    }
+    setTopUpBusy(false)
   }
 
   const handleLogout = () => {
@@ -373,6 +418,42 @@ export default function BusinessLayout() {
         </div>
       )}
 
+      {/* CREDIT TOP-UP MODAL */}
+      {creditModalOpen && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.90)', backdropFilter:'blur(14px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
+          onClick={e=>e.target===e.currentTarget&&setCreditModalOpen(false)}>
+          <div style={{ background:'#030302', border:`1px solid ${BB}`, width:'100%', maxWidth:400, position:'relative', borderRadius:4 }}>
+            <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
+            <button onClick={()=>setCreditModalOpen(false)} style={{ position:'absolute', top:14, right:18, background:'none', border:'none', cursor:'pointer', color:W4, fontSize:18 }}>✕</button>
+            <div style={{ padding:'32px' }}>
+              <div style={{ fontSize:9, letterSpacing:'0.32em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD, marginBottom:6 }}>Job Posting Credit</div>
+              <h2 style={{ fontFamily:FD, fontSize:20, fontWeight:700, color:W, marginBottom:4 }}>Current balance: {fmtZAR(profile?.creditBalance ?? 0)}</h2>
+              <p style={{ fontSize:12, color:W4, fontFamily:FB, marginBottom:22 }}>Every job you post draws down this balance automatically. Top up below.</p>
+              <label style={{ display:'block', fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:W4, marginBottom:7, fontFamily:FD }}>Amount (ZAR)</label>
+              <input type="number" min={1} placeholder="e.g. 200000" value={topUpAmount} onChange={e=>setTopUpAmount(e.target.value)}
+                style={{ width:'100%', background:'rgba(170,160,135,0.04)', border:'1px solid rgba(170,160,135,0.16)', padding:'12px 14px', color:W, fontFamily:FB, fontSize:14, outline:'none', borderRadius:3, marginBottom:16 }}
+                onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor='rgba(170,160,135,0.16)'} />
+              <div style={{ display:'flex', gap:8, marginBottom:18 }}>
+                {[50000, 100000, 200000, 500000].map(v => (
+                  <button key={v} onClick={()=>setTopUpAmount(String(v))} style={{ flex:1, padding:'8px 4px', background:'rgba(201,191,166,0.08)', border:`1px solid ${BB}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3 }}>
+                    R{(v/1000)}k
+                  </button>
+                ))}
+              </div>
+              {topUpMsg && (
+                <div style={{ padding:'10px 14px', background:'rgba(127,121,105,0.12)', border:'1px solid rgba(127,121,105,0.4)', borderRadius:3, fontSize:12, color:GL, fontFamily:FD, marginBottom:16 }}>
+                  {topUpMsg}
+                </div>
+              )}
+              <button onClick={handleTopUp} disabled={topUpBusy}
+                style={{ width:'100%', padding:'13px', background:topUpBusy?'rgba(255,255,255,0.05)':`linear-gradient(135deg,${GL},${GD})`, border:'none', color:topUpBusy?W4:BLK, fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', cursor:topUpBusy?'wait':'pointer', borderRadius:3 }}>
+                {topUpBusy?'Adding…':'Add Credit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MAIN */}
       <main style={{ flex:1, overflow:'auto', minWidth:0, background:BLK }}>
         {/* Top bar */}
@@ -384,6 +465,13 @@ export default function BusinessLayout() {
             </p>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+            <button onClick={()=>setCreditModalOpen(true)} title="Job postings are funded from this balance"
+              style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(201,191,166,0.08)', border:`1px solid ${GL}55`, cursor:'pointer', padding:'6px 12px 6px 14px', borderRadius:20, transition:'all 0.2s' }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor=GL} onMouseLeave={e=>e.currentTarget.style.borderColor=`${GL}55`}>
+              <span style={{ fontFamily:FB, fontSize:9, fontWeight:600, letterSpacing:'0.12em', textTransform:'uppercase', color:W4 }}>Credit</span>
+              <span style={{ fontFamily:FD, fontSize:13, fontWeight:700, color:GL }}>{fmtZAR(profile?.creditBalance ?? 0)}</span>
+              <span style={{ display:'flex', alignItems:'center', justifyContent:'center', width:16, height:16, borderRadius:'50%', background:GL, color:BLK, fontSize:11, fontWeight:700, lineHeight:1 }}>+</span>
+            </button>
             <button onClick={()=>navigate('/')} style={{ background:'none', border:`1px solid ${BB}`, cursor:'pointer', fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.16em', textTransform:'uppercase', color:W4, padding:'6px 14px', transition:'all 0.2s' }}
               onMouseEnter={e=>{e.currentTarget.style.borderColor=GL;e.currentTarget.style.color=GL}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor=BB;e.currentTarget.style.color=W4}}>

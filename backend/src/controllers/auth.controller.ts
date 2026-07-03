@@ -98,6 +98,30 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       console.error('[Auth] auditLog failed (non-fatal):', auditErr);
     }
 
+    // Keep the CRM Client table in sync so this business shows up immediately
+    // in admin's PO/budget-tracking and activation-report client dropdowns —
+    // non-fatal, admin.getAllClients also self-heals this as a backstop.
+    if (isBusiness) {
+      try {
+        const alreadyLinked = await prisma.client.findUnique({ where: { email: user.email } });
+        if (!alreadyLinked) {
+          await prisma.client.create({
+            data: {
+              name:     user.fullName,
+              contact:  user.contactName || user.fullName,
+              email:    user.email,
+              phone:    user.phone || 'Not provided',
+              city:     user.city || 'Not provided',
+              industry: user.industry || 'General',
+              status:   'active',
+            },
+          });
+        }
+      } catch (clientSyncErr) {
+        console.error('[Auth] Client sync failed (non-fatal):', clientSyncErr);
+      }
+    }
+
     // Return token so frontend can immediately upload documents
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -229,6 +253,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         consentPopia:     true,
         createdAt:        true,
         rejectionReason:  true,
+        creditBalance:    true,
         // Business fields
         contactName:  true,
         vatNumber:    true,

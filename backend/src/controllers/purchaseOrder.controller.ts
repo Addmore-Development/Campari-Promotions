@@ -152,20 +152,32 @@ export const getPurchaseOrderById = async (req: AuthRequest, res: Response): Pro
   }
 };
 
+// System-generated PO number: PO-YYYYMM-XXXX, sequential within the month.
+async function generatePoNumber(): Promise<string> {
+  const now = new Date();
+  const prefix = `PO-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}-`;
+  const countThisMonth = await prisma.purchaseOrder.count({
+    where: { poNumber: { startsWith: prefix } },
+  });
+  return `${prefix}${String(countThisMonth + 1).padStart(4, '0')}`;
+}
+
 export const createPurchaseOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { clientId, poNumber, amount, periodStart, periodEnd, description } = req.body;
-    if (!clientId || !poNumber || !amount || !periodStart || !periodEnd) {
-      res.status(400).json({ error: 'clientId, poNumber, amount, periodStart and periodEnd are required' });
+    if (!clientId || !amount || !periodStart || !periodEnd) {
+      res.status(400).json({ error: 'clientId, amount, periodStart and periodEnd are required' });
       return;
     }
     const client = await prisma.client.findUnique({ where: { id: clientId } });
     if (!client) { res.status(404).json({ error: 'Client not found' }); return; }
 
+    const resolvedPoNumber = poNumber?.trim() ? poNumber.trim() : await generatePoNumber();
+
     const po = await prisma.purchaseOrder.create({
       data: {
         clientId,
-        poNumber,
+        poNumber: resolvedPoNumber,
         amount: parseInt(amount, 10),
         periodStart: new Date(periodStart),
         periodEnd: new Date(periodEnd),

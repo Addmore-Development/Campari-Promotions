@@ -601,12 +601,157 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [form, setForm] = useState({
+    title: '', brand: '', venue: '', address: '', city: '',
+    date: '', startTime: '09:00', endTime: '17:00',
+    hourlyRate: '', totalSlots: '1',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
+
+  const F = (key: keyof typeof form, val: string) => setForm(p => ({ ...p, [key]: val }))
+
+  const estHours = () => {
+    const [sh, sm] = form.startTime.split(':').map(Number)
+    const [eh, em] = form.endTime.split(':').map(Number)
+    const h = (eh + em / 60) - (sh + sm / 60)
+    return h > 0 ? h : 8
+  }
+  const rate  = parseInt(form.hourlyRate, 10) || 0
+  const slots = parseInt(form.totalSlots, 10) || 1
+  const estimatedCost = Math.round(rate * slots * estHours())
+
+  const submit = async () => {
+    setError('')
+    if (!form.title || !form.brand || !form.date || !rate || !slots) {
+      setError('Title, brand, date, hourly rate and slots are required.')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch(`${API}/jobs`, {
+        method: 'POST',
+        headers: authHdr() as any,
+        body: JSON.stringify({
+          title: form.title,
+          client: form.brand,
+          brand: form.brand,
+          venue: form.venue,
+          address: form.address || form.venue,
+          city: form.city,
+          date: form.date,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          hourlyRate: rate,
+          totalSlots: slots,
+          filters: {},
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        window.dispatchEvent(new Event('hg_credit_updated'))
+        onCreated()
+      } else if (res.status === 402) {
+        setError(data.error || `Insufficient credit — this job costs R${estimatedCost.toLocaleString('en-ZA')}.`)
+      } else {
+        setError(data.error || 'Failed to post job')
+      }
+    } catch {
+      setError('Network error')
+    }
+    setSaving(false)
+  }
+
+  const inputStyle = { width: '100%', background: 'rgba(170,160,135,0.04)', border: `1px solid ${BB}`, padding: '11px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 3 }
+  const labelStyle = { display: 'block', fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: W4, marginBottom: 7, fontFamily: FD }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.90)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: '#030302', border: `1px solid ${BB}`, width: '100%', maxWidth: 560, maxHeight: '92vh', overflowY: 'auto', position: 'relative', borderRadius: 4 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 18 }}>✕</button>
+        <div style={{ padding: 32 }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD, marginBottom: 6 }}>New Campaign</div>
+          <h2 style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 20 }}>Post a Job</h2>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle}>Job Title</label>
+              <input style={inputStyle} placeholder="Weekend Retail Activation" value={form.title} onChange={e => F('title', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Brand / Campaign</label>
+              <input style={inputStyle} placeholder="Espolon Tequila" value={form.brand} onChange={e => F('brand', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>City</label>
+              <input style={inputStyle} placeholder="Johannesburg" value={form.city} onChange={e => F('city', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Venue</label>
+              <input style={inputStyle} placeholder="Sandton Checkers" value={form.venue} onChange={e => F('venue', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Address</label>
+              <input style={inputStyle} placeholder="Street address" value={form.address} onChange={e => F('address', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Date</label>
+              <input type="date" style={inputStyle} value={form.date} onChange={e => F('date', e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>Start</label>
+                <input type="time" style={inputStyle} value={form.startTime} onChange={e => F('startTime', e.target.value)} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>End</label>
+                <input type="time" style={inputStyle} value={form.endTime} onChange={e => F('endTime', e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Hourly Rate (R)</label>
+              <input type="number" min={0} style={inputStyle} placeholder="150" value={form.hourlyRate} onChange={e => F('hourlyRate', e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Promoter Slots</label>
+              <input type="number" min={1} style={inputStyle} placeholder="4" value={form.totalSlots} onChange={e => F('totalSlots', e.target.value)} />
+            </div>
+          </div>
+
+          <div style={{ padding: '12px 14px', background: 'rgba(201,191,166,0.08)', border: `1px solid ${BB}`, borderRadius: 3, marginBottom: 16 }}>
+            <span style={{ fontFamily: FB, fontSize: 11, color: W4 }}>Estimated cost, deducted from your credit balance: </span>
+            <span style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: GL }}>R{estimatedCost.toLocaleString('en-ZA')}</span>
+          </div>
+
+          {error && (
+            <div style={{ padding: '10px 14px', background: 'rgba(112,106,90,0.2)', border: '1px solid rgba(112,106,90,0.5)', borderRadius: 3, fontSize: 12, color: '#F0F0F0', fontFamily: FD, marginBottom: 16 }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${BB}`, color: W4, fontFamily: FD, fontSize: 11, cursor: 'pointer', borderRadius: 3 }}>Cancel</button>
+            <button onClick={submit} disabled={saving}
+              style={{ flex: 2, padding: '12px', background: saving ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: saving ? W4 : BLK, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', borderRadius: 3 }}>
+              {saving ? 'Posting…' : 'Post Job & Deduct Credit'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function BusinessJobs() {
   const [jobs,     setJobs]     = useState<ApiJob[]>([])
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState<'all' | 'OPEN' | 'FILLED' | 'COMPLETED' | 'CANCELLED'>('all')
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<ApiJob | null>(null)
+  const [showNewJob, setShowNewJob] = useState(false)
 
   const loadJobs = useCallback(async () => {
     setLoading(true)
@@ -681,11 +826,15 @@ export default function BusinessJobs() {
             </button>
           ))}
         </div>
-        <div style={{ marginLeft: 'auto', position: 'relative' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
           <input placeholder="Search jobs…" value={search} onChange={e => setSearch(e.target.value)}
             style={{ background: BLK2, border: `1px solid ${BB}`, padding: '7px 14px', color: W, fontFamily: FB, fontSize: 11, outline: 'none', borderRadius: 2, width: 200 }}
             onFocus={e => e.currentTarget.style.borderColor = GL}
             onBlur={e => e.currentTarget.style.borderColor = BB} />
+          <button onClick={() => setShowNewJob(true)}
+            style={{ padding: '8px 16px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2 }}>
+            + Post a Job
+          </button>
         </div>
       </div>
 
@@ -712,6 +861,10 @@ export default function BusinessJobs() {
 
       {selected && (
         <JobDetailPanel job={selected} onClose={() => { setSelected(null); loadJobs() }} onRefresh={loadJobs} />
+      )}
+
+      {showNewJob && (
+        <NewJobModal onClose={() => setShowNewJob(false)} onCreated={() => { setShowNewJob(false); loadJobs() }} />
       )}
     </div>
   )

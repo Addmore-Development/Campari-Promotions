@@ -93,15 +93,16 @@ export default function BudgetTracking() {
 
   const createPO = async () => {
     setPoError('')
-    if (!poForm.clientId || !poForm.poNumber || !poForm.amount || !poForm.periodStart || !poForm.periodEnd) {
-      setPoError('Client, PO number, amount and period dates are required.')
+    if (!poForm.clientId || !poForm.amount || !poForm.periodStart || !poForm.periodEnd) {
+      setPoError('Client, amount and period dates are required.')
       return
     }
     setPoSaving(true)
     try {
       await purchaseOrdersService.create({
         clientId: poForm.clientId,
-        poNumber: poForm.poNumber,
+        // Leave blank to let the server auto-generate a PO number (PO-YYYYMM-XXXX)
+        poNumber: poForm.poNumber || undefined,
         amount: parseInt(poForm.amount, 10),
         periodStart: poForm.periodStart,
         periodEnd: poForm.periodEnd,
@@ -313,7 +314,7 @@ export default function BudgetTracking() {
                 <option value="">Select client…</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-              <input placeholder="PO Number (client reference)" value={poForm.poNumber} onChange={e => setPoForm(f => ({ ...f, poNumber: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="PO Number (leave blank to auto-generate)" value={poForm.poNumber} onChange={e => setPoForm(f => ({ ...f, poNumber: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
               <input placeholder="Amount (R)" type="number" value={poForm.amount} onChange={e => setPoForm(f => ({ ...f, amount: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
               <div style={{ display: 'flex', gap: 8 }}>
                 <input type="date" value={poForm.periodStart} onChange={e => setPoForm(f => ({ ...f, periodStart: e.target.value }))} style={{ flex: 1, background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />

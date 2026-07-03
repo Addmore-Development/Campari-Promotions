@@ -127,6 +127,13 @@ export default function FullCRUDUsers() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [createPassword, setCreatePassword] = useState('')
   const [createdCreds,   setCreatedCreds]   = useState<{ email: string; password: string } | null>(null)
+  const [businesses,     setBusinesses]     = useState<{ id: string; fullName: string }[]>([])
+  const [supBusinessId,  setSupBusinessId]  = useState('')
+  const [supWorkField,   setSupWorkField]   = useState('')
+
+  useEffect(() => {
+    fetch(`${API_URL}/auth/businesses`).then(r => r.ok ? r.json() : []).then(setBusinesses).catch(() => {})
+  }, [])
 
   // mobile styles removed — using inline styles throughout
 
@@ -155,13 +162,17 @@ export default function FullCRUDUsers() {
       .finally(() => setSyncing(false))
   }, [])
 
-  const openCreate = () => { setForm(EMPTY); setEditing(null); setCreatePassword(''); setModal('create') }
+  const openCreate = () => { setForm(EMPTY); setEditing(null); setCreatePassword(''); setSupBusinessId(''); setSupWorkField(''); setModal('create') }
   const openEdit   = (u: User) => { setForm({ name:u.name, email:u.email, phone:u.phone, role:u.role, status:u.status, city:u.city, joined:u.joined }); setEditing(u); setModal('edit') }
   const openView   = (u: User) => { setEditing(u); setModal('view') }
   const closeModal = () => { setModal(null); setEditing(null) }
 
   const save = async () => {
     if (modal === 'create') {
+      if (form.role === 'supervisor' && !supBusinessId) {
+        alert('Please select which business this supervisor works under.')
+        return
+      }
       const newUser: User = { ...form, id:`U${Date.now()}`, jobs:0, payouts:0, source:'mock' }
       setUsers(prev => [newUser, ...prev])
       const token = localStorage.getItem('hg_token')
@@ -173,6 +184,7 @@ export default function FullCRUDUsers() {
             body: JSON.stringify({
               fullName: form.name, email: form.email, phone: form.phone, city: form.city,
               role: form.role.toUpperCase(), password: createPassword || undefined,
+              ...(form.role === 'supervisor' && { businessId: supBusinessId, workField: supWorkField || undefined }),
             }),
           })
           if (res.ok) {
@@ -470,6 +482,23 @@ export default function FullCRUDUsers() {
                       </select>
                     </div>
                   </div>
+                  {modal === 'create' && form.role === 'supervisor' && (
+                    <div className="hg-form-grid-2" style={{ gap:16 }}>
+                      <div>
+                        <label style={labelStyle}>Business (reports to)</label>
+                        <select value={supBusinessId} onChange={e=>setSupBusinessId(e.target.value)} style={{ ...inputStyle, background:D3, cursor:'pointer' }}>
+                          <option value="">Select business…</option>
+                          {businesses.map(b => <option key={b.id} value={b.id}>{b.fullName}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Work Field</label>
+                        <input type="text" placeholder="e.g. In-store activations" value={supWorkField} onChange={e=>setSupWorkField(e.target.value)}
+                          style={inputStyle}
+                          onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
+                      </div>
+                    </div>
+                  )}
                   <Btn onClick={save}>{modal==='create'?'Create User':'Save Changes'}</Btn>
                 </div>
               </div>

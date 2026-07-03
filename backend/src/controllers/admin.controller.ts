@@ -128,8 +128,41 @@ export const updateReliabilityScore = async (req: AuthRequest, res: Response): P
 };
 
 
+// Registered BUSINESS accounts are the real source of truth for "who is a
+// client", but PurchaseOrder/ActivationReport client-report features are
+// built against the separate CRM `Client` table. Before listing clients we
+// self-heal: any BUSINESS user without a matching Client row (matched by
+// email) gets one created automatically, so demo-seeded and newly-registered
+// businesses always show up in admin dropdowns without a manual sync step.
+async function syncBusinessUsersToClients(): Promise<void> {
+  const businesses = await prisma.user.findMany({
+    where: { role: 'BUSINESS' },
+    select: { id: true, fullName: true, contactName: true, email: true, phone: true, city: true, industry: true, createdAt: true },
+  });
+  if (businesses.length === 0) return;
+
+  const existing = await prisma.client.findMany({ select: { email: true } });
+  const existingEmails = new Set(existing.map(c => c.email.toLowerCase()));
+
+  const missing = businesses.filter(b => !existingEmails.has(b.email.toLowerCase()));
+  if (missing.length === 0) return;
+
+  await Promise.all(missing.map(b => prisma.client.create({
+    data: {
+      name:     b.fullName || b.email,
+      contact:  b.contactName || b.fullName || b.email,
+      email:    b.email,
+      phone:    b.phone || 'Not provided',
+      city:     b.city || 'Not provided',
+      industry: b.industry || 'General',
+      status:   'active',
+    },
+  }).catch(() => null)));
+}
+
 export const getAllClients = async (_req: Request, res: Response): Promise<void> => {
   try {
+    await syncBusinessUsersToClients();
     const clients = await prisma.client.findMany({ orderBy: { registeredDate: 'desc' } });
     res.json(clients);
   } catch (err) {

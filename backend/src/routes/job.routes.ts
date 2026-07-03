@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getAllJobs, getJobById, createJob, updateJob, deleteJob, getMyJobs, getBusinessJobs, getSupervisorJobs } from "../controllers/job.controller";
-import { protect, adminOnly, adminOrSupervisor } from "../middleware/auth";
+import { protect, adminOnly, adminOrBusiness, adminOrSupervisor } from "../middleware/auth";
 
 // Optional auth middleware — attaches req.user if token present, but does NOT reject if missing.
 // This lets the public landing page fetch all open jobs without a token,
@@ -31,7 +31,7 @@ router.get("/my",      protect, getMyJobs);
 router.get("/business", protect, getBusinessJobs);
 router.get("/supervisor", protect, getSupervisorJobs);
 router.get("/:id",     optionalAuth, getJobById);
-router.post("/",       protect, adminOnly, createJob);
+router.post("/",       protect, adminOrBusiness, createJob);
 router.put("/:id",     protect, adminOrSupervisor, updateJob);
 router.delete("/:id",  protect, adminOnly, deleteJob);
 

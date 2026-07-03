@@ -10,6 +10,7 @@ import {
   adminCreateUser,
   deleteUser,
   getEligiblePromoters,
+  topUpCredit,
 } from '../controllers/user.controller';
 import { protect, adminOnly, adminOrBusiness, adminOrSupervisor } from '../middleware/auth';
 
@@ -19,6 +20,7 @@ const router = Router();
 router.get('/me',            protect, getUserById);
 router.put('/me/profile',    protect, updateMyProfile);
 router.post('/me/documents', protect, documentUpload, uploadDocuments);
+router.post('/me/credit/topup', protect, topUpCredit);
 
 // FIX: register-documents route used by RegisterPage right after account creation
 router.post('/register-documents/:id', protect, documentUpload, uploadDocumentsByUserId);

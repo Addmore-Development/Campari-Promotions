@@ -3,7 +3,8 @@ import type { PurchaseOrder, CommitmentEntry, POStatus, CEStatus, MyBudgetSummar
 
 export interface CreatePOPayload {
   clientId: string
-  poNumber: string
+  // Optional — server auto-generates a PO-YYYYMM-XXXX number when omitted
+  poNumber?: string
   amount: number
   periodStart: string
   periodEnd: string

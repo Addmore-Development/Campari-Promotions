@@ -55,7 +55,7 @@ function extractFileUrls(files: { [fieldname: string]: Express.Multer.File[] }):
 // where there's no self-registration flow) ─────────────────────────────────
 export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { fullName, email, phone, city, role, password } = req.body;
+    const { fullName, email, phone, city, role, password, workField, businessId } = req.body;
 
     if (!fullName || !email || !role) {
       res.status(400).json({ error: 'fullName, email and role are required' });
@@ -66,6 +66,21 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
     if (!['PROMOTER', 'BUSINESS', 'ADMIN', 'SUPERVISOR'].includes(normalizedRole)) {
       res.status(400).json({ error: 'Invalid role' });
       return;
+    }
+
+    // Supervisors must be linked to the business they work under.
+    let resolvedBusinessId: string | null = null;
+    if (normalizedRole === 'SUPERVISOR') {
+      if (!businessId) {
+        res.status(400).json({ error: 'businessId is required when creating a supervisor' });
+        return;
+      }
+      const biz = await prisma.user.findUnique({ where: { id: businessId }, select: { id: true, role: true } });
+      if (!biz || biz.role !== 'BUSINESS') {
+        res.status(400).json({ error: 'businessId must belong to a BUSINESS user' });
+        return;
+      }
+      resolvedBusinessId = biz.id;
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -91,6 +106,8 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         city: city || null,
         status: 'approved',
         onboardingStatus: 'approved',
+        workField:  normalizedRole === 'SUPERVISOR' ? (workField || null) : null,
+        businessId: normalizedRole === 'SUPERVISOR' ? resolvedBusinessId : null,
       },
     });
 
@@ -99,7 +116,7 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
       action: 'ADMIN_CREATE_USER',
       entity: 'User',
       entityId: user.id,
-      meta: { role: normalizedRole },
+      meta: { role: normalizedRole, businessId: resolvedBusinessId },
     });
 
     res.status(201).json({
@@ -183,7 +200,7 @@ export const getUserById = async (req: AuthRequest, res: Response): Promise<void
         rejectionReason: true, consentPopia: true, vatNumber: true,
         industry: true, website: true, contactName: true,
         cipcDocUrl: true, taxPinUrl: true, bizBankProofUrl: true,
-        address: true,
+        address: true, creditBalance: true,
       },
     });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
@@ -197,6 +214,7 @@ export const getUserById = async (req: AuthRequest, res: Response): Promise<void
       delete (user as any).bankName;
       delete (user as any).accountNumber;
       delete (user as any).branchCode;
+      delete (user as any).creditBalance;
     }
 
     res.json(user);
@@ -404,6 +422,44 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
   } catch (err) {
     console.error('[User] getChatableUsers error:', err);
     res.status(500).json({ error: 'Failed to fetch chattable users' });
+  }
+};
+
+// ── Business: top up prepaid credit balance ─────────────────────────────────
+// Simple direct top-up (no live payment gateway wired in yet) — adds the
+// given amount (in whole Rands) to the business's credit balance, which is
+// then drawn down automatically whenever they post a job.
+export const topUpCredit = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'BUSINESS') {
+      res.status(403).json({ error: 'Only business accounts have a credit balance' });
+      return;
+    }
+
+    const amount = parseInt(req.body?.amount, 10);
+    if (!amount || amount <= 0) {
+      res.status(400).json({ error: 'A positive top-up amount is required' });
+      return;
+    }
+    if (amount > 10_000_000) {
+      res.status(400).json({ error: 'Top-up amount exceeds the allowed limit' });
+      return;
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { creditBalance: { increment: amount } },
+      select: { id: true, creditBalance: true },
+    });
+
+    try {
+      await auditLog({ userId: req.user.id, action: 'CREDIT_TOPUP', entity: 'User', entityId: req.user.id, meta: { amount } });
+    } catch { /* non-fatal */ }
+
+    res.json({ message: 'Credit added', creditBalance: user.creditBalance });
+  } catch (err) {
+    console.error('[User] topUpCredit error:', err);
+    res.status(500).json({ error: 'Failed to top up credit' });
   }
 };
 

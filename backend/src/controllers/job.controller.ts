@@ -106,6 +106,47 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
+    // ── SUPERVISOR: see every campaign/job across all clients (read-only —
+    //    no hourly rate, mirrors the admin view minus financials) ───────────
+    if (userRole === 'SUPERVISOR') {
+      const where: any = {};
+      if (status && status !== 'all') {
+        where.status = (status as string).toUpperCase();
+      }
+      const jobs = await prisma.job.findMany({
+        where,
+        include: {
+          supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
+          shifts: {
+            include: {
+              promoter: {
+                select: { id: true, fullName: true, phone: true, email: true, profilePhotoUrl: true, headshotUrl: true },
+              },
+            },
+          },
+          applications: {
+            include: {
+              promoter: {
+                select: {
+                  id: true, fullName: true, profilePhotoUrl: true, headshotUrl: true,
+                  fullBodyPhotoUrl: true, city: true, reliabilityScore: true, height: true,
+                  gender: true, clothingSize: true, shoeSize: true, phone: true, email: true,
+                  province: true, cvUrl: true, status: true, onboardingStatus: true, createdAt: true,
+                },
+              },
+            },
+          },
+          activationReport: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Supervisors don't see the financial side — strip pay rate from the response.
+      const sanitised = jobs.map(({ hourlyRate, ...rest }) => rest);
+      res.json(sanitised);
+      return;
+    }
+
     // ── PROMOTER: open/active jobs only ──────────────────────────────────────
     if (userRole === 'PROMOTER') {
       const where: any = {};
@@ -221,6 +262,18 @@ export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promis
   }
 };
 
+// Estimate shift length in hours from "HH:MM" strings, for credit cost calc.
+// Falls back to a sane 8-hour default if the times are missing/invalid.
+function estimateHours(startTime?: string, endTime?: string): number {
+  if (!startTime || !endTime) return 8;
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) return 8;
+  let hours = (eh + em / 60) - (sh + sm / 60);
+  if (hours <= 0) hours += 24; // shift crosses midnight
+  return Math.max(hours, 0.5);
+}
+
 export const createJob = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
@@ -236,7 +289,11 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
 
     // Validate clientId belongs to a real BUSINESS user
     let resolvedClientId: string | null = null;
-    if (clientId) {
+    if (req.user!.role === 'BUSINESS') {
+      // A business can only ever post jobs against its own account — ignore
+      // any clientId sent in the body to prevent spoofing another client.
+      resolvedClientId = req.user!.id;
+    } else if (clientId) {
       try {
         const bizUser = await prisma.user.findUnique({
           where: { id: clientId },
@@ -248,6 +305,17 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
       } catch {
         // clientId column may not exist yet — continue without it
       }
+    }
+
+    // ── Business credit check + deduction ──────────────────────────────────
+    // Businesses fund their own job postings from a prepaid credit balance;
+    // admin-created jobs (on behalf of a client, tracked via PO/CE) are unaffected.
+    let jobCost = 0;
+    if (req.user!.role === 'BUSINESS') {
+      const rate  = parseInt(hourlyRate) || 0;
+      const slots = parseInt(totalSlots) || 1;
+      const hours = estimateHours(startTime, endTime);
+      jobCost = Math.round(rate * slots * hours);
     }
 
     // Validate supervisorId belongs to a real SUPERVISOR user
@@ -296,9 +364,42 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
       createData.termsAndConditions = termsAndConditions;
     }
 
-    const job = await prisma.job.create({ data: createData });
+    if (jobCost > 0) {
+      // Atomic conditional decrement — only succeeds if balance covers the cost,
+      // preventing a race between the balance check and the deduction.
+      const deducted = await prisma.user.updateMany({
+        where: { id: req.user!.id, creditBalance: { gte: jobCost } },
+        data:  { creditBalance: { decrement: jobCost } },
+      });
+      if (deducted.count === 0) {
+        const current = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { creditBalance: true } });
+        res.status(402).json({
+          error: `Insufficient credit balance. This job costs R${jobCost.toLocaleString('en-ZA')} but your balance is R${(current?.creditBalance || 0).toLocaleString('en-ZA')}. Please top up your credit.`,
+          required: jobCost,
+          balance: current?.creditBalance || 0,
+        });
+        return;
+      }
+    }
 
-    await auditLog({ userId: req.user!.id, action: 'CREATE_JOB', entity: 'Job', entityId: job.id });
+    let job;
+    try {
+      job = await prisma.job.create({ data: createData });
+    } catch (createErr) {
+      // Refund the deducted credit if job creation failed after payment
+      if (jobCost > 0) {
+        await prisma.user.update({ where: { id: req.user!.id }, data: { creditBalance: { increment: jobCost } } }).catch(() => {});
+      }
+      throw createErr;
+    }
+
+    await auditLog({ userId: req.user!.id, action: 'CREATE_JOB', entity: 'Job', entityId: job.id, meta: jobCost > 0 ? { creditDeducted: jobCost } : undefined });
+
+    if (jobCost > 0) {
+      const updatedUser = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { creditBalance: true } });
+      res.status(201).json({ ...job, creditCharged: jobCost, creditBalance: updatedUser?.creditBalance ?? 0 });
+      return;
+    }
     res.status(201).json(job);
   } catch (err) {
     console.error('[Job] createJob error:', err);

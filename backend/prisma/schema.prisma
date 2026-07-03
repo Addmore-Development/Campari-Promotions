@@ -1,4 +1,4 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
 }
 
@@ -48,6 +48,8 @@ model User {
   fullBodyPhotoUrl String?
   profilePhotoUrl  String?
   cvUrl            String?
+  // Business-specific: prepaid credit balance used to fund job postings
+  creditBalance    Int       @default(0)
   // Supervisor-specific: field/category supervised + business they work under
   workField    String?
   businessId   String?

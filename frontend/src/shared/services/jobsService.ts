@@ -118,4 +118,17 @@ export const jobsService = {
       return []
     }
   },
+
+  // Supervisor portal — EVERY campaign/job across every client, admin-style,
+  // so a supervisor can browse the full operation, not just what they're
+  // assigned to. Raw shape (client, applications, shifts, activationReport)
+  // — hourlyRate is stripped server-side for this role.
+  async getAllActivations(): Promise<any[]> {
+    try {
+      return await apiFetch<any[]>('/jobs')
+    } catch (err) {
+      console.error('[jobsService] getAllActivations error:', err)
+      return []
+    }
+  },
 }
