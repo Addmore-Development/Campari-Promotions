@@ -20,6 +20,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       // Business fields
       companyName, contactName, companyReg, vatNumber,
       industry: bizIndustry,
+      // Supervisor fields
+      workField, businessId,
     } = req.body;
 
     const displayName = fullName || name || '';
@@ -40,9 +42,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const hashed = await bcrypt.hash(password, 12);
     const normalizedRole = (role?.toUpperCase() || 'PROMOTER') as any;
     const isBusiness = normalizedRole === 'BUSINESS';
+    const isSupervisor = normalizedRole === 'SUPERVISOR';
+
+    if (isSupervisor) {
+      if (!workField || !businessId) {
+        res.status(400).json({ error: 'workField and businessId are required to register as a supervisor' });
+        return;
+      }
+      const parentBusiness = await prisma.user.findFirst({ where: { id: businessId, role: 'BUSINESS' } });
+      if (!parentBusiness) {
+        res.status(400).json({ error: 'Selected business could not be found' });
+        return;
+      }
+    }
+
+    const hashed = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
@@ -74,6 +90,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         contactName:      isBusiness ? (contactName || displayName) : null,
         vatNumber:        isBusiness ? (vatNumber   || null)        : null,
         address:          isBusiness ? (companyReg  || null)        : null,
+
+        // Supervisor-specific
+        workField:        isSupervisor ? workField  : null,
+        businessId:       isSupervisor ? businessId : null,
       },
     });
 
@@ -111,6 +131,22 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       ? 'Registration failed'
       : (err?.message || 'Registration failed');
     res.status(500).json({ error: msg });
+  }
+};
+
+// Public — used by the registration form so a supervisor can pick which
+// business they work under. Deliberately minimal: id + name only.
+export const listBusinesses = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const businesses = await prisma.user.findMany({
+      where:  { role: 'BUSINESS', status: 'approved' },
+      select: { id: true, fullName: true },
+      orderBy: { fullName: 'asc' },
+    });
+    res.json(businesses);
+  } catch (err) {
+    console.error('[Auth] listBusinesses error:', err);
+    res.status(500).json({ error: 'Failed to load businesses' });
   }
 };
 
