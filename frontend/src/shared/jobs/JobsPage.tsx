@@ -238,55 +238,10 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
             <span style={{ fontSize:12, color:WM, lineHeight:1.6, fontFamily:FB }}>I have read and understand the Terms & Conditions. I accept this engagement as an independent contractor.</span>
           </label>
           <div style={{ display:'flex', gap:10 }}>
-            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(236,236,236,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Continue</button>
+            <button onClick={onAccept} disabled={!agreed} style={{ flex:1, padding:'13px', background:agreed?G:'rgba(236,236,236,0.05)', border:'none', color:agreed?B:WD, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:agreed?'pointer':'not-allowed', transition:'all 0.25s', borderRadius:2 }}>Accept & Apply</button>
             <button onClick={onClose} style={{ padding:'13px 18px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:2 }}>Cancel</button>
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Payment Modal ─────────────────────────────────────────────────────────────
-function PaymentModal({ job, onClose, onSuccess }: { job:any; onClose:()=>void; onSuccess:()=>void }) {
-  const [step,setStep]=useState<'select'|'processing'|'done'>('select')
-  const [method,setMethod]=useState<'card'|'eft'|'wallet'>('card')
-  const [cardNum,setCardNum]=useState(''); const [expiry,setExpiry]=useState(''); const [cvv,setCvv]=useState(''); const [name,setName]=useState('')
-  const fmtCard=(v:string)=>v.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim()
-  const fmtExpiry=(v:string)=>{const d=v.replace(/\D/g,'').slice(0,4);return d.length>2?d.slice(0,2)+'/'+d.slice(2):d}
-  const handlePay=()=>{setStep('processing');setTimeout(()=>{setStep('done');setTimeout(onSuccess,1800)},2200)}
-  const inp:React.CSSProperties={width:'100%',padding:'11px 12px',background:B,border:`1px solid ${BB}`,color:W,fontFamily:FB,fontSize:13,outline:'none',marginBottom:10,boxSizing:'border-box',borderRadius:2}
-  return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', backdropFilter:'blur(16px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1001, padding:16 }}
-      onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{ background:BC, border:`1px solid ${BB}`, width:'100%', maxWidth:440, position:'relative', overflow:'hidden', borderRadius:4 }}>
-        <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${G5},${G},${GL},${G},${G5})` }} />
-        {step==='processing'&&<div style={{ padding:'72px 40px', textAlign:'center' }}><div style={{ fontSize:44, color:G, marginBottom:16, display:'inline-block', animation:'spin 1.2s linear infinite' }}>◎</div><div style={{ fontFamily:FD, fontSize:20, color:W, marginBottom:6 }}>Processing</div><div style={{ fontSize:13, color:WM, fontFamily:FB }}>Securing your slot...</div><style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style></div>}
-        {step==='done'&&<div style={{ padding:'72px 40px', textAlign:'center' }}><div style={{ fontSize:52, marginBottom:14, color:G }}>✓</div><div style={{ fontFamily:FD, fontSize:22, color:GL, marginBottom:8 }}>Application Submitted!</div><div style={{ fontSize:13, color:WM, lineHeight:1.6, fontFamily:FB }}>Your slot for <strong style={{ color:W }}>{job.title}</strong> has been reserved.</div></div>}
-        {step==='select'&&(
-          <>
-            <div style={{ padding:'22px 24px 16px', borderBottom:`1px solid ${BB}` }}>
-              <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:G, marginBottom:4, fontFamily:FB }}>Demo Payment Gateway</div>
-              <h2 style={{ fontFamily:FD, fontSize:18, color:W, marginBottom:4 }}>Confirm Application</h2>
-              <div style={{ fontSize:12, color:WM, fontFamily:FB }}>{job.title} — {job.company}</div>
-              <div style={{ marginTop:10, padding:'10px 14px', background:'rgba(201,191,166,0.08)', border:`1px solid rgba(201,191,166,0.22)`, display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:2 }}>
-                <span style={{ fontSize:11, color:WM, fontFamily:FB }}>Application Fee (Demo)</span>
-                <span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 25.00</span>
-              </div>
-              <button onClick={onClose} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', cursor:'pointer', color:WD, fontSize:18 }}>✕</button>
-            </div>
-            <div style={{ padding:'16px 24px 22px' }}>
-              <div style={{ display:'flex', gap:6, marginBottom:16 }}>
-                {(['card','eft','wallet'] as const).map(m=><button key={m} onClick={()=>setMethod(m)} style={{ flex:1, padding:'9px 6px', background:method===m?'rgba(189,189,189,0.16)':'transparent', border:`1px solid ${method===m?G:BB}`, color:method===m?G:WM, fontFamily:FB, fontSize:10, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', transition:'all 0.2s', borderRadius:2 }}>{m==='card'?'💳 Card':m==='eft'?'🏦 EFT':'👜 Wallet'}</button>)}
-              </div>
-              {method==='card'&&<><input placeholder="Cardholder Name" value={name} onChange={e=>setName(e.target.value)} style={inp} /><input placeholder="Card Number" value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} style={inp} maxLength={19} /><div style={{ display:'flex', gap:10 }}><input placeholder="MM/YY" value={expiry} onChange={e=>setExpiry(fmtExpiry(e.target.value))} style={{ ...inp, flex:1 }} maxLength={5} /><input placeholder="CVV" value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} style={{ ...inp, flex:1 }} maxLength={4} type="password" /></div></>}
-              {method==='eft'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}>{[['Bank','Campari Bank (Demo)'],['Account','1234 5678 9012'],['Branch','250655'],['Reference',`CP-${job.id}`]].map(([l,v])=><div key={l} style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}><span style={{ fontSize:11, color:WD, fontFamily:FB }}>{l}</span><span style={{ fontSize:11, color:W, fontWeight:600, fontFamily:FB }}>{v}</span></div>)}</div>}
-              {method==='wallet'&&<div style={{ padding:'14px', background:'rgba(236,236,236,0.03)', border:`1px solid ${BB}`, marginBottom:10, borderRadius:2 }}><div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}><span style={{ fontSize:12, color:WM, fontFamily:FB }}>Campari Wallet Balance (Demo)</span><span style={{ fontFamily:FD, fontSize:16, color:G, fontWeight:700 }}>R 250.00</span></div><div style={{ fontSize:11, color:WD, fontFamily:FB }}>R 25.00 will be deducted.</div></div>}
-              <button onClick={handlePay} style={{ width:'100%', padding:'13px', background:`linear-gradient(90deg,${G5},${G},${GL})`, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>{method==='eft'?'Confirm EFT (Demo)':'Pay R 25.00 (Demo)'}</button>
-              <div style={{ textAlign:'center', marginTop:8, fontSize:10, color:WD, fontFamily:FB }}>🔒 Demo Mode · POPIA Compliant</div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   )
@@ -304,7 +259,6 @@ export default function JobsPage() {
   const [searchQ,   setSearchQ   ]=useState('')
   const [session,   setSession   ]=useState<{role:string;name:string}|null>(null)
   const [termsJob,  setTermsJob  ]=useState<any>(null)
-  const [paymentJob,setPaymentJob]=useState<any>(null)
   const [toast,     setToast     ]=useState('')
   const [appliedIds,setAppliedIds]=useState<Set<string>>(new Set())
   const [allJobs,   setAllJobs   ]=useState<any[]>([])
@@ -372,32 +326,30 @@ export default function JobsPage() {
     if(session.role && session.role !== 'promoter'){showToast('Only promoters can apply for jobs.');return}
     setTermsJob(job)
   }
-  const handleTermsAccepted=()=>{if(!termsJob)return;setPaymentJob(termsJob);setTermsJob(null)}
-
   // FIX: POST to /api/applications so it reflects on business + promoter dashboards
-  const handlePaymentSuccess=async()=>{
-    if(!paymentJob) return
+  const handleTermsAccepted=async()=>{
+    if(!termsJob) return
     const token=localStorage.getItem('hg_token')
     if(token){
-      const isStaticJob=/^JB-\d+$/.test(paymentJob.id)
+      const isStaticJob=/^JB-\d+$/.test(termsJob.id)
       if(!isStaticJob){
         try{
           const res=await fetch(`${API_URL}/applications`,{
             method:'POST',
             headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
-            body:JSON.stringify({jobId:paymentJob.id}),
+            body:JSON.stringify({jobId:termsJob.id}),
           })
           if(!res.ok && res.status!==409){
             const err=await res.json().catch(()=>({error:'Failed'}))
             showToast(err.error||'Application failed. Please try again.')
-            setPaymentJob(null); return
+            setTermsJob(null); return
           }
-        }catch{ showToast('Could not submit. Check your connection.'); setPaymentJob(null); return }
+        }catch{ showToast('Could not submit. Check your connection.'); setTermsJob(null); return }
       }
     }
-    setAppliedIds(prev=>new Set([...prev,paymentJob.id]))
-    showToast(`✓ Applied for "${paymentJob.title}"`)
-    setPaymentJob(null)
+    setAppliedIds(prev=>new Set([...prev,termsJob.id]))
+    showToast(`✓ Applied for "${termsJob.title}"`)
+    setTermsJob(null)
   }
 
   const activeJobs=getActiveJobs(allJobs)
@@ -438,7 +390,7 @@ export default function JobsPage() {
           <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:20, gap:12, flexWrap:'wrap' }}>
             <div>
               <h1 style={{ fontFamily:FD, fontSize:'clamp(26px,4vw,48px)', fontWeight:700, lineHeight:1 }}>All Jobs</h1>
-              <p style={{ fontSize:12, color:WD, marginTop:6, fontFamily:FB }}>Sorted newest-approved first · T&C + payment required to apply</p>
+              <p style={{ fontSize:12, color:WD, marginTop:6, fontFamily:FB }}>Sorted newest-approved first · T&C acceptance required to apply</p>
             </div>
             <div style={{ textAlign:'right' }}>
               <div style={{ fontFamily:FD, fontSize:32, fontWeight:700, color:G, lineHeight:1 }}>{filtered.length}</div>
@@ -488,8 +440,7 @@ export default function JobsPage() {
         </div>
       </div>
 
-      {termsJob   &&<TermsModal   job={termsJob}   onAccept={handleTermsAccepted}   onClose={()=>setTermsJob(null)}   />}
-      {paymentJob &&<PaymentModal job={paymentJob} onSuccess={handlePaymentSuccess} onClose={()=>setPaymentJob(null)} />}
+      {termsJob &&<TermsModal job={termsJob} onAccept={handleTermsAccepted} onClose={()=>setTermsJob(null)} />}
     </div>
   )
 }
