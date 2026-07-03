@@ -1028,7 +1028,7 @@ export default function RegisterPage() {
               <Field label="Confirm Password" type="password" placeholder="••••••••" value={bizConfirmPw} onChange={setBizConfirmPw} focused={focused === 'bizConfirmPw'} onFocus={() => setFocused('bizConfirmPw')} onBlur={() => setFocused(null)} error={errors.bizConfirmPw} />
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Campari Promotions administrators.
+                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by HONEY GROUP Promotions administrators.
                 </p>
               </div>
             </div>
