@@ -211,7 +211,10 @@ export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promis
       orderBy: { date: 'desc' },
     });
 
-    res.json(jobs);
+    // Supervisors don't see the financial side — strip pay rate from the response.
+    const sanitised = jobs.map(({ hourlyRate, ...rest }) => rest);
+
+    res.json(sanitised);
   } catch (err) {
     console.error('[Job] getSupervisorJobs error:', err);
     res.status(500).json({ error: 'Failed to fetch supervised jobs' });
@@ -314,6 +317,12 @@ export const updateJob = async (req: AuthRequest, res: Response): Promise<void> 
     const existing = await prisma.job.findUnique({ where: { id: req.params.id } });
     if (!existing) { res.status(404).json({ error: 'Job not found' }); return; }
 
+    const isSupervisor = req.user?.role === 'SUPERVISOR';
+    if (isSupervisor && existing.supervisorId !== req.user!.id) {
+      res.status(403).json({ error: 'Supervisors may only edit promotions they are assigned to' });
+      return;
+    }
+
     // Validate clientId if being updated
     let resolvedClientId: string | null | undefined = undefined;
     if (clientId !== undefined) {
@@ -361,7 +370,7 @@ export const updateJob = async (req: AuthRequest, res: Response): Promise<void> 
       ...(date        !== undefined && { date: new Date(date) }),
       ...(startTime   !== undefined && { startTime }),
       ...(endTime     !== undefined && { endTime }),
-      ...(hourlyRate  !== undefined && { hourlyRate: parseInt(hourlyRate) }),
+      ...(hourlyRate  !== undefined && !isSupervisor && { hourlyRate: parseInt(hourlyRate) }),
       ...(totalSlots  !== undefined && { totalSlots: parseInt(totalSlots) }),
       ...(filledSlots !== undefined && { filledSlots: parseInt(filledSlots) }),
       ...(status      !== undefined && { status: status.toUpperCase() }),

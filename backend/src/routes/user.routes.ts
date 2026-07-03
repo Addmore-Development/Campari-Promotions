@@ -11,7 +11,7 @@ import {
   deleteUser,
   getEligiblePromoters,
 } from '../controllers/user.controller';
-import { protect, adminOnly, adminOrBusiness } from '../middleware/auth';
+import { protect, adminOnly, adminOrBusiness, adminOrSupervisor } from '../middleware/auth';
 
 const router = Router();
 
@@ -29,11 +29,11 @@ router.post('/register-documents/:id', protect, documentUpload, uploadDocumentsB
 router.get('/eligible',           protect, adminOrBusiness, getEligiblePromoters);
 router.get('/promoters/eligible', protect, adminOrBusiness, getEligiblePromoters);
 
-// ── Admin: all users ─────────────────────────────────────────────────────────
-router.get('/',       protect, adminOnly, getAllUsers);
-router.post('/',      protect, adminOnly, adminCreateUser);
-router.get('/:id',    protect, adminOnly, getUserById);
-router.put('/:id',    protect, adminOnly, adminUpdateUser);
+// ── Admin: all users / Admin+Supervisor: businesses only (scoped in controller) ─
+router.get('/',       protect, adminOrSupervisor, getAllUsers);
+router.post('/',      protect, adminOnly, adminCreateUser);       // create/delete stay admin-only
+router.get('/:id',    protect, adminOrSupervisor, getUserById);
+router.put('/:id',    protect, adminOrSupervisor, adminUpdateUser);
 router.delete('/:id', protect, adminOnly, deleteUser);
 
 export default router;

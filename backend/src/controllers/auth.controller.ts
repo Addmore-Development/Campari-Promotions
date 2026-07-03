@@ -46,16 +46,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const isBusiness = normalizedRole === 'BUSINESS';
     const isSupervisor = normalizedRole === 'SUPERVISOR';
 
+    // Supervisors are added by an admin only — public self-registration is disabled.
     if (isSupervisor) {
-      if (!workField || !businessId) {
-        res.status(400).json({ error: 'workField and businessId are required to register as a supervisor' });
-        return;
-      }
-      const parentBusiness = await prisma.user.findFirst({ where: { id: businessId, role: 'BUSINESS' } });
-      if (!parentBusiness) {
-        res.status(400).json({ error: 'Selected business could not be found' });
-        return;
-      }
+      res.status(403).json({ error: 'Supervisor accounts can only be created by an administrator' });
+      return;
     }
 
     const hashed = await bcrypt.hash(password, 12);

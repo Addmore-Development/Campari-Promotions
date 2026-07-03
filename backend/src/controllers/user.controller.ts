@@ -126,7 +126,13 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void
     const { role, status } = req.query;
     const where: any = {};
 
-    if (role) where.role = (role as string).toUpperCase();
+    if (req.user?.role === 'SUPERVISOR') {
+      // Supervisors can only ever list business accounts — not promoters,
+      // admins, or other supervisors.
+      where.role = 'BUSINESS';
+    } else if (role) {
+      where.role = (role as string).toUpperCase();
+    }
 
     if (status) {
       const s = (status as string).toLowerCase().trim();
@@ -181,6 +187,18 @@ export const getUserById = async (req: AuthRequest, res: Response): Promise<void
       },
     });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+
+    if (req.user?.role === 'SUPERVISOR' && req.params.id !== 'me') {
+      if (user.role !== 'BUSINESS') {
+        res.status(403).json({ error: 'Supervisors may only view business accounts' });
+        return;
+      }
+      // Financial fields are never exposed to supervisors, even on a business record.
+      delete (user as any).bankName;
+      delete (user as any).accountNumber;
+      delete (user as any).branchCode;
+    }
+
     res.json(user);
   } catch (err) {
     console.error('[User] getUserById error:', err);
@@ -294,17 +312,32 @@ export const adminUpdateUser = async (req: AuthRequest, res: Response): Promise<
       fullName, phone, city,
     } = req.body;
 
+    const isSupervisor = req.user?.role === 'SUPERVISOR';
+
+    if (isSupervisor) {
+      const target = await prisma.user.findUnique({ where: { id: req.params.id }, select: { role: true } });
+      if (!target || target.role !== 'BUSINESS') {
+        res.status(403).json({ error: 'Supervisors may only edit business accounts' });
+        return;
+      }
+    }
+
     const data: any = {};
 
     if (status           !== undefined) data.status           = normaliseStatus(status);
     if (onboardingStatus !== undefined) data.onboardingStatus = normaliseStatus(onboardingStatus);
     if (rejectionReason  !== undefined) data.rejectionReason  = rejectionReason;
-    if (role             !== undefined) data.role             = (role as string).toUpperCase();
-    if (reliabilityScore !== undefined) data.reliabilityScore = parseFloat(reliabilityScore);
-    if (paymentStatus    !== undefined) data.paymentStatus    = paymentStatus;
     if (fullName         !== undefined) data.fullName         = fullName;
     if (phone            !== undefined) data.phone            = phone;
     if (city             !== undefined) data.city             = city;
+
+    // Role changes and anything payment/financial are admin-only — never
+    // settable by a supervisor, even on a business record they can edit.
+    if (!isSupervisor) {
+      if (role             !== undefined) data.role             = (role as string).toUpperCase();
+      if (reliabilityScore !== undefined) data.reliabilityScore = parseFloat(reliabilityScore);
+      if (paymentStatus    !== undefined) data.paymentStatus    = paymentStatus;
+    }
 
     const updated = await prisma.user.update({ where: { id: req.params.id }, data });
     res.json(updated);
