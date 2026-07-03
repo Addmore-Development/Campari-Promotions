@@ -38,7 +38,7 @@ export const SupervisorApp: React.FC = () => {
   return (
     <SupervisorLayout>
       {tab === 'dashboard' && (
-        <SupervisorDashboard onNavigate={(view, jobId) => navigate(`/supervisor/?tab=${view}${jobId ? `&job=${jobId}` : ''}`)} />
+        <SupervisorDashboard onNavigate={(view: string, jobId?: string) => navigate(`/supervisor/?tab=${view}${jobId ? `&job=${jobId}` : ''}`)} />
       )}
       {tab === 'activations'       && <ActivationsPlaceholder />}
       {tab === 'activation-report' && <ActivationReportPlaceholder />}
