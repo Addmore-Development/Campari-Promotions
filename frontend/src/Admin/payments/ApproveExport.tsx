@@ -95,7 +95,7 @@ function buildCampaignPDFHtml(records: PayRecord[]): string {
     const rows = cr.map(r => `<tr><td>${r.promoter}</td><td>${r.job}</td><td>${r.date}</td><td style="text-align:center">${r.hours}h</td><td>R${r.rate}/hr</td><td style="color:#C9BFA6;font-weight:700">${fmtZAR(net(r))}</td><td style="text-transform:capitalize">${r.status}</td></tr>`).join('')
     return `<div class="section"><div class="client-name">${client}</div><div class="summary"><div class="card"><div class="card-label">Promoters</div><div class="card-value">${promoters}</div></div><div class="card"><div class="card-label">Shifts</div><div class="card-value">${cr.length}</div></div><div class="card"><div class="card-label">Total Hours</div><div class="card-value">${totalHours}h</div></div><div class="card"><div class="card-label">Total Payout</div><div class="card-value" style="color:#C9BFA6">${fmtZAR(totalCost)}</div></div></div><table><thead><tr><th>Promoter</th><th>Job</th><th>Date</th><th>Hours</th><th>Rate</th><th>Net Payout</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
   }).join('')
-  return `<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#050504;color:#F8F8F8;padding:48px;font-size:13px}.header{border-bottom:2px solid #8F8A7C;padding-bottom:24px;margin-bottom:36px}.logo{font-size:26px;font-weight:700;color:#C9BFA6}.logo span{color:#F8F8F8}.sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#7A756A;margin-top:6px}.date{font-size:11px;color:rgba(248,248,248,.45);margin-top:10px}.section{margin-bottom:44px;page-break-inside:avoid}.client-name{font-size:15px;font-weight:700;color:#C9BFA6;border-left:3px solid #C9BFA6;padding-left:12px;margin-bottom:14px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.card{background:rgba(170,160,135,.08);border:1px solid rgba(170,160,135,.2);padding:12px 14px;border-radius:3px}.card-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,248,248,.5);margin-bottom:6px}.card-value{font-size:20px;font-weight:700;color:#F8F8F8}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:rgba(170,160,135,.1)}th{padding:9px 12px;text-align:left;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(248,248,248,.5);border-bottom:1px solid rgba(170,160,135,.2)}td{padding:9px 12px;border-bottom:1px solid rgba(170,160,135,.08);color:rgba(248,248,248,.85)}.footer{margin-top:40px;padding-top:14px;border-top:1px solid rgba(170,160,135,.18);font-size:10px;color:rgba(248,248,248,.25)}@media print{body{background:#fff;color:#111}.logo{color:#6E6A5E}.client-name{color:#6E6A5E;border-color:#6E6A5E}.card{background:#F1F1F1}.card-value{color:#111}td{color:#333}}</style><div class="header"><div class="logo">HONEY <span>GROUP</span></div><div class="sub">Campaign Attendance &amp; Payroll Report</div><div class="date">Generated: ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>${clientSections}<div class="footer">Honey Group · Campaign Report · Confidential · ${new Date().toISOString()}</div>`
+  return `<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#050504;color:#F8F8F8;padding:48px;font-size:13px}.header{border-bottom:2px solid #8F8A7C;padding-bottom:24px;margin-bottom:36px}.logo{font-size:26px;font-weight:700;color:#C9BFA6}.logo span{color:#F8F8F8}.sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#7A756A;margin-top:6px}.date{font-size:11px;color:rgba(248,248,248,.45);margin-top:10px}.section{margin-bottom:44px;page-break-inside:avoid}.client-name{font-size:15px;font-weight:700;color:#C9BFA6;border-left:3px solid #C9BFA6;padding-left:12px;margin-bottom:14px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.card{background:rgba(170,160,135,.08);border:1px solid rgba(170,160,135,.2);padding:12px 14px;border-radius:3px}.card-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,248,248,.5);margin-bottom:6px}.card-value{font-size:20px;font-weight:700;color:#F8F8F8}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:rgba(170,160,135,.1)}th{padding:9px 12px;text-align:left;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(248,248,248,.5);border-bottom:1px solid rgba(170,160,135,.2)}td{padding:9px 12px;border-bottom:1px solid rgba(170,160,135,.08);color:rgba(248,248,248,.85)}.footer{margin-top:40px;padding-top:14px;border-top:1px solid rgba(170,160,135,.18);font-size:10px;color:rgba(248,248,248,.25)}@media print{body{background:#fff;color:#111}.logo{color:#6E6A5E}.client-name{color:#6E6A5E;border-color:#6E6A5E}.card{background:#F1F1F1}.card-value{color:#111}td{color:#333}}</style><div class="header"><div class="logo">CAMPARI <span>PROMOTIONS</span></div><div class="sub">Campaign Attendance &amp; Payroll Report</div><div class="date">Generated: ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>${clientSections}<div class="footer">Campari Promotions · Campaign Report · Confidential · ${new Date().toISOString()}</div>`
 }
 
 function buildJobsData() {
@@ -176,33 +176,33 @@ export default function ReportsExports() {
           <ExportCard
             icon="📄" title="Full Payroll Register" color={G3}
             description="All promoter payout records with bank details, hours, rates, and net pay."
-            onCSV={() => { exportCSV([payrollHeaders, ...payrollRows(MOCK_RECORDS)] as string[][], `honey-group-payroll-${today()}.csv`); flash('Payroll CSV downloaded') }}
-            onExcel={() => { exportExcel(payrollHeaders, payrollRows(MOCK_RECORDS), `honey-group-payroll-${today()}.xls`); flash('Payroll Excel downloaded') }}
-            onPDF={() => { exportPDF(buildCampaignPDFHtml(MOCK_RECORDS), `honey-group-payroll-${today()}`); flash('Payroll PDF export initiated') }}
+            onCSV={() => { exportCSV([payrollHeaders, ...payrollRows(MOCK_RECORDS)] as string[][], `campari-promotions-payroll-${today()}.csv`); flash('Payroll CSV downloaded') }}
+            onExcel={() => { exportExcel(payrollHeaders, payrollRows(MOCK_RECORDS), `campari-promotions-payroll-${today()}.xls`); flash('Payroll Excel downloaded') }}
+            onPDF={() => { exportPDF(buildCampaignPDFHtml(MOCK_RECORDS), `campari-promotions-payroll-${today()}`); flash('Payroll PDF export initiated') }}
           />
 
           <ExportCard
             icon="📋" title="Campaign Client Report" color={GL}
             description="Per-client attendance and payout summary grouped by client."
-            onCSV={() => { exportCSV([payrollHeaders, ...payrollRows(MOCK_RECORDS)] as string[][], `honey-group-campaign-${today()}.csv`); flash('Campaign CSV downloaded') }}
-            onExcel={() => { exportExcel(payrollHeaders, payrollRows(MOCK_RECORDS), `honey-group-campaign-${today()}.xls`); flash('Campaign Excel downloaded') }}
-            onPDF={() => { exportPDF(buildCampaignPDFHtml(MOCK_RECORDS), `honey-group-campaign-${today()}`); flash('Campaign PDF export initiated — check your browser print dialog') }}
+            onCSV={() => { exportCSV([payrollHeaders, ...payrollRows(MOCK_RECORDS)] as string[][], `campari-promotions-campaign-${today()}.csv`); flash('Campaign CSV downloaded') }}
+            onExcel={() => { exportExcel(payrollHeaders, payrollRows(MOCK_RECORDS), `campari-promotions-campaign-${today()}.xls`); flash('Campaign Excel downloaded') }}
+            onPDF={() => { exportPDF(buildCampaignPDFHtml(MOCK_RECORDS), `campari-promotions-campaign-${today()}`); flash('Campaign PDF export initiated — check your browser print dialog') }}
           />
 
           <ExportCard
             icon="💼" title="Jobs Register" color={G4}
             description="All active and archived jobs with slots, pay rates, locations, and status."
-            onCSV={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `honey-group-jobs-${today()}.csv`); flash('Jobs CSV downloaded') }}
-            onExcel={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportExcel(d.headers, d.rows, `honey-group-jobs-${today()}.xls`); flash('Jobs Excel downloaded') }}
-            onPDF={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string) => `<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Jobs Register</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-jobs-${today()}`); flash('Jobs PDF export initiated') }}
+            onCSV={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `campari-promotions-jobs-${today()}.csv`); flash('Jobs CSV downloaded') }}
+            onExcel={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; exportExcel(d.headers, d.rows, `campari-promotions-jobs-${today()}.xls`); flash('Jobs Excel downloaded') }}
+            onPDF={() => { const d = buildJobsData(); if (d.empty) { flash('No jobs data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string) => `<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Jobs Register</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `campari-promotions-jobs-${today()}`); flash('Jobs PDF export initiated') }}
           />
 
           <ExportCard
             icon="👥" title="Promoter Roster" color={G3}
             description="Full promoter list with city, reliability scores, and onboarding status."
-            onCSV={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `honey-group-promoters-${today()}.csv`); flash('Promoters CSV downloaded') }}
-            onExcel={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportExcel(d.headers, d.rows, `honey-group-promoters-${today()}.xls`); flash('Promoters Excel downloaded') }}
-            onPDF={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string)=>`<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Promoter Roster</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-promoters-${today()}`); flash('Promoters PDF export initiated') }}
+            onCSV={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportCSV([d.headers, ...d.rows] as string[][], `campari-promotions-promoters-${today()}.csv`); flash('Promoters CSV downloaded') }}
+            onExcel={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; exportExcel(d.headers, d.rows, `campari-promotions-promoters-${today()}.xls`); flash('Promoters Excel downloaded') }}
+            onPDF={() => { const d = buildPromotersData(); if (d.empty) { flash('No promoter data available'); return }; const trs = d.rows.map((r: string[]) => `<tr>${r.map((c: string)=>`<td>${c}</td>`).join('')}</tr>`).join(''); exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Promoter Roster</h2><table><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `campari-promotions-promoters-${today()}`); flash('Promoters PDF export initiated') }}
           />
 
           <ExportCard
@@ -213,7 +213,7 @@ export default function ReportsExports() {
               if (!approved.length) { flash('No approved records to export'); return }
               const headers = ['Promoter','Email','Bank','Account No','Net Payout (R)','Job','Date']
               const rows    = approved.map(r => [r.promoter, r.email, r.bank, r.accountNo, net(r), r.job, r.date])
-              exportCSV([headers, ...rows] as string[][], `honey-group-eft-batch-${today()}.csv`)
+              exportCSV([headers, ...rows] as string[][], `campari-promotions-eft-batch-${today()}.csv`)
               flash(`EFT batch CSV downloaded — ${approved.length} records`)
             }}
             onExcel={() => {
@@ -221,14 +221,14 @@ export default function ReportsExports() {
               if (!approved.length) { flash('No approved records to export'); return }
               const headers = ['Promoter','Email','Bank','Account No','Net Payout (R)','Job','Date']
               const rows    = approved.map(r => [r.promoter, r.email, r.bank, r.accountNo, net(r), r.job, r.date])
-              exportExcel(headers, rows, `honey-group-eft-batch-${today()}.xls`)
+              exportExcel(headers, rows, `campari-promotions-eft-batch-${today()}.xls`)
               flash(`EFT batch Excel downloaded — ${approved.length} records`)
             }}
             onPDF={() => {
               const approved = MOCK_RECORDS.filter(r => r.status === 'approved')
               if (!approved.length) { flash('No approved records to export'); return }
               const trs = approved.map(r => `<tr><td>${r.promoter}</td><td>${r.email}</td><td>${r.bank}</td><td>${r.accountNo}</td><td style="color:#C9BFA6;font-weight:700">${fmtZAR(net(r))}</td><td>${r.job}</td><td>${r.date}</td></tr>`).join('')
-              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">EFT Batch — ${approved.length} Records</h2><table><thead><tr><th>Promoter</th><th>Email</th><th>Bank</th><th>Account No</th><th>Net Payout</th><th>Job</th><th>Date</th></tr></thead><tbody>${trs}</tbody></table>`, `honey-group-eft-batch-${today()}`)
+              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">EFT Batch — ${approved.length} Records</h2><table><thead><tr><th>Promoter</th><th>Email</th><th>Bank</th><th>Account No</th><th>Net Payout</th><th>Job</th><th>Date</th></tr></thead><tbody>${trs}</tbody></table>`, `campari-promotions-eft-batch-${today()}`)
               flash('EFT PDF export initiated')
             }}
           />
@@ -236,11 +236,11 @@ export default function ReportsExports() {
           <ExportCard
             icon="📊" title="Attendance Summary" color={G4}
             description="Shift-level attendance log: hours worked, job, client, and promoter per shift."
-            onCSV={() => { exportCSV([attendanceHeaders, ...attendanceRows(MOCK_RECORDS)] as string[][], `honey-group-attendance-${today()}.csv`); flash('Attendance CSV downloaded') }}
-            onExcel={() => { exportExcel(attendanceHeaders, attendanceRows(MOCK_RECORDS), `honey-group-attendance-${today()}.xls`); flash('Attendance Excel downloaded') }}
+            onCSV={() => { exportCSV([attendanceHeaders, ...attendanceRows(MOCK_RECORDS)] as string[][], `campari-promotions-attendance-${today()}.csv`); flash('Attendance CSV downloaded') }}
+            onExcel={() => { exportExcel(attendanceHeaders, attendanceRows(MOCK_RECORDS), `campari-promotions-attendance-${today()}.xls`); flash('Attendance Excel downloaded') }}
             onPDF={() => {
               const trs = attendanceRows(MOCK_RECORDS).map(r => `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Attendance Summary</h2><table><thead><tr>${attendanceHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `honey-group-attendance-${today()}`)
+              exportPDF(`<style>body{font-family:Georgia;background:#050504;color:#F8F8F8;padding:40px}table{width:100%;border-collapse:collapse}th{background:rgba(170,160,135,0.2);padding:8px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9BFA6}td{padding:8px;border-bottom:1px solid rgba(170,160,135,0.12);font-size:12px;color:rgba(248,248,248,0.85)}</style><h2 style="color:#C9BFA6;font-family:Georgia;margin-bottom:24px">Attendance Summary</h2><table><thead><tr>${attendanceHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>`, `campari-promotions-attendance-${today()}`)
               flash('Attendance PDF export initiated')
             }}
           />
@@ -281,7 +281,7 @@ export default function ReportsExports() {
             <button onClick={() => {
               const headers = ['Description','Value']
               const rows: string[][] = [['Hourly Rate (R)',`R${calc.rate}`],['Hours Per Shift',`${calc.hours}h`],['No. of Promoters',`${calc.promoters}`],['Total Payout (R)',`R${totalPayout.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]]
-              exportCSV([headers,...rows], `honey-group-payout-estimate-${today()}.csv`); flash('Payout estimate CSV downloaded')
+              exportCSV([headers,...rows], `campari-promotions-payout-estimate-${today()}.csv`); flash('Payout estimate CSV downloaded')
             }} style={{ padding:'9px 18px', background:'transparent', border:`1px solid ${G3}`, color:G3, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em' }}
               onMouseEnter={e => e.currentTarget.style.background = hex2rgba(G3,0.15)}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -290,7 +290,7 @@ export default function ReportsExports() {
             <button onClick={() => {
               const headers = ['Description','Value']
               const rows: (string|number)[][] = [['Hourly Rate (R)',`R${calc.rate}`],['Hours Per Shift',`${calc.hours}h`],['No. of Promoters',calc.promoters],['Total Payout (R)',`R${totalPayout.toLocaleString('en-ZA')}`]]
-              exportExcel(headers, rows, `honey-group-payout-estimate-${today()}.xls`); flash('Payout estimate Excel downloaded')
+              exportExcel(headers, rows, `campari-promotions-payout-estimate-${today()}.xls`); flash('Payout estimate Excel downloaded')
             }} style={{ padding:'9px 18px', background:'transparent', border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em' }}
               onMouseEnter={e => e.currentTarget.style.background = hex2rgba(GL,0.15)}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>

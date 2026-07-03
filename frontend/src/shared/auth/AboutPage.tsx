@@ -93,7 +93,7 @@ export default function AboutPage() {
       }}>
         <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer' }}
           onClick={() => navigate('/')}>
-          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
+          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}> PROMOTIONS</span>
         </div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => navigate('/jobs')}

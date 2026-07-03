@@ -622,49 +622,49 @@ function ReportsTab({ regs }: { regs:any[] }) {
     {
       icon:'📄', title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honey-group-payroll-${todayStr()}.csv`);flash('✓ Payroll CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honey-group-payroll-${todayStr()}.xls`);flash('✓ Payroll Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`honey-group-payroll-${todayStr()}`);flash('✓ Payroll PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`campari-promotions-payroll-${todayStr()}.csv`);flash('✓ Payroll CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`campari-promotions-payroll-${todayStr()}.xls`);flash('✓ Payroll Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`campari-promotions-payroll-${todayStr()}`);flash('✓ Payroll PDF — print/save from your browser')}},
       ]
     },
     {
       icon:'📋', title:'Campaign Client Report', desc:'Per-client attendance and payout summary grouped by job.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.csv`);flash('✓ Campaign CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honey-group-campaign-${todayStr()}.xls`);flash('✓ Campaign Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honey-group-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`campari-promotions-campaign-${todayStr()}.csv`);flash('✓ Campaign CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`campari-promotions-campaign-${todayStr()}.xls`);flash('✓ Campaign Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`campari-promotions-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
       ]
     },
     {
       icon:'💼', title:'Jobs Register', desc:'All active and archived jobs with slots, rates, and status.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`honey-group-jobs-${todayStr()}.csv`);flash('✓ Jobs CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`honey-group-jobs-${todayStr()}.xls`);flash('✓ Jobs Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`honey-group-jobs-${todayStr()}`);flash('✓ Jobs PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`campari-promotions-jobs-${todayStr()}.csv`);flash('✓ Jobs CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`campari-promotions-jobs-${todayStr()}.xls`);flash('✓ Jobs Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`campari-promotions-jobs-${todayStr()}`);flash('✓ Jobs PDF — print/save from your browser')}},
       ]
     },
     {
       icon:'👥', title:'Promoter Roster', desc:'Full promoter list with city, reliability scores, and onboarding status.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`honey-group-promoters-${todayStr()}.csv`);flash('✓ Promoters CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`honey-group-promoters-${todayStr()}.xls`);flash('✓ Promoters Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`honey-group-promoters-${todayStr()}`);flash('✓ Promoters PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`campari-promotions-promoters-${todayStr()}.csv`);flash('✓ Promoters CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`campari-promotions-promoters-${todayStr()}.xls`);flash('✓ Promoters Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`campari-promotions-promoters-${todayStr()}`);flash('✓ Promoters PDF — print/save from your browser')}},
       ]
     },
     {
       icon:'🏦', title:'EFT Batch File', desc:'Bank-ready payment batch — approved payroll records only.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`honey-group-eft-${todayStr()}.csv`);flash(`✓ EFT CSV — ${eftApproved.length} records`)}},
-        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`honey-group-eft-${todayStr()}.xls`);flash(`✓ EFT Excel — ${eftApproved.length} records`)}},
-        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`honey-group-eft-${todayStr()}`);flash('✓ EFT PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`campari-promotions-eft-${todayStr()}.csv`);flash(`✓ EFT CSV — ${eftApproved.length} records`)}},
+        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`campari-promotions-eft-${todayStr()}.xls`);flash(`✓ EFT Excel — ${eftApproved.length} records`)}},
+        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`campari-promotions-eft-${todayStr()}`);flash('✓ EFT PDF — print/save from your browser')}},
       ]
     },
     {
       icon:'📊', title:'Attendance Summary', desc:'Shift-level check-in/out records with hours worked per promoter.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`honey-group-attendance-${todayStr()}.csv`);flash('✓ Attendance CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`honey-group-attendance-${todayStr()}.xls`);flash('✓ Attendance Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`honey-group-attendance-${todayStr()}`);flash('✓ Attendance PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`campari-promotions-attendance-${todayStr()}.csv`);flash('✓ Attendance CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`campari-promotions-attendance-${todayStr()}.xls`);flash('✓ Attendance Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`campari-promotions-attendance-${todayStr()}`);flash('✓ Attendance PDF — print/save from your browser')}},
       ]
     },
   ]
@@ -730,11 +730,11 @@ function ReportsTab({ regs }: { regs:any[] }) {
           </div>
         </div>
         <div style={{ display:'flex', gap:8 }}>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`honey-group-estimate-${todayStr()}.csv`);flash('✓ Estimate CSV downloaded')}}
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`campari-promotions-estimate-${todayStr()}.csv`);flash('✓ Estimate CSV downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${G3}`, color:G3, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(G3,0.15)}
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}>↓ CSV</button>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`honey-group-estimate-${todayStr()}.xls`);flash('✓ Estimate Excel downloaded')}}
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`campari-promotions-estimate-${todayStr()}.xls`);flash('✓ Estimate Excel downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(GL,0.15)}
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}>↓ Excel</button>
@@ -763,8 +763,8 @@ function ReportsTab({ regs }: { regs:any[] }) {
 // ─── SETTINGS TAB// ─── SETTINGS TAB ─────────────────────────────────────────────────────────────
 function SettingsTab() {
   const [saved,    setSaved   ]=useState(false)
-  const [platName, setPlatName]=useState('Honey Group Promotions')
-  const [email,    setEmail   ]=useState('admin@honeygroup.co.za')
+  const [platName, setPlatName]=useState('Campari Promotions')
+  const [email,    setEmail   ]=useState('admin@camparipromotions.co.za')
   const [otp,      setOtp     ]=useState("Africa's Talking")
   const [payment,  setPayment ]=useState('Paystack')
   const [geoR,     setGeoR    ]=useState('5')

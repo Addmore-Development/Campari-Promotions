@@ -449,7 +449,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
           {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promotions Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -797,7 +797,7 @@ export default function LandingPage() {
       {/* ── NAV ── */}
       <nav className="nav-root" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200, padding: '0 48px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
         <div className="nav-logo" style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.01em', flexShrink: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
+          <span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}> PROMOTIONS</span>
         </div>
 
         {/* Desktop nav links — hidden on mobile */}
@@ -998,7 +998,7 @@ export default function LandingPage() {
           <div className="footer-grid-3col" style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1fr', gap: 80, alignItems: 'start' }}>
             {/* Newsletter */}
             <div>
-              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span></div>
+              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>CAMPARI</span><span style={{ color: W }}> PROMOTIONS</span></div>
               <h3 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 12, lineHeight: 1.2 }}>Newsletter Sign-Up</h3>
               <p style={{ fontSize: 13, color: WM, lineHeight: 1.75, fontFamily: FD, marginBottom: 28, maxWidth: 300 }}>Subscribe to receive our latest opportunities and platform updates directly to your inbox.</p>
               <div style={{ marginBottom: 12 }}>
@@ -1024,7 +1024,7 @@ export default function LandingPage() {
 
             {/* Contact + social */}
             <div style={{ paddingTop: 8 }}>
-              {[{ label: 'Partnership Opportunities', email: 'partnerships@honeygroup.co.za' }, { label: 'Career Opportunities', email: 'careers@honeygroup.co.za' }, { label: 'Press', email: 'press@honeygroup.co.za' }].map(c => (
+              {[{ label: 'Partnership Opportunities', email: 'partnerships@camparipromotions.co.za' }, { label: 'Career Opportunities', email: 'careers@camparipromotions.co.za' }, { label: 'Press', email: 'press@camparipromotions.co.za' }].map(c => (
                 <div key={c.label} style={{ marginBottom: 32 }}>
                   <h4 style={{ fontFamily: FD, fontSize: 16, fontWeight: 700, color: W, marginBottom: 6 }}>{c.label}</h4>
                   <a href={`mailto:${c.email}`} style={{ fontFamily: FD, fontSize: 13, color: GL, textDecoration: 'underline', textUnderlineOffset: 3 }}>{c.email}</a>
@@ -1036,7 +1036,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ borderTop: `1px solid ${BB}`, paddingTop: 24 }}>
-                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Honey Group Promotions. All rights reserved.</p>
+                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Campari Promotions. All rights reserved.</p>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                   {['Privacy Policy', 'POPIA Compliant', 'Terms of Use'].map(t => (
                     <span key={t} style={{ fontSize: 10, color: WD, letterSpacing: '0.06em', fontFamily: FD, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = GL} onMouseLeave={e => e.currentTarget.style.color = WD}>{t}</span>

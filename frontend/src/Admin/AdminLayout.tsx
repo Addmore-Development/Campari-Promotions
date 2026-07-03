@@ -671,7 +671,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Logo — centred */}
         <div style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, letterSpacing: '0.02em', position: 'absolute', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-          <span style={{ color: GL }}>HONEY</span>
+          <span style={{ color: GL }}>CAMPARI</span>
           <span style={{ color: W }}> GROUP</span>
         </div>
 

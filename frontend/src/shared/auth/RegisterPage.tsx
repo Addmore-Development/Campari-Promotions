@@ -738,7 +738,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>HONEY</span><span style={{ color: WHITE }}> GROUP</span>
+            <span style={{ color: GOLD }}>CAMPARI</span><span style={{ color: WHITE }}> PROMOTIONS</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 16px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>Create Account</p>
@@ -746,10 +746,10 @@ export default function RegisterPage() {
 
         {/* Role toggle */}
         <div style={{ display: 'flex', background: '#060605', border: `1px solid ${BLACK_BORDER}`, padding: 4, marginBottom: 24, gap: 4 }}>
-          {(['promoter', 'business', 'supervisor'] as Role[]).map(r => (
+          {(['promoter', 'business'] as Role[]).map(r => (
             <button key={r} onClick={() => switchRole(r)}
               style={{ flex: 1, padding: '11px 8px', background: role === r ? GOLD_FAINT : 'transparent', border: role === r ? `1px solid ${GOLD}44` : '1px solid transparent', color: role === r ? GOLD : GOLD_PALE, fontFamily: FB, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s' }}>
-              {r === 'promoter' ? '◉ Promoter' : r === 'business' ? '◈ Business' : '◆ Supervisor'}
+              {r === 'promoter' ? '◉ Promoter' : '◈ Business'}
             </button>
           ))}
         </div>
@@ -908,7 +908,7 @@ export default function RegisterPage() {
 
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  By creating an account you agree to Honey Group's Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
+                  By creating an account you agree to Campari Promotions' Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
                 </p>
               </div>
             </div>
@@ -1028,7 +1028,7 @@ export default function RegisterPage() {
               <Field label="Confirm Password" type="password" placeholder="••••••••" value={bizConfirmPw} onChange={setBizConfirmPw} focused={focused === 'bizConfirmPw'} onFocus={() => setFocused('bizConfirmPw')} onBlur={() => setFocused(null)} error={errors.bizConfirmPw} />
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Honey Group administrators.
+                  Your business account will be <span style={{ color: GOLD }}>pending review</span> until verified by Campari Promotions administrators.
                 </p>
               </div>
             </div>

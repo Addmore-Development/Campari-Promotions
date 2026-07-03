@@ -199,7 +199,7 @@ export default function PendingApprovalPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 700 }}>
-            <span style={{ color: GL }}>HONEY</span>
+            <span style={{ color: GL }}>CAMPARI</span>
             <span style={{ color: W }}> GROUP</span>
           </div>
           <div style={{ width: 28, height: 1, background: G, margin: '10px auto 0' }} />
@@ -242,7 +242,7 @@ export default function PendingApprovalPage() {
           {!isRejected ? (
             <>
               <p style={{ fontSize: 14, color: WM, lineHeight: 1.75, marginBottom: 24 }}>
-                Your application is being reviewed by the Honey Group admin team. This typically takes
+                Your application is being reviewed by the Campari Promotions admin team. This typically takes
                 <span style={{ color: GL, fontWeight: 600 }}> 1–2 business days</span>. We'll activate your account as soon as your documents have been verified.
               </p>
 
@@ -341,7 +341,7 @@ export default function PendingApprovalPage() {
               <div style={{ background: 'rgba(200,112,96,0.08)', border: '1px solid rgba(200,112,96,0.25)', padding: '16px 20px', marginBottom: 20 }}>
                 <p style={{ fontSize: 14, color: WM, lineHeight: 1.75 }}>
                   {status === 'blacklisted'
-                    ? 'Your account has been suspended. Please contact the Honey Group admin team for further information.'
+                    ? 'Your account has been suspended. Please contact the Campari Promotions admin team for further information.'
                     : 'Unfortunately your application was not approved at this time. You may re-apply with updated documentation.'}
                 </p>
                 {rejectionNote && (
@@ -370,7 +370,7 @@ export default function PendingApprovalPage() {
               )}
 
               <a
-                href="mailto:admin@honeygroup.co.za"
+                href="mailto:admin@camparipromotions.co.za"
                 style={{
                   display: 'block', width: '100%', padding: '12px',
                   background: 'transparent', border: `1px solid ${BB}`,

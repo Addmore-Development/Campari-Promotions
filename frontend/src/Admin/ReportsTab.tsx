@@ -59,7 +59,7 @@ function downloadPDF(title: string, content: string) {
     @media print{body{padding:20px;}}
   </style></head><body>
   <h1>${title}</h1>
-  <div class="meta">Generated: ${new Date().toLocaleString('en-ZA')} · Honey Group Admin Console</div>
+  <div class="meta">Generated: ${new Date().toLocaleString('en-ZA')} · Campari Promotions Admin Console</div>
   ${content}
   </body></html>`
   const blob = new Blob([html], { type: 'text/html' })

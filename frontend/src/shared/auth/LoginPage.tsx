@@ -229,7 +229,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>HONEY</span>
+            <span style={{ color: GOLD }}>CAMPARI</span>
             <span style={{ color: WHITE }}> GROUP</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 18px' }} />
@@ -295,7 +295,7 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <FloatingInput
-              label="Email Address" type="email" placeholder="you@honeygroup.co.za"
+              label="Email Address" type="email" placeholder="you@camparipromotions.co.za"
               value={email} onChange={setEmail}
               focused={focusedField === 'email'}
               onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}

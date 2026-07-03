@@ -99,7 +99,7 @@ export const PromoterApp: React.FC = () => {
           textAlign: 'center',
         }}>
           <p style={{ color: CORAL, fontSize: 15, fontWeight: 700, margin: 0 }}>
-            🚫 Your account has been suspended. Please contact support at support@honeygroup.co.za
+            🚫 Your account has been suspended. Please contact support at support@camparipromotions.co.za
           </p>
         </div>
       )}

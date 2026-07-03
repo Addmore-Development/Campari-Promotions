@@ -17,8 +17,8 @@ export interface UserProfileWithEmail extends UserProfile {
 export const MOCK_PROFILES: UserProfileWithEmail[] = [
   // Approved promoter with complete data
   {
-    userId:      'lebo@honeygroup.co.za',
-    email:       'lebo@honeygroup.co.za',
+    userId:      'lebo@camparipromotions.co.za',
+    email:       'lebo@camparipromotions.co.za',
     fullName:    'Lebo Mokoena',
     idNumber:    '0001125034567',
     dateOfBirth: '2000-01-12',
@@ -42,8 +42,8 @@ export const MOCK_PROFILES: UserProfileWithEmail[] = [
   },
   // Approved promoter with lower reliability score
   {
-    userId:      'thabo@honeygroup.co.za',
-    email:       'thabo@honeygroup.co.za',
+    userId:      'thabo@camparipromotions.co.za',
+    email:       'thabo@camparipromotions.co.za',
     fullName:    'Thabo Nkosi',
     idNumber:    '9505105034567',
     dateOfBirth: '1995-05-10',
@@ -67,8 +67,8 @@ export const MOCK_PROFILES: UserProfileWithEmail[] = [
   },
   // Pending promoter
   {
-    userId:      'nomsa@honeygroup.co.za',
-    email:       'nomsa@honeygroup.co.za',
+    userId:      'nomsa@camparipromotions.co.za',
+    email:       'nomsa@camparipromotions.co.za',
     fullName:    'Nomsa Zulu',
     idNumber:    '9902034567890',
     dateOfBirth: '1999-02-03',
@@ -92,8 +92,8 @@ export const MOCK_PROFILES: UserProfileWithEmail[] = [
   },
   // Rejected promoter with reason
   {
-    userId:      'siya@honeygroup.co.za',
-    email:       'siya@honeygroup.co.za',
+    userId:      'siya@camparipromotions.co.za',
+    email:       'siya@camparipromotions.co.za',
     fullName:    'Siyabonga Dlamini',
     idNumber:    '8807123456789',
     dateOfBirth: '1988-07-12',
@@ -118,8 +118,8 @@ export const MOCK_PROFILES: UserProfileWithEmail[] = [
   },
   // Blacklisted promoter
   {
-    userId:      'zandile@honeygroup.co.za',
-    email:       'zandile@honeygroup.co.za',
+    userId:      'zandile@camparipromotions.co.za',
+    email:       'zandile@camparipromotions.co.za',
     fullName:    'Zandile Khumalo',
     idNumber:    '9201011234567',
     dateOfBirth: '1992-01-01',
@@ -143,8 +143,8 @@ export const MOCK_PROFILES: UserProfileWithEmail[] = [
   },
   // Incomplete promoter (registered but not finished)
   {
-    userId:      'karabo@honeygroup.co.za',
-    email:       'karabo@honeygroup.co.za',
+    userId:      'karabo@camparipromotions.co.za',
+    email:       'karabo@camparipromotions.co.za',
     fullName:    'Karabo Moloi',
     idNumber:    '',
     dateOfBirth: '',
@@ -442,10 +442,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-001',
     jobId: 'j-001',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-001',
-      promoterId: 'lebo@honeygroup.co.za',
+      promoterId: 'lebo@camparipromotions.co.za',
       jobId: 'j-001',
       checkInTime: '2025-06-28T18:02:00Z',
       checkInLocation: { lat: -26.1076, lng: 28.056, accuracy: 12, timestamp: '2025-06-28T18:02:00Z' },
@@ -466,10 +466,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-002',
     jobId: 'j-002',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-002',
-      promoterId: 'lebo@honeygroup.co.za',
+      promoterId: 'lebo@camparipromotions.co.za',
       jobId: 'j-002',
       checkInTime: '2025-07-05T09:10:00Z',
       checkInLocation: { lat: -26.1461, lng: 28.0438, accuracy: 15, timestamp: '2025-07-05T09:10:00Z' },
@@ -492,10 +492,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-003',
     jobId: 'j-003',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-003',
-      promoterId: 'lebo@honeygroup.co.za',
+      promoterId: 'lebo@camparipromotions.co.za',
       jobId: 'j-003',
       issues: [],
       status: 'scheduled',
@@ -505,10 +505,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-004',
     jobId: 'j-004',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-004',
-      promoterId: 'lebo@honeygroup.co.za',
+      promoterId: 'lebo@camparipromotions.co.za',
       jobId: 'j-004',
       checkInTime: new Date().toISOString(),
       checkInLocation: { lat: -26.1778, lng: 28.1214, accuracy: 10, timestamp: new Date().toISOString() },
@@ -521,10 +521,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-005',
     jobId: 'j-006',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-005',
-      promoterId: 'lebo@honeygroup.co.za',
+      promoterId: 'lebo@camparipromotions.co.za',
       jobId: 'j-006',
       checkInTime: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
       checkInLocation: { lat: -33.9055, lng: 18.4197, accuracy: 8, timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
@@ -541,10 +541,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-006',
     jobId: 'j-007',
-    promoterId: 'thabo@honeygroup.co.za',
+    promoterId: 'thabo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-006',
-      promoterId: 'thabo@honeygroup.co.za',
+      promoterId: 'thabo@camparipromotions.co.za',
       jobId: 'j-007',
       issues: [{ id: 'i-2', type: 'other', note: 'No-show', loggedBy: 'admin-001', loggedAt: '2025-06-25T12:15:00Z' }],
       status: 'no_show',
@@ -656,10 +656,10 @@ export const MOCK_SHIFTS: Shift[] = [
   {
     id: 's-012',
     jobId: 'j-009',
-    promoterId: 'thabo@honeygroup.co.za',
+    promoterId: 'thabo@camparipromotions.co.za',
     attendance: {
       shiftId: 's-012',
-      promoterId: 'thabo@honeygroup.co.za',
+      promoterId: 'thabo@camparipromotions.co.za',
       jobId: 'j-009',
       checkInTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       checkInLocation: { lat: -25.9977, lng: 28.1241, accuracy: 12, timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
@@ -702,7 +702,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-001',
     shiftId: 's-001',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     grossAmount: 486,
     deductions: 0,
     netAmount: 486,
@@ -716,7 +716,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-002',
     shiftId: 's-002',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     grossAmount: 800,
     deductions: 50,
     netAmount: 750,
@@ -726,7 +726,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-003',
     shiftId: 's-004',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     grossAmount: 760,
     deductions: 0,
     netAmount: 760,
@@ -738,7 +738,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-004',
     shiftId: 's-005',
-    promoterId: 'lebo@honeygroup.co.za',
+    promoterId: 'lebo@camparipromotions.co.za',
     grossAmount: 1200,
     deductions: 0,
     netAmount: 1200,
@@ -748,7 +748,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-005',
     shiftId: 's-006',
-    promoterId: 'thabo@honeygroup.co.za',
+    promoterId: 'thabo@camparipromotions.co.za',
     grossAmount: 550,
     deductions: 0,
     netAmount: 550,
@@ -808,7 +808,7 @@ export const MOCK_PAYMENTS: Payment[] = [
   {
     id: 'pay-010',
     shiftId: 's-012',
-    promoterId: 'thabo@honeygroup.co.za',
+    promoterId: 'thabo@camparipromotions.co.za',
     grossAmount: 1120,
     deductions: 0,
     netAmount: 1120,

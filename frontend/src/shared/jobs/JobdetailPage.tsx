@@ -142,7 +142,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
           {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Honey Group Promoter Terms & Conditions apply.'}</div>
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promotions Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -400,7 +400,7 @@ export default function JobDetailPage() {
           onMouseEnter={e=>e.currentTarget.style.color=W} onMouseLeave={e=>e.currentTarget.style.color=WM}>
           ← Jobs
         </button>
-        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>HONEY</span><span style={{ color:W }}> GROUP</span></div>
+        <div style={{ fontFamily:FD, fontSize:15, fontWeight:700 }}><span style={{ color:G }}>CAMPARI</span><span style={{ color:W }}> PROMOTIONS</span></div>
         {session
           ? <span style={{ fontSize:11, color:WM, fontFamily:FB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:100 }}>{session.name}</span>
           : <button onClick={()=>navigate('/login')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${BB}`, color:WM, fontFamily:FB, fontSize:11, cursor:'pointer', borderRadius:3 }}>Log In</button>
