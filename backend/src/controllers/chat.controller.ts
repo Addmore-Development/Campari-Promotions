@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { prisma } from '../config';
 import { AuthRequest } from '../middleware/auth';
+import { supabaseAdmin } from '../config/supabase';
 
 // ── GET threads for the current user ────────────────────────────────────────
 export const getMyThreads = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -84,10 +85,35 @@ export const getThreadMessages = async (req: AuthRequest, res: Response): Promis
   }
 };
 
+// ── SUPERVISOR -> ADMIN message-request gating (Instagram-DM style) ────────
+// The supervisor's first message to an admin creates a pending ChatRequest.
+// Everything the supervisor sends after that is blocked until an admin
+// accepts it. Once accepted, the thread behaves like any normal chat.
+async function checkSupervisorAdminGate(senderId: string, senderRole: string, receiverRole: string): Promise<{ blocked: boolean; reason?: string; isFirstMessage?: boolean }> {
+  if (senderRole !== 'SUPERVISOR' || receiverRole !== 'ADMIN') return { blocked: false };
+
+  const existing = await prisma.chatRequest.findUnique({ where: { supervisorId: senderId } });
+
+  if (!existing) {
+    await prisma.chatRequest.create({ data: { supervisorId: senderId, status: 'pending' } });
+    return { blocked: false, isFirstMessage: true };
+  }
+
+  if (existing.status === 'accepted') return { blocked: false };
+
+  if (existing.status === 'pending') {
+    return { blocked: true, reason: 'Your message request is awaiting admin approval. You can only send one message until it is accepted.' };
+  }
+
+  // declined
+  return { blocked: true, reason: 'Your message request was declined by admin.' };
+}
+
 // ── POST send a message ─────────────────────────────────────────────────────
 export const sendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const senderId             = req.user!.id;
+    const senderRole           = req.user!.role;
     const { receiverId, text } = req.body;
 
     if (!receiverId || !text?.trim()) {
@@ -98,11 +124,22 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
     // Verify receiver exists
     const receiver = await prisma.user.findUnique({
       where:  { id: receiverId },
-      select: { id: true },
+      select: { id: true, role: true },
     });
     if (!receiver) {
       res.status(404).json({ error: 'Receiver not found' });
       return;
+    }
+
+    // If this is a supervisor messaging an admin, and they've already sent
+    // their one allowed "request" message and it's still pending/declined,
+    // block further sends until an admin accepts.
+    if (senderRole === 'SUPERVISOR' && receiver.role === 'ADMIN') {
+      const gate = await checkSupervisorAdminGate(senderId, senderRole, receiver.role);
+      if (gate.blocked) {
+        res.status(403).json({ error: gate.reason, requestGated: true });
+        return;
+      }
     }
 
     const msg = await prisma.chatMessage.create({
@@ -113,10 +150,75 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
       },
     });
 
+    // Push live to anyone subscribed to this thread — non-fatal, chat still
+    // works via the existing REST polling if this fails or Realtime isn't set up.
+    try {
+      const threadChannel = [senderId, receiverId].sort().join('__');
+      await supabaseAdmin.channel(`chat:${threadChannel}`).send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: msg,
+      });
+    } catch (broadcastErr) {
+      console.error('[Chat] realtime broadcast failed (non-fatal):', broadcastErr);
+    }
+
     res.json(msg);
   } catch (err) {
     console.error('[Chat] sendMessage error:', err);
     res.status(500).json({ error: 'Failed to send message' });
+  }
+};
+
+// ── GET the current supervisor's own chat-request status ──────────────────
+export const getMyChatRequestStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user!.role !== 'SUPERVISOR') { res.json({ status: 'n/a' }); return; }
+    const request = await prisma.chatRequest.findUnique({ where: { supervisorId: req.user!.id } });
+    res.json({ status: request?.status || 'none' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch chat request status' });
+  }
+};
+
+// ── ADMIN: list pending supervisor message requests ────────────────────────
+export const getPendingChatRequests = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user!.role !== 'ADMIN') { res.status(403).json({ error: 'Admins only' }); return; }
+    const requests = await prisma.chatRequest.findMany({
+      where: { status: 'pending' },
+      include: { supervisor: { select: { id: true, fullName: true, email: true, phone: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch chat requests' });
+  }
+};
+
+// ── ADMIN: accept or decline a supervisor's message request ────────────────
+export const respondToChatRequest = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user!.role !== 'ADMIN') { res.status(403).json({ error: 'Admins only' }); return; }
+    const { supervisorId } = req.params;
+    const { accept } = req.body; // boolean
+
+    const existing = await prisma.chatRequest.findUnique({ where: { supervisorId } });
+    if (!existing) { res.status(404).json({ error: 'No pending request from this supervisor' }); return; }
+
+    const updated = await prisma.chatRequest.update({
+      where: { supervisorId },
+      data: {
+        status: accept ? 'accepted' : 'declined',
+        respondedAt: new Date(),
+        respondedBy: req.user!.id,
+      },
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('[Chat] respondToChatRequest error:', err);
+    res.status(500).json({ error: 'Failed to respond to chat request' });
   }
 };
 
@@ -129,6 +231,25 @@ export const getUnreadCount = async (req: AuthRequest, res: Response): Promise<v
     res.json({ count });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get unread count' });
+  }
+};
+
+// ── SUPERVISOR: re-send a message request after a decline ─────────────────
+export const resendChatRequest = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user!.role !== 'SUPERVISOR') { res.status(403).json({ error: 'Supervisors only' }); return; }
+    const existing = await prisma.chatRequest.findUnique({ where: { supervisorId: req.user!.id } });
+    if (!existing || existing.status !== 'declined') {
+      res.status(400).json({ error: 'No declined request to resend' });
+      return;
+    }
+    const updated = await prisma.chatRequest.update({
+      where: { supervisorId: req.user!.id },
+      data: { status: 'pending', respondedAt: null, respondedBy: null },
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to resend chat request' });
   }
 };
 

@@ -279,6 +279,12 @@ function SidebarContent({
     setOpenGroups(p => ({ ...p, [label]: !p[label] }))
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('hg_session')
+    localStorage.removeItem('hg_token')
+    navigate('/')
+  }
+
   return (
     <div style={{
       display: 'flex',
@@ -557,6 +563,35 @@ function SidebarContent({
         >
           ← Back to Site
         </button>
+
+        <button
+          className="hg-footer-btn"
+          onClick={handleLogout}
+          title={collapsed && !isMobile ? 'Log Out' : undefined}
+          style={{
+            fontSize: 11,
+            color: '#E4E4E4',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: FD,
+            padding: 0,
+            marginTop: 8,
+            letterSpacing: '0.06em',
+            textAlign: 'left' as const,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
+            width: '100%',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#C4614A'}
+          onMouseLeave={e => e.currentTarget.style.color = '#E4E4E4'}
+        >
+          <span style={{ fontSize: 12 }}>⏻</span>
+          {(!collapsed || isMobile) && <span>Log Out</span>}
+        </button>
       </div>
     </div>
   )
@@ -672,7 +707,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Logo — centred */}
         <div style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, letterSpacing: '0.02em', position: 'absolute', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-          <span style={{ color: GL }}>HONEYGROUP</span>
+          <span style={{ color: GL }}>HONEY</span>
           <span style={{ color: W }}> GROUP</span>
         </div>
 

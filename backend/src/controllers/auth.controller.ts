@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prisma, JWT_SECRET, JWT_EXPIRES_IN } from '../config';
 import { AuthRequest } from '../middleware/auth';
 import { auditLog } from '../utils/auditLogger';
+import { syncUserToSupabaseAuth } from '../utils/supabaseAuthSync';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -97,6 +98,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     } catch (auditErr) {
       console.error('[Auth] auditLog failed (non-fatal):', auditErr);
     }
+
+    // Mirror into Supabase Auth — non-fatal, doesn't affect JWT login at all
+    await syncUserToSupabaseAuth({ id: user.id, email: user.email, role: user.role });
 
     // Keep the CRM Client table in sync so this business shows up immediately
     // in admin's PO/budget-tracking and activation-report client dropdowns —

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllJobs, getJobById, createJob, updateJob, deleteJob, getMyJobs, getBusinessJobs, getSupervisorJobs } from "../controllers/job.controller";
+import { getAllJobs, getJobById, createJob, updateJob, deleteJob, getMyJobs, getBusinessJobs, getSupervisorJobs, getSupervisorBusinessInsights } from "../controllers/job.controller";
 import { protect, adminOnly, adminBusinessOrSupervisor } from "../middleware/auth";
 
 // Optional auth middleware — attaches req.user if token present, but does NOT reject if missing.
@@ -30,6 +30,7 @@ router.get("/",        optionalAuth, getAllJobs);
 router.get("/my",      protect, getMyJobs);
 router.get("/business", protect, getBusinessJobs);
 router.get("/supervisor", protect, getSupervisorJobs);
+router.get("/supervisor/insights", protect, getSupervisorBusinessInsights);
 router.get("/:id",     optionalAuth, getJobById);
 router.post("/",       protect, adminBusinessOrSupervisor, createJob);
 router.put("/:id",     protect, adminBusinessOrSupervisor, updateJob);

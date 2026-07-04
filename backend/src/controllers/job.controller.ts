@@ -262,6 +262,131 @@ export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promis
   }
 };
 
+/**
+ * GET /api/jobs/supervisor/insights
+ * Real-time performance & budget snapshot, per business, for every campaign
+ * this supervisor oversees: money in (PO budget) vs money out (committed/
+ * spent), the promoters they work with, and simple "what's working / what
+ * isn't" signals so the supervisor can advise the business on how to improve.
+ * Polled by the frontend on an interval to approximate real-time.
+ */
+export const getSupervisorBusinessInsights = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
+
+    const jobs = await prisma.job.findMany({
+      where: { supervisorId: userId },
+      include: {
+        shifts: {
+          include: {
+            promoter: { select: { id: true, fullName: true, phone: true, email: true, profilePhotoUrl: true, reliabilityScore: true } },
+            payment: true,
+          },
+        },
+        activationReport: true,
+      },
+      orderBy: { date: 'desc' },
+    });
+
+    // Group jobs by business (Client). Fall back to the free-text client
+    // name for jobs created before clientId linking existed.
+    const byBusiness = new Map<string, any>();
+    for (const j of jobs) {
+      const key = j.clientId || `name:${j.client}`;
+      if (!byBusiness.has(key)) {
+        byBusiness.set(key, {
+          businessId: j.clientId || null,
+          businessName: j.client,
+          jobs: [] as typeof jobs,
+        });
+      }
+      byBusiness.get(key).jobs.push(j);
+    }
+
+    // Pull PO budgets for the businesses that have a real clientId.
+    const clientIds = Array.from(byBusiness.values()).map(b => b.businessId).filter(Boolean) as string[];
+    const purchaseOrders = clientIds.length
+      ? await prisma.purchaseOrder.findMany({
+          where: { clientId: { in: clientIds } },
+          include: { commitments: true },
+        })
+      : [];
+
+    const ACTIVE_CE = ['pending', 'approved'];
+
+    const insights = Array.from(byBusiness.values()).map(b => {
+      const pos = purchaseOrders.filter(p => p.clientId === b.businessId);
+      const budgetIn = pos.reduce((s, p) => s + p.amount, 0);
+      const budgetOut = pos.reduce((s, p) => s + p.commitments.filter(c => ACTIVE_CE.includes(c.status)).reduce((s2, c) => s2 + c.amount, 0), 0);
+      const budgetRemaining = budgetIn - budgetOut;
+
+      const allShifts = b.jobs.flatMap((j: any) => j.shifts || []);
+      const promoterMap = new Map<string, any>();
+      allShifts.forEach((s: any) => { if (s.promoter) promoterMap.set(s.promoter.id, s.promoter); });
+      const promoters = Array.from(promoterMap.values());
+
+      const totalSlots = b.jobs.reduce((s: number, j: any) => s + (j.totalSlots || 0), 0);
+      const filledSlots = b.jobs.reduce((s: number, j: any) => s + (j.filledSlots || 0), 0);
+      const fillRate = totalSlots > 0 ? Math.round((filledSlots / totalSlots) * 1000) / 10 : 0;
+
+      const noShows = allShifts.filter((s: any) => s.status === 'NO_SHOW').length;
+      const completed = allShifts.filter((s: any) => s.status === 'COMPLETED' || s.status === 'APPROVED').length;
+      const lateShifts = allShifts.filter((s: any) => (s.lateMinutes || 0) > 0).length;
+      const noShowRate = allShifts.length > 0 ? Math.round((noShows / allShifts.length) * 1000) / 10 : 0;
+
+      const reports = b.jobs.map((j: any) => j.activationReport).filter(Boolean);
+      const unitsServed = reports.reduce((s: number, r: any) => s + (r.unitsServed || 0), 0);
+      const conversions = reports.reduce((s: number, r: any) => s + (r.conversions || 0), 0);
+      const conversionRate = unitsServed > 0 ? Math.round((conversions / unitsServed) * 1000) / 10 : 0;
+
+      // ── Simple, explainable heuristics for "what's working / what's not" ──
+      const working: string[] = [];
+      const notWorking: string[] = [];
+      const suggestions: string[] = [];
+
+      if (fillRate >= 85) working.push(`Strong slot fill rate (${fillRate}%) — staffing demand is being met.`);
+      else if (fillRate > 0) { notWorking.push(`Slot fill rate is only ${fillRate}%.`); suggestions.push('Widen promoter pool or raise the hourly rate to attract more applicants.'); }
+
+      if (noShowRate > 10) { notWorking.push(`No-show rate is ${noShowRate}% across shifts.`); suggestions.push('Tighten check-in reminders or review reliability scores before allocating promoters.'); }
+      else if (allShifts.length > 0) working.push(`Low no-show rate (${noShowRate}%) — the promoter team is reliable.`);
+
+      if (lateShifts > 0) { notWorking.push(`${lateShifts} shift(s) had late arrivals.`); suggestions.push('Consider promoters closer to the venue, or earlier check-in windows.'); }
+
+      if (reports.length > 0) {
+        if (conversionRate >= 20) working.push(`Healthy conversion rate (${conversionRate}%) from activation reports.`);
+        else { notWorking.push(`Conversion rate is ${conversionRate}% on filed reports.`); suggestions.push('Review activation insights/feedback for merchandising or pitch adjustments.'); }
+      }
+
+      if (budgetIn > 0) {
+        const pctUsed = Math.round((budgetOut / budgetIn) * 1000) / 10;
+        if (budgetRemaining < 0) { notWorking.push('Budget has been exceeded on active POs.'); suggestions.push('Flag to admin — this business needs a topped-up PO before further jobs are booked.'); }
+        else if (pctUsed >= 85) { notWorking.push(`${pctUsed}% of PO budget already committed.`); suggestions.push('Give the business early notice that a new PO will be needed soon.'); }
+        else working.push(`Budget healthy — ${100 - pctUsed}% of PO remaining.`);
+      }
+
+      return {
+        businessId: b.businessId,
+        businessName: b.businessName,
+        jobsCount: b.jobs.length,
+        budgetIn, budgetOut, budgetRemaining,
+        promotersCount: promoters.length,
+        promoters: promoters.map((p: any) => ({ id: p.id, fullName: p.fullName, phone: p.phone, email: p.email, profilePhotoUrl: p.profilePhotoUrl, reliabilityScore: p.reliabilityScore })),
+        fillRate, noShowRate, lateShifts, completedShifts: completed,
+        unitsServed, conversions, conversionRate,
+        reportsFiled: reports.filter((r: any) => r.status === 'submitted').length,
+        working, notWorking, suggestions,
+        generatedAt: new Date().toISOString(),
+      };
+    });
+
+    res.json(insights);
+  } catch (err) {
+    console.error('[Job] getSupervisorBusinessInsights error:', err);
+    res.status(500).json({ error: 'Failed to build business insights' });
+  }
+};
+
 // Estimate shift length in hours from "HH:MM" strings, for credit cost calc.
 // Falls back to a sane 8-hour default if the times are missing/invalid.
 function estimateHours(startTime?: string, endTime?: string): number {

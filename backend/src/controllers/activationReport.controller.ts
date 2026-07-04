@@ -2,18 +2,14 @@ import { Response } from 'express';
 import { prisma } from '../config';
 import { AuthRequest } from '../middleware/auth';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { auditLog } from '../utils/auditLogger';
+import { uploadToSupabaseStorage } from '../utils/supabaseStorage';
 
 // ── Multer setup for activation-shot uploads ─────────────────────────────────
-const uploadDir = path.join(process.cwd(), 'uploads', 'activation-shots');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
+// Files are held in memory just long enough to forward to Supabase Storage —
+// nothing is written to local disk, since Render's filesystem doesn't persist
+// across restarts/redeploys.
+const storage = multer.memoryStorage();
 
 export const activationShotUpload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }).fields([
   { name: 'shotSetup', maxCount: 1 },
@@ -83,9 +79,20 @@ export const saveReportForJob = async (req: AuthRequest, res: Response): Promise
     }
 
     const files = (req.files as { [field: string]: Express.Multer.File[] }) || {};
-    const shotSetupUrl    = files.shotSetup?.[0]    ? `/uploads/activation-shots/${files.shotSetup[0].filename}`    : undefined;
-    const shotMidEventUrl = files.shotMidEvent?.[0] ? `/uploads/activation-shots/${files.shotMidEvent[0].filename}` : undefined;
-    const shotCloseUrl    = files.shotClose?.[0]    ? `/uploads/activation-shots/${files.shotClose[0].filename}`    : undefined;
+
+    // Upload any provided shots to Supabase Storage in parallel; each is
+    // undefined if that shot wasn't included in this request.
+    const [shotSetupUrl, shotMidEventUrl, shotCloseUrl] = await Promise.all([
+      files.shotSetup?.[0]
+        ? uploadToSupabaseStorage(files.shotSetup[0].buffer, files.shotSetup[0].originalname, files.shotSetup[0].mimetype)
+        : Promise.resolve(undefined),
+      files.shotMidEvent?.[0]
+        ? uploadToSupabaseStorage(files.shotMidEvent[0].buffer, files.shotMidEvent[0].originalname, files.shotMidEvent[0].mimetype)
+        : Promise.resolve(undefined),
+      files.shotClose?.[0]
+        ? uploadToSupabaseStorage(files.shotClose[0].buffer, files.shotClose[0].originalname, files.shotClose[0].mimetype)
+        : Promise.resolve(undefined),
+    ]);
 
     const reportStatus = status === 'submitted' ? 'submitted' : 'draft';
 

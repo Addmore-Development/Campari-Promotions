@@ -747,7 +747,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>HONEYGROUP</span><span style={{ color: WHITE }}> PROMOTIONS</span>
+            <span style={{ color: GOLD }}>HONEY</span><span style={{ color: WHITE }}> GROUP</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 16px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>Create Account</p>

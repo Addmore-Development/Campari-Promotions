@@ -3,7 +3,7 @@ import { AdminLayout } from '../AdminLayout'
 import { injectAdminMobileStyles } from '../adminMobileStyles'
 import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService'
 import { apiFetch } from '../../shared/services/api'
-import type { PurchaseOrder, CommitmentEntry, CEStatus } from '../../shared/types/purchaseOrder.types'
+import type { PurchaseOrder, CommitmentEntry, CEStatus, POStatus } from '../../shared/types/purchaseOrder.types'
 
 const G   = '#8F8A7C'
 const GL  = '#C9BFA6'
@@ -64,6 +64,11 @@ export default function BudgetTracking() {
   const [poForm, setPoForm] = useState({ clientId: '', poNumber: '', amount: '', periodStart: '', periodEnd: '', description: '' })
   const [poError, setPoError] = useState('')
   const [poSaving, setPoSaving] = useState(false)
+
+  const [showEditPO, setShowEditPO] = useState(false)
+  const [editPoForm, setEditPoForm] = useState({ poNumber: '', amount: '', periodStart: '', periodEnd: '', description: '', status: 'active' as POStatus })
+  const [editPoError, setEditPoError] = useState('')
+  const [editPoSaving, setEditPoSaving] = useState(false)
 
   const [showNewCE, setShowNewCE] = useState(false)
   const [ceForm, setCeForm] = useState({ jobId: '', ceNumber: '', amount: '', notes: '' })
@@ -148,6 +153,44 @@ export default function BudgetTracking() {
       setPoError(err?.message || 'Failed to create purchase order')
     }
     setPoSaving(false)
+  }
+
+  const openEditPO = (p: PurchaseOrder) => {
+    setEditPoError('')
+    setEditPoForm({
+      poNumber: p.poNumber,
+      amount: String(p.amount),
+      periodStart: p.periodStart ? p.periodStart.slice(0, 10) : '',
+      periodEnd: p.periodEnd ? p.periodEnd.slice(0, 10) : '',
+      description: p.description || '',
+      status: p.status,
+    })
+    setShowEditPO(true)
+  }
+
+  const saveEditPO = async () => {
+    if (!selectedPO) return
+    setEditPoError('')
+    if (!editPoForm.poNumber || !editPoForm.amount || !editPoForm.periodStart || !editPoForm.periodEnd) {
+      setEditPoError('PO number, amount and period dates are required.')
+      return
+    }
+    setEditPoSaving(true)
+    try {
+      await purchaseOrdersService.update(selectedPO.id, {
+        poNumber: editPoForm.poNumber,
+        amount: parseInt(editPoForm.amount, 10),
+        periodStart: editPoForm.periodStart,
+        periodEnd: editPoForm.periodEnd,
+        description: editPoForm.description || undefined,
+        status: editPoForm.status,
+      })
+      setShowEditPO(false)
+      loadPOs()
+    } catch (err: any) {
+      setEditPoError(err?.message || 'Failed to update purchase order')
+    }
+    setEditPoSaving(false)
   }
 
   const releaseCE = async (allowOverride: boolean) => {
@@ -300,7 +343,12 @@ export default function BudgetTracking() {
                     {new Date(selectedPO.periodStart).toLocaleDateString()} → {new Date(selectedPO.periodEnd).toLocaleDateString()}
                   </p>
                 </div>
-                <button onClick={() => setSelectedPO(null)} style={{ background: 'transparent', border: 'none', color: W28, cursor: 'pointer', fontSize: 16 }}>✕</button>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <button onClick={() => openEditPO(selectedPO)} style={{ padding: '6px 14px', background: hex2rgba(GL, 0.14), border: `1px solid ${GL}`, color: GL, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>
+                    Edit PO
+                  </button>
+                  <button onClick={() => setSelectedPO(null)} style={{ background: 'transparent', border: 'none', color: W28, cursor: 'pointer', fontSize: 16 }}>✕</button>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, margin: '16px 0 20px' }}>
@@ -393,6 +441,35 @@ export default function BudgetTracking() {
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               <button onClick={() => setShowNewPO(false)} style={{ flex: 1, padding: '11px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
               <button onClick={createPO} disabled={poSaving} style={{ flex: 1.4, padding: '11px 0', background: GL, border: 'none', color: B, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer', opacity: poSaving ? 0.6 : 1 }}>{poSaving ? 'Saving…' : 'Create PO'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit PO modal ── */}
+      {showEditPO && selectedPO && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 8, padding: 28, width: 420 }}>
+            <h3 style={{ fontFamily: FD, fontSize: 18, color: W, marginBottom: 4 }}>Edit Purchase Order</h3>
+            <p style={{ fontSize: 12, color: W28, marginBottom: 18 }}>{selectedPO.client?.name}</p>
+            {editPoError && <p style={{ color: CORAL, fontSize: 12, marginBottom: 12 }}>{editPoError}</p>}
+            <div style={{ display: 'grid', gap: 12 }}>
+              <input placeholder="PO Number" value={editPoForm.poNumber} onChange={e => setEditPoForm(f => ({ ...f, poNumber: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="Amount (R)" type="number" value={editPoForm.amount} onChange={e => setEditPoForm(f => ({ ...f, amount: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type="date" value={editPoForm.periodStart} onChange={e => setEditPoForm(f => ({ ...f, periodStart: e.target.value }))} style={{ flex: 1, background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+                <input type="date" value={editPoForm.periodEnd} onChange={e => setEditPoForm(f => ({ ...f, periodEnd: e.target.value }))} style={{ flex: 1, background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              </div>
+              <select value={editPoForm.status} onChange={e => setEditPoForm(f => ({ ...f, status: e.target.value as POStatus }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }}>
+                <option value="active">Active</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <textarea placeholder="Description (optional)" value={editPoForm.description} onChange={e => setEditPoForm(f => ({ ...f, description: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12, minHeight: 60, resize: 'vertical' as const }} />
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowEditPO(false)} style={{ flex: 1, padding: '11px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEditPO} disabled={editPoSaving} style={{ flex: 1.4, padding: '11px 0', background: GL, border: 'none', color: B, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer', opacity: editPoSaving ? 0.6 : 1 }}>{editPoSaving ? 'Saving…' : 'Save Changes'}</button>
             </div>
           </div>
         </div>

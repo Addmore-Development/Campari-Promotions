@@ -748,7 +748,7 @@ export default function LandingPage() {
       {/* ── NAV ── */}
       <nav className="nav-root" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200, padding: '0 48px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
         <div className="nav-logo" style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.01em', flexShrink: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span style={{ color: GL }}>HONEYGROUP</span><span style={{ color: W }}> PROMOTIONS</span>
+          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
         </div>
 
         {/* Desktop nav links — hidden on mobile */}
@@ -949,7 +949,7 @@ export default function LandingPage() {
           <div className="footer-grid-3col" style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1fr', gap: 80, alignItems: 'start' }}>
             {/* Newsletter */}
             <div>
-              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> PROMOTIONS</span></div>
+              <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 800, marginBottom: 32, letterSpacing: '0.01em' }}><span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span></div>
               <h3 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 12, lineHeight: 1.2 }}>Newsletter Sign-Up</h3>
               <p style={{ fontSize: 13, color: WM, lineHeight: 1.75, fontFamily: FD, marginBottom: 28, maxWidth: 300 }}>Subscribe to receive our latest opportunities and platform updates directly to your inbox.</p>
               <div style={{ marginBottom: 12 }}>
@@ -987,7 +987,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ borderTop: `1px solid ${BB}`, paddingTop: 24 }}>
-                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Honey Promotions. All rights reserved.</p>
+                <p style={{ fontSize: 11, color: WD, fontFamily: FD, marginBottom: 12 }}>©2026 Honey GROUP. All rights reserved.</p>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
                   {['Privacy Policy', 'POPIA Compliant', 'Terms of Use'].map(t => (
                     <span key={t} style={{ fontSize: 10, color: WD, letterSpacing: '0.06em', fontFamily: FD, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = GL} onMouseLeave={e => e.currentTarget.style.color = WD}>{t}</span>

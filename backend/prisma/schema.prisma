@@ -65,6 +65,7 @@ model User {
   sentMessages     ChatMessage[] @relation("SentMessages")
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
   activationReports ActivationReport[] @relation("ActivationReportSubmitter")
+  chatRequest       ChatRequest?       @relation("SupervisorChatRequest")
 
 }
 
@@ -217,6 +218,24 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
+
+// ── Chat "message request" gating (Instagram-DM style) ─────────────────────
+// A SUPERVISOR's first message to the admin team creates a pending request.
+// Nothing else the supervisor sends is delivered until an admin accepts it.
+// Scoped to supervisor→admin for now since that's the only gated relationship
+// requested; other roles chat freely via ChatMessage as before.
+model ChatRequest {
+  id           String    @id @default(uuid())
+  supervisorId String    @unique
+  status       String    @default("pending") // pending | accepted | declined
+  createdAt    DateTime  @default(now())
+  respondedAt  DateTime?
+  respondedBy  String?
+
+  supervisor User @relation("SupervisorChatRequest", fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@map("chat_requests")
+}
 
 enum Role {
   PROMOTER

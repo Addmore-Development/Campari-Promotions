@@ -43,8 +43,10 @@ interface Job {
   status: string; filters?: any; termsAndConditions?: string;
   applications?: any[]; createdAt?: string;
   purchaseOrderId?: string;
+  supervisorId?: string; supervisor?: { id: string; fullName: string; email?: string };
 }
 interface Client { id?: string; name: string; email?: string; }
+interface SupervisorOpt { id: string; name: string; email?: string; }
 interface PurchaseOrderOpt { id: string; poNumber: string; clientId?: string; amount: number; committedAmount: number; remainingAmount: number; client?: { id: string; name: string } }
 
 const EMPTY_FORM = {
@@ -55,7 +57,7 @@ const EMPTY_FORM = {
   date: '', endDate: '', startTime: '09:00', endTime: '17:00',
   hourlyRate: '', totalSlots: '4', filledSlots: '0',
   status: 'OPEN', filters: {} as any, termsAndConditions: '',
-  purchaseOrderId: '',
+  purchaseOrderId: '', supervisorId: '',
 };
 
 const STATUS_OPTS = ['OPEN', 'FILLED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
@@ -317,6 +319,7 @@ const JobsPageContent: React.FC = () => {
   const [search,   setSearch]   = useState('');
   const [statusF,  setStatusF]  = useState('all');
   const [clients,  setClients]  = useState<Client[]>([]);
+  const [supervisors, setSupervisors] = useState<SupervisorOpt[]>([]);
   const [deleting, setDeleting] = useState<string|null>(null);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderOpt[]>([]);
   const [poNotice, setPoNotice] = useState('');
@@ -370,6 +373,13 @@ const JobsPageContent: React.FC = () => {
     } catch {}
   };
 
+  const loadSupervisors = async () => {
+    try {
+      const res = await fetch(`${API}/users?role=SUPERVISOR`,{headers:authHdr() as any});
+      if(res.ok){ const data=await res.json(); setSupervisors(data.map((u:any)=>({id:u.id,name:u.fullName,email:u.email}))); }
+    } catch {}
+  };
+
   // Approved businesses' purchase orders — used to link a job to a PO so its
   // cost can be deducted from that client's budget automatically.
   const loadPurchaseOrders = async () => {
@@ -383,7 +393,16 @@ const JobsPageContent: React.FC = () => {
     } catch { /* non-fatal — PO linking is optional */ }
   };
 
-  useEffect(()=>{ loadJobs(); loadClients(); loadPurchaseOrders(); },[]);
+  useEffect(()=>{ loadJobs(); loadClients(); loadPurchaseOrders(); loadSupervisors(); },[]);
+
+  // ── Poll so a promoter applying to a job shows up here (and in the
+  //    business/supervisor dashboards) without needing a manual refresh ──────
+  useEffect(() => {
+    const poll = setInterval(loadJobs, 20000);
+    const onFocus = () => loadJobs();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(poll); window.removeEventListener('focus', onFocus); };
+  }, []);
 
   const F = (key: string, val: any) => setForm(f=>({...f,[key]:val}));
 
@@ -417,6 +436,7 @@ const JobsPageContent: React.FC = () => {
       filledSlots:String(job.filledSlots||0),status:job.status||'OPEN',
       filters:job.filters||{},termsAndConditions:job.termsAndConditions||'',
       purchaseOrderId: job.purchaseOrderId || '',
+      supervisorId: job.supervisorId || job.supervisor?.id || '',
     });
     setEditing(job); setError(''); setPoNotice(''); setModal('edit');
   };
@@ -488,6 +508,7 @@ const JobsPageContent: React.FC = () => {
     };
     if(selectedClient?.id) body.clientId=selectedClient.id;
     if(form.purchaseOrderId) body.purchaseOrderId=form.purchaseOrderId;
+    body.supervisorId = form.supervisorId || null;
 
     try {
       const method=modal==='edit'&&editing?'PUT':'POST';
@@ -700,6 +721,18 @@ const JobsPageContent: React.FC = () => {
                         Estimated cost: <strong style={{ color:GL }}>R{estimatedCost.toLocaleString('en-ZA')}</strong> (rate × slots × shift hours) will be deducted from <strong style={{ color:GL }}>{selectedPO?.poNumber}</strong> when this job is created.
                       </p>
                     </div>
+                  )}
+                </div>
+
+                {/* ── Supervisor assignment — who oversees this job on the ground ── */}
+                <div style={{ background:'rgba(170,160,135,0.04)',border:`1px solid ${BB}`,borderRadius:3,padding:'14px 12px' }}>
+                  <div style={{ fontSize:9,letterSpacing:'0.22em',textTransform:'uppercase',color:GL,fontWeight:700,marginBottom:10 }}>☺ Assign Supervisor</div>
+                  <select style={sel} value={form.supervisorId} onChange={e=>F('supervisorId',e.target.value)}>
+                    <option value="">— No supervisor assigned —</option>
+                    {supervisors.map(s=><option key={s.id} value={s.id}>{s.name}{s.email?` (${s.email})`:''}</option>)}
+                  </select>
+                  {supervisors.length===0 && (
+                    <p style={{ fontSize:11,color:WD,marginTop:8 }}>No supervisor accounts found yet.</p>
                   )}
                 </div>
 

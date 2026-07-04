@@ -131,6 +131,7 @@ export function AdminChatTab() {
   const [newFilter,    setNewFilter   ] = useState<'all'|'promoter'|'business'>('all')
   const [sending,      setSending     ] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const pollRef   = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -169,16 +170,40 @@ export function AdminChatTab() {
     setLoadingUsers(false)
   }, [])
 
+  // ── Instagram-DM-style message requests from supervisors ──────────────────
+  const loadPendingRequests = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/chat/requests`, { headers: authHdr() })
+      if (res.ok) setPendingRequests(await res.json())
+    } catch {}
+  }, [])
+
+  const respondToRequest = async (supervisorId: string, accept: boolean) => {
+    try {
+      const res = await fetch(`${API}/chat/requests/${supervisorId}/respond`, {
+        method: 'POST',
+        headers: { ...authHdr(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept }),
+      })
+      if (res.ok) {
+        setPendingRequests(prev => prev.filter(r => r.supervisorId !== supervisorId))
+        loadThreads()
+      }
+    } catch {}
+  }
+
   // Poll for new threads + messages every 4 s
   useEffect(() => {
     loadThreads()
+    loadPendingRequests()
     const ref = setInterval(() => {
       loadThreads()
+      loadPendingRequests()
       if (activeThread) loadMessages(activeThread.otherId)
     }, 4000)
     pollRef.current = ref
     return () => clearInterval(ref)
-  }, [loadThreads, loadMessages, activeThread])
+  }, [loadThreads, loadMessages, loadPendingRequests, activeThread])
 
   const selectThread = async (t: Thread) => {
     setActiveThread(t)
@@ -282,6 +307,34 @@ export function AdminChatTab() {
 
         {/* ── Thread list ── */}
         <div style={{ background: D2, borderRight: `1px solid ${BB}`, display: 'flex', flexDirection: 'column' }}>
+          {pendingRequests.length > 0 && (
+            <div style={{ padding: '12px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0, background: 'rgba(201,191,166,0.06)' }}>
+              <div style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: GL, fontWeight: 700, marginBottom: 8, fontFamily: FD }}>
+                Message Requests ({pendingRequests.length})
+              </div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {pendingRequests.map((r: any) => (
+                  <div key={r.id} style={{ background: BB2, border: `1px solid ${BB}`, borderRadius: 4, padding: '8px 10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <Avatar name={r.supervisor?.fullName || 'Supervisor'} role="supervisor" />
+                      <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.supervisor?.fullName}</div>
+                    </div>
+                    <p style={{ fontSize: 10.5, color: W28, marginBottom: 8, fontFamily: FD }}>wants to send you a message</p>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => respondToRequest(r.supervisorId, true)}
+                        style={{ flex: 1, padding: '5px 0', background: `linear-gradient(135deg,${GL},${G})`, border: 'none', color: B, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
+                        Accept
+                      </button>
+                      <button onClick={() => respondToRequest(r.supervisorId, false)}
+                        style={{ flex: 1, padding: '5px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0 }}>
             <input placeholder="Search conversations…" value={search} onChange={e => setSearch(e.target.value)}
               style={{ ...inp, marginBottom: 10, fontSize: 12 }}

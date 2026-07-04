@@ -11,6 +11,8 @@ import { SupervisorActivations } from './activations/SupervisorActivations'
 import { SupervisorJobs } from './jobs/SupervisorJobs'
 import { SupervisorFileReport } from './reports/SupervisorFileReport'
 import { SupervisorReportsTab } from './reports/SupervisorReportsTab'
+import { SupervisorBusinessInsights } from './reports/SupervisorBusinessInsights'
+import { SupervisorAdminChat } from './chat/SupervisorAdminChat'
 import { SupervisorProfile } from './profile/SupervisorProfile'
 import { useAuth } from '../shared/hooks/useAuth'
 
@@ -29,10 +31,12 @@ export const SupervisorApp: React.FC = () => {
     <SupervisorLayout>
       {tab === 'dashboard'         && <SupervisorDashboard onNavigate={goTo} />}
       {tab === 'clients'           && <SupervisorClients />}
+      {tab === 'insights'          && <SupervisorBusinessInsights />}
       {tab === 'activations'       && <SupervisorActivations onNavigate={goTo} />}
       {tab === 'jobs'              && <SupervisorJobs />}
       {tab === 'activation-report' && <SupervisorFileReport />}
       {tab === 'reports'           && <SupervisorReportsTab />}
+      {tab === 'chat'              && <SupervisorAdminChat />}
       {tab === 'profile'           && <SupervisorProfile />}
     </SupervisorLayout>
   )

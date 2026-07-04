@@ -93,7 +93,7 @@ export default function AboutPage() {
       }}>
         <div style={{ fontFamily: FD, fontSize: 20, fontWeight: 800, cursor: 'pointer' }}
           onClick={() => navigate('/')}>
-          <span style={{ color: GL }}>HONEYGROUP</span><span style={{ color: W }}> PROMOTIONS</span>
+          <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
         </div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => navigate('/jobs')}
@@ -157,7 +157,7 @@ export default function AboutPage() {
             color: W, marginBottom: 32,
           }}>
             About<br />
-            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>HoneyS Group.</span>
+            <span style={{ color: 'transparent', WebkitTextStroke: `2px ${GL}` }}>Honey Group.</span>
           </h1>
           <p style={{ fontSize: 16, color: W55, lineHeight: 1.85, maxWidth: 620, fontFamily: FD, marginBottom: 48 }}>
             South Africa's premier promoter management platform. We connect brands with verified, reliable promoters across 12 cities — powered by GPS technology, smart payroll, and real-time operations.

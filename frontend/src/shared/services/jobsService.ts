@@ -119,6 +119,15 @@ export const jobsService = {
     }
   },
 
+  async getSupervisorInsights(): Promise<any[]> {
+    try {
+      return await apiFetch<any[]>('/jobs/supervisor/insights')
+    } catch (err) {
+      console.error('[jobsService] getSupervisorInsights error:', err)
+      return []
+    }
+  },
+
   // Supervisor portal — EVERY campaign/job across every client, admin-style,
   // so a supervisor can browse the full operation, not just what they're
   // assigned to. Raw shape (client, applications, shifts, activationReport)
