@@ -1,0 +1,215 @@
+import { useState, useEffect, useCallback } from 'react'
+import { purchaseOrdersService } from '../shared/services/purchaseOrdersService'
+
+const BLK2  = '#070706'
+const BLK3  = '#0A0A08'
+const GL    = '#C9BFA6'
+const GD    = '#7A756A'
+const GD2   = '#8A8474'
+const GD3   = '#443F36'
+const BB    = 'rgba(170,160,135,0.16)'
+const W     = '#F8F8F8'
+const W4    = 'rgba(248,248,248,0.40)'
+const FD    = "'Playfair Display', Georgia, serif"
+const FB    = "'DM Sans', system-ui, sans-serif"
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+function authHdr(): Record<string, string> {
+  const t = localStorage.getItem('hg_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+function hex2rgba(hex: string, a: number) {
+  const h = hex.replace('#', '')
+  return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`
+}
+
+interface MyJob {
+  id: string; title: string; venue: string; date: string
+  hourlyRate: number; totalSlots: number; filledSlots: number; status: string
+}
+interface LedgerEntry {
+  id: string; type: 'topup' | 'spend' | 'refund'; createdAt: string
+  amount: number; description: string
+}
+
+function downloadCSV(filename: string, headers: string[], rows: (string | number)[][]) {
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`
+  const lines = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))]
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+function downloadExcel(filename: string, headers: string[], rows: (string | number)[][]) {
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`
+  const lines = [headers.map(escape).join('\t'), ...rows.map(r => r.map(escape).join('\t'))]
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'application/vnd.ms-excel;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+function downloadPDF(title: string, subtitle: string, headers: string[], rows: (string | number)[][]) {
+  const rowsHtml = rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+  <style>
+    body{font-family:Georgia,serif;color:#12120D;background:#fff;padding:40px;max-width:900px;margin:0 auto;}
+    h1{font-size:22px;border-bottom:2px solid #8F8A7C;padding-bottom:12px;margin-bottom:6px;color:#050504;}
+    .meta{font-size:11px;color:#888;margin-bottom:26px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th{background:#8F8A7C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;}
+    td{padding:7px 10px;border-bottom:1px solid #DBDBDB;font-size:11.5px;}
+    tr:nth-child(even) td{background:#F9F9F9;}
+    @media print{body{padding:16px;}}
+  </style></head><body>
+  <h1>${title}</h1>
+  <div class="meta">${subtitle} · Generated ${new Date().toLocaleString('en-ZA')}</div>
+  <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rowsHtml}</tbody></table>
+  </body></html>`
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const w = window.open(url, '_blank')
+  if (w) { w.onload = () => { w.print(); URL.revokeObjectURL(url) } }
+  else { URL.revokeObjectURL(url) }
+}
+
+const todayStr = () => new Date().toISOString().slice(0, 10)
+
+export default function BusinessReports() {
+  const [jobs, setJobs] = useState<MyJob[]>([])
+  const [jobsLoading, setJobsLoading] = useState(true)
+
+  const [poSummary, setPoSummary] = useState<any>(null)
+  const [poLoading, setPoLoading] = useState(true)
+
+  const [ledger, setLedger] = useState<LedgerEntry[]>([])
+  const [ledgerLoading, setLedgerLoading] = useState(true)
+
+  const loadJobs = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/jobs`, { headers: authHdr() as any })
+      if (res.ok) setJobs(await res.json())
+    } catch { /* offline */ }
+    setJobsLoading(false)
+  }, [])
+
+  const loadPOs = useCallback(async () => {
+    try {
+      const summary = await purchaseOrdersService.getMyBudget()
+      setPoSummary(summary)
+    } catch { /* offline */ }
+    setPoLoading(false)
+  }, [])
+
+  const loadLedger = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/users/me/credit/ledger`, { headers: authHdr() as any })
+      if (res.ok) {
+        const data = await res.json()
+        setLedger(data.entries || [])
+      }
+    } catch { /* offline */ }
+    setLedgerLoading(false)
+  }, [])
+
+  useEffect(() => { loadJobs(); loadPOs(); loadLedger() }, [loadJobs, loadPOs, loadLedger])
+
+  // -- My Jobs Register ----------------------------------------------------
+  const jobsHeaders = ['Title','Venue','Date','Rate (R/hr)','Slots','Filled','Status']
+  const jobsRows = jobs.map(j => [
+    j.title, j.venue || '—',
+    j.date ? new Date(j.date).toLocaleDateString('en-ZA') : '—',
+    j.hourlyRate, j.totalSlots, j.filledSlots, j.status,
+  ])
+
+  // -- My Purchase Orders --------------------------------------------------
+  const poHeaders = ['PO Number','Amount (R)','Committed (R)','Remaining (R)','Status']
+  const poRows = (poSummary?.purchaseOrders || []).map((po: any) => [
+    po.poNumber, po.amount, po.committedAmount, po.remainingAmount, po.status,
+  ])
+
+  // -- My Transaction Ledger -----------------------------------------------
+  const ledgerHeaders = ['Date','Type','Description','Amount (R)']
+  const ledgerRows = ledger.map(e => [
+    new Date(e.createdAt).toLocaleDateString('en-ZA'),
+    e.type === 'topup' ? 'Top-Up' : e.type === 'refund' ? 'Refund' : 'Campaign Spend',
+    e.description,
+    e.type === 'spend' ? -e.amount : e.amount,
+  ])
+
+  return (
+    <div>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 9, letterSpacing: '0.36em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Finance · Reports</div>
+        <h1 style={{ fontFamily: FD, fontSize: 'clamp(22px,3vw,34px)', fontWeight: 700, color: W }}>Reports &amp; Exports</h1>
+        <p style={{ fontSize: 13, color: W4, marginTop: 6, fontFamily: FB }}>Download your jobs, purchase orders, and transaction history.</p>
+      </div>
+
+      {(jobsLoading || poLoading || ledgerLoading) ? (
+        <div style={{ padding: 40, textAlign: 'center', color: W4, fontFamily: FD }}>Loading report data…</div>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: BB, marginBottom: 28 }}>
+            {[
+              { label: 'Total Jobs',       value: jobs.length,                                   color: GL  },
+              { label: 'Purchase Orders',  value: poSummary?.purchaseOrders?.length || 0,         color: GD  },
+              { label: 'Remaining Budget', value: `R${(poSummary?.totalRemaining || 0).toLocaleString('en-ZA')}`, color: GD2 },
+              { label: 'Ledger Entries',   value: ledger.length,                                  color: GL  },
+            ].map((s, i) => (
+              <div key={i} style={{ background: BLK2, padding: '20px 20px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${GD3},${s.color},${GD3})` }} />
+                <div style={{ fontFamily: FD, fontSize: 26, fontWeight: 700, color: W, lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 9, color: W4, marginTop: 6, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: FD }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+            {[
+              {
+                icon: '??', title: 'My Jobs Register', desc: 'All campaigns you have posted, with slots and status.', color: GL,
+                headers: jobsHeaders, rows: jobsRows, filePrefix: 'my-jobs', empty: 'No jobs posted yet',
+              },
+              {
+                icon: '??', title: 'My Purchase Orders', desc: 'Your POs with committed and remaining budget.', color: GD,
+                headers: poHeaders, rows: poRows, filePrefix: 'my-purchase-orders', empty: 'No purchase orders yet',
+              },
+              {
+                icon: '??', title: 'My Transaction Ledger', desc: 'Every top-up and campaign spend against your balance.', color: GD2,
+                headers: ledgerHeaders, rows: ledgerRows, filePrefix: 'my-ledger', empty: 'No transactions yet',
+              },
+            ].map((card, i) => (
+              <div key={i} style={{ background: BLK2, border: `1px solid ${BB}`, borderRadius: 4, padding: '20px 20px 18px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${card.color},${hex2rgba(card.color,0.3)})` }} />
+                <div style={{ fontSize: 20, marginBottom: 10 }}>{card.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: W, fontFamily: FD, marginBottom: 6 }}>{card.title}</div>
+                <div style={{ fontSize: 12, color: W4, fontFamily: FB, lineHeight: 1.6, marginBottom: 14 }}>{card.desc}</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <button onClick={() => card.rows.length ? downloadCSV(`honeygroup-promotions-${card.filePrefix}-${todayStr()}.csv`, card.headers, card.rows) : null}
+                    style={{ padding: '6px 12px', background: `linear-gradient(135deg,${card.color},${hex2rgba(card.color,0.8)})`, border: `1px solid ${card.color}`, color: '#050504', fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', borderRadius: 3 }}>
+                    ? CSV
+                  </button>
+                  <button onClick={() => card.rows.length ? downloadExcel(`honeygroup-promotions-${card.filePrefix}-${todayStr()}.xls`, card.headers, card.rows) : null}
+                    style={{ padding: '6px 12px', background: 'transparent', border: `1px solid ${card.color}`, color: card.color, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', borderRadius: 3 }}>
+                    ? Excel
+                  </button>
+                  <button onClick={() => card.rows.length ? downloadPDF(card.title, 'HoneyGroup Promotions', card.headers, card.rows) : null}
+                    style={{ padding: '6px 12px', background: 'transparent', border: `1px solid ${card.color}`, color: card.color, fontFamily: FD, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', borderRadius: 3 }}>
+                    ? PDF
+                  </button>
+                </div>
+                {card.rows.length === 0 && (
+                  <div style={{ marginTop: 10, fontSize: 10, color: '#C4614A' }}>? {card.empty}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

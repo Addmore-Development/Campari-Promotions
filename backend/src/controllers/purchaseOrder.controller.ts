@@ -350,3 +350,59 @@ export const updateCommitment = async (req: AuthRequest, res: Response): Promise
     res.status(500).json({ error: 'Failed to update commitment entry' });
   }
 };
+
+// â”€â”€ Business self-service top-up â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// A BUSINESS user tops up their own budget. Rather than touching the legacy
+// User.creditBalance field (which admin's Budget Tracking never reads), this
+// creates a brand-new active PurchaseOrder for the caller's linked Client
+// record, so it shows up immediately in admin's PO list and totals.
+export const selfTopUpBudget = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'BUSINESS') {
+      res.status(403).json({ error: 'Only business accounts can top up their own budget' });
+      return;
+    }
+
+    const amount = parseInt(req.body?.amount, 10);
+    if (!amount || amount <= 0) {
+      res.status(400).json({ error: 'A positive top-up amount is required' });
+      return;
+    }
+    if (amount > 10_000_000) {
+      res.status(400).json({ error: 'Top-up amount exceeds the allowed limit' });
+      return;
+    }
+
+    const { client, error } = await resolveClientRecordForRequest(req);
+    if (error) { res.status(400).json({ error }); return; }
+    if (!client) {
+      res.status(404).json({ error: 'No matching client record found for your account. Contact your account manager to get set up before topping up.' });
+      return;
+    }
+
+    const poNumber = await generatePoNumber();
+    const periodStart = new Date();
+    const periodEnd = new Date();
+    periodEnd.setMonth(periodEnd.getMonth() + 3);
+
+    const po = await prisma.purchaseOrder.create({
+      data: {
+        clientId: client.id,
+        poNumber,
+        amount,
+        periodStart,
+        periodEnd,
+        description: 'Business self-funded top-up',
+        createdBy: req.user!.id,
+      },
+      include: PO_INCLUDE,
+    });
+
+    await auditLog({ userId: req.user!.id, action: 'CREATE_PURCHASE_ORDER', entity: 'PurchaseOrder', entityId: po.id, meta: { amount: po.amount, clientId: client.id, selfTopUp: true } });
+
+    res.status(201).json(summarizePO(po));
+  } catch (err) {
+    console.error('[PurchaseOrder] selfTopUpBudget error:', err);
+    res.status(500).json({ error: 'Failed to top up budget' });
+  }
+};

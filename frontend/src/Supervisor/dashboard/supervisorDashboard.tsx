@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { jobsService } from '../../shared/services/jobsService'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+function authHdr() {
+  const t = localStorage.getItem('hg_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
 const G    = '#8F8A7C'
 const GL   = '#C9BFA6'
 const B    = '#050504'
@@ -25,13 +31,12 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
   const [jobs, setJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [pendingCounts, setPendingCounts] = useState<Record<string, number>>({})
+  const [business, setBusiness] = useState<any>(null)
 
   useEffect(() => {
     jobsService.getSupervisorJobs().then(async j => {
       setJobs(j)
       setLoading(false)
-      // Pull pending (STANDBY) application counts per job so the dashboard
-      // can surface "needs your attention" instead of sitting empty.
       const entries = await Promise.all(j.map(async (job: any) => {
         try {
           const apps = await jobsService.getApplicationsForJob(job.id)
@@ -40,6 +45,13 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
       }))
       setPendingCounts(Object.fromEntries(entries))
     })
+  }, [])
+
+  useEffect(() => {
+    fetch(`${API_URL}/auth/me`, { headers: authHdr() as any })
+      .then(r => r.ok ? r.json() : null)
+      .then(me => { if (me?.business) setBusiness(me.business) })
+      .catch(() => {})
   }, [])
 
   const totalActivations = jobs.length
@@ -75,16 +87,25 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
         </p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:14, marginBottom:24 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:14, marginBottom:24 }}>
         {stat('Total Activations', totalActivations, GL)}
-        {stat('Clients',           uniqueClients,     GL)}
+        <div style={{ background:BC, border:`1px solid ${BB}`, borderRadius:6, padding:'18px 20px', position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${GL},${hex2rgba(GL,0.3)})` }} />
+         <div style={{ fontFamily:FD, fontSize:26, fontWeight:700, color:W }}>{business ? 1 : uniqueClients}</div>
+          <div style={{ fontSize:10, color:WD, marginTop:4, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:FB }}>Clients</div>
+          {business && (
+            <div style={{ fontSize:10.5, color:GL, marginTop:6, fontFamily:FB, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {business.fullName || business.companyName}
+            </div>
+          )}
+        </div>
         {stat('Reports Filed',     reportsFiled,      GREEN)}
         {stat('Drafts Pending',    reportsDraft,       AMBER)}
         {stat('Promoters On Team', totalPromoters,     G)}
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:28 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:12, marginBottom:28 }}>
         {[
           { label:'All Campaigns & Clients', icon:'◎', desc:'Browse every campaign across every client', action:() => onNavigate('activations') },
           { label:'File Activation Report',  icon:'▤', desc:'Log serves, conversions, and insights',       action:() => onNavigate('activation-report') },

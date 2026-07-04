@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { AdminLayout } from '../AdminLayout'
+import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService'
 // adminMobileStyles not used
 
 const G   = '#8F8A7C'
@@ -214,10 +215,31 @@ export default function FullCRUDUsers() {
   }
 
   const updateUserStatus = async (id: string, status: Status) => {
+    // Grab role before the optimistic update mutates state, so we know whether
+    // this approval is a business (and therefore needs a starter PO).
+    const user = users.find(u => u.id === id)
     setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u))
     const token = localStorage.getItem('hg_token')
     const apiDecision = status === 'active' ? 'approved' : 'rejected'
     if (token) fetch(`${API_URL}/admin/users/${id}/approve`, { method:'PUT', headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' }, body:JSON.stringify({ decision: apiDecision }) }).catch(()=>{})
+
+    // ── Auto-create a starter Purchase Order for newly-approved businesses
+    // so they immediately have a budget reflected in Budget Tracking and on
+    // their own dashboard, with no separate manual step for the admin.
+    if (status === 'active' && user?.role === 'client') {
+      const today = new Date()
+      const periodStart = today.toISOString().slice(0,10)
+      const periodEnd = new Date(today.getFullYear(), today.getMonth()+3, today.getDate()).toISOString().slice(0,10)
+      try {
+        await purchaseOrdersService.create({
+          clientId: id,
+          amount: 10000,
+          periodStart,
+          periodEnd,
+          description: 'Auto-created starter PO on business approval',
+        })
+      } catch { /* admin can create one manually in Budget Tracking if this fails */ }
+    }
   }
 
   const F = (key: keyof typeof form, val: string) => setForm(prev => ({ ...prev, [key]: val }))

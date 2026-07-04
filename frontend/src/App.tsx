@@ -25,6 +25,7 @@ import BusinessDashboard            from './Business/Businessdashboard'
 import BusinessJobs                 from './Business/Businessjobs'
 import BusinessTracking             from './Business/Businesstracking'
 import BusinessPayroll              from './Business/Businesspayroll'
+import BusinessReports              from './Business/BusinessReports'
 import JobsPage                     from './shared/jobs/JobsPage'
 
 export default function App() {
@@ -78,6 +79,7 @@ export default function App() {
               <Route path="jobs"      element={<BusinessJobs />}      />
               <Route path="tracking"  element={<BusinessTracking />}  />
               <Route path="payroll"   element={<BusinessPayroll />}   />
+              <Route path="reports"   element={<BusinessReports />}   />
             </Route>
           </Route>
 

@@ -51,27 +51,27 @@ async function main() {
   console.log('Seeding demo accounts...\n');
 
   // ── Business ─────────────────────────────────────────────────────────
-  // Campari Group SA — client running the Courvoisier & Espolon campaign
+  // HoneyGroup SA — client running the Courvoisier & Espolon campaign
   // shown in the Formal On Trade / Main Market schedule.
   const business = await upsertUser({
-    email: 'business@campari-demo.co.za',
-    fullName: 'Campari Group SA',
+    email: 'business@honeygroup-demo.co.za',
+    fullName: 'HoneyGroup SA',
     role: 'BUSINESS',
     phone: '+27 31 000 1000',
     extra: {
-      contactName: 'Campari Group SA',
+      contactName: 'HoneyGroup SA',
       industry: 'FMCG / Beverages',
       vatNumber: '4000123456',
     },
   });
-  console.log('Business:   business@campari-demo.co.za /', PASSWORD);
+  console.log('Business:   business@honeygroup-demo.co.za /', PASSWORD);
 
   // ── Promoters ────────────────────────────────────────────────────────
   const promoterNames = [
     'Lerato Mokoena', 'Musa Dube', 'Thandeka Zulu', 'Sipho Ngcobo', 'Amahle Khumalo',
   ];
   for (let i = 0; i < promoterNames.length; i++) {
-    const email = `promoter${i + 1}@campari-demo.co.za`;
+    const email = `promoter${i + 1}@honeygroup-demo.co.za`;
     await upsertUser({
       email,
       fullName: promoterNames[i],
@@ -92,7 +92,7 @@ async function main() {
   // Two supervisors, matching the two campaign streams on the schedule:
   // Formal On Trade (venues/carwashes/clubs) and Main Market (stores).
   const supervisor1 = await upsertUser({
-    email: 'supervisor1@campari-demo.co.za',
+    email: 'supervisor1@honeygroup-demo.co.za',
     fullName: 'Nomvula Mthembu',
     role: 'SUPERVISOR',
     phone: '+27 71 111 0001',
@@ -101,7 +101,7 @@ async function main() {
   console.log(`Supervisor: ${supervisor1.email} / ${PASSWORD}  (Formal On Trade -> ${business.fullName})`);
 
   const supervisor2 = await upsertUser({
-    email: 'supervisor2@campari-demo.co.za',
+    email: 'supervisor2@honeygroup-demo.co.za',
     fullName: 'Bongani Cele',
     role: 'SUPERVISOR',
     phone: '+27 71 111 0002',

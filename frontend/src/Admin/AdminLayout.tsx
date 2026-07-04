@@ -25,6 +25,7 @@ const NAV_GROUPS = [
     { label: 'Users',                  icon: '⬡', path: '/admin/users',      tab: 'users',         external: true  },
     { label: 'Clients',                icon: '◉', path: '/admin',            tab: 'clients',       external: false },
     { label: 'Registrations',          icon: '▣', path: '/admin',            tab: 'registrations', external: false },
+    { label: 'Supervisors',          icon: '☺', path: '/admin',            tab: 'supervisors',   external: false },
     { label: 'Onboarding',             icon: '✧', path: '/admin/onboarding', tab: 'onboarding',    external: true  },
   ]},
   { label: 'Operations', items: [
@@ -671,7 +672,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Logo — centred */}
         <div style={{ fontFamily: FD, fontSize: 15, fontWeight: 700, letterSpacing: '0.02em', position: 'absolute', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-          <span style={{ color: GL }}>CAMPARI</span>
+          <span style={{ color: GL }}>HONEYGROUP</span>
           <span style={{ color: W }}> GROUP</span>
         </div>
 

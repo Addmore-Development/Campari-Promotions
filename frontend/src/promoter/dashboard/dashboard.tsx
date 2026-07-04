@@ -193,7 +193,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 ? `You have ${allocatedApps.length} confirmed job${allocatedApps.length > 1 ? 's' : ''}`
                 : pendingApps.length > 0
                 ? `${pendingApps.length} application${pendingApps.length > 1 ? 's' : ''} pending review`
-                : 'Welcome back to your Campari Promotions portal'}
+                : 'Welcome back to your HoneyGroup Promotions portal'}
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>

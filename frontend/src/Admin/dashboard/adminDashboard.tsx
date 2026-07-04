@@ -4,8 +4,10 @@ import { AdminLayout } from '../AdminLayout'
 import { AdminChatTab } from '../ChatSystem'
 import { getAllJobsWithAdminJobs, getActiveJobs } from '../../shared/jobs/JobsPage'
 import { injectAdminMobileStyles } from '../adminMobileStyles'
+import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService'
+import type { PurchaseOrder } from '../../shared/types/purchaseOrder.types'
 
-// ─── Palette ──────────────────────────────────────────────────────────────────
+// --- Palette ------------------------------------------------------------------
 const G   = '#8F8A7C'
 const GL  = '#C9BFA6'
 const G2  = '#8A8474'
@@ -36,7 +38,7 @@ const FD   = "'Playfair Display', Georgia, serif"
 const MONO = "'DM Mono', 'Courier New', monospace"
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 function hex2rgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '')
   const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16)
@@ -71,7 +73,7 @@ function bizToClient(u: any, source: 'api'|'local'): any {
   return { id:u.id, name:u.companyName||u.fullName||u.name||'Unknown', contact:u.contactName||u.fullName||u.name||'N/A', email:u.email||'', phone:u.phone||'Not provided', industry:u.industry||'Other', city:u.bizAddress||u.city||'Not specified', website:u.website||'', regNumber:u.regNumber||u.address||'', vatNumber:u.vatNumber||'', registeredDate:u.createdAt?String(u.createdAt).slice(0,10):u.submittedAt?String(u.submittedAt).slice(0,10):new Date().toISOString().slice(0,10), activeSince:u.createdAt?String(u.createdAt).slice(0,7):u.submittedAt?String(u.submittedAt).slice(0,7):new Date().toISOString().slice(0,7), jobsRun:0, totalHours:0, status, budget:'R 0', description:`${u.industry||'Business'} client registered via platform.`, source }
 }
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+// --- Mock data ----------------------------------------------------------------
 const MOCK_LOGINS = [
   { id:'L001', name:'Ayanda Dlamini', email:'ayanda@email.com', role:'promoter', time:'2026-03-11T08:02:00', ip:'196.25.1.4'  },
   { id:'L002', name:'Thabo Nkosi',    email:'thabo@email.com',  role:'promoter', time:'2026-03-11T08:14:00', ip:'196.25.1.7'  },
@@ -109,10 +111,10 @@ const INIT_MESSAGES = [
 ]
 
 const STATIC_ACTIVITY = [
-  { time:'14m ago', msg:'Job #JB-204 filled — 8/8 slots taken',       type:'job',     ts: Date.now() - 14*60*1000 },
+  { time:'14m ago', msg:'Job #JB-204 filled â€” 8/8 slots taken',       type:'job',     ts: Date.now() - 14*60*1000 },
   { time:'22m ago', msg:'Sipho Mhlongo submitted ID document',         type:'doc',     ts: Date.now() - 22*60*1000 },
-  { time:'31m ago', msg:'Payroll batch calculated — R12,400',          type:'payment', ts: Date.now() - 31*60*1000 },
-  { time:'45m ago', msg:'Lerato Mokoena flagged late — Rosebank Mall', type:'flag',    ts: Date.now() - 45*60*1000 },
+  { time:'31m ago', msg:'Payroll batch calculated â€” R12,400',          type:'payment', ts: Date.now() - 31*60*1000 },
+  { time:'45m ago', msg:'Lerato Mokoena flagged late â€” Rosebank Mall', type:'flag',    ts: Date.now() - 45*60*1000 },
 ]
 const TYPE_CLR: Record<string,string> = { checkin:GL, apply:G3, job:G4, doc:G2, payment:GL, flag:'#8A8474', approve:GL, reject:G2 }
 
@@ -136,11 +138,11 @@ function buildLiveActivity(regs: any[]): { time:string; msg:string; type:string;
     const role = r.role === 'business' ? 'Business' : 'Promoter'
 
     if (r.status === 'approved') {
-      events.push({ ts, type: 'approve', msg: `${name} approved ✓ — ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'approve', msg: `${name} approved ? â€” ${role}`, time: timeAgo(ts) })
     } else if (r.status === 'rejected') {
-      events.push({ ts, type: 'reject', msg: `${name} rejected — ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'reject', msg: `${name} rejected â€” ${role}`, time: timeAgo(ts) })
     } else {
-      events.push({ ts, type: 'apply', msg: `New registration: ${name} — ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'apply', msg: `New registration: ${name} â€” ${role}`, time: timeAgo(ts) })
     }
   })
 
@@ -151,7 +153,7 @@ function buildLiveActivity(regs: any[]): { time:string; msg:string; type:string;
     .map(e => ({ ...e, time: e.ts > 0 ? timeAgo(e.ts) : e.time }))
 }
 
-// ─── Shared UI ────────────────────────────────────────────────────────────────
+// --- Shared UI ----------------------------------------------------------------
 function Badge({ label, color, bg, border }: { label:string; color:string; bg?:string; border?:string }) {
   return <span style={{ fontSize:9, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:FD, color, background:bg??statusBg(label), border:`1px solid ${border??statusBorder(label)}`, padding:'3px 10px', borderRadius:3 }}>{label}</span>
 }
@@ -183,7 +185,7 @@ function StatCard({ label, value, sub, color, onClick }: { label:string; value:a
   )
 }
 
-// ─── Detail Modal (for registrations) ────────────────────────────────────────
+// --- Detail Modal (for registrations) ----------------------------------------
 function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose:()=>void; onApprove:()=>void; onReject:()=>void }) {
   const isPromoter = item.role==='promoter'
   const pending    = isPending(item.status)
@@ -197,7 +199,7 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:480, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${accent},${G5})` }} />
-        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>✕</button>
+        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>?</button>
         <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>{isPromoter?'Promoter':'Business'} Application</div>
         <div style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:8 }}>{item.name}</div>
         <div style={{ marginBottom:20 }}><Badge label={item.status} color={statusColor(item.status)} bg={statusBg(item.status)} border={statusBorder(item.status)} /></div>
@@ -207,20 +209,20 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
             <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD }}>{r.value}</span>
           </div>
         ))}
-        {pending&&<div style={{ display:'flex', gap:12, marginTop:24 }}><Btn onClick={onApprove} color={C_ACTIVE}>✓ Approve</Btn><Btn onClick={onReject} color={G2} outline>✗ Reject</Btn></div>}
+        {pending&&<div style={{ display:'flex', gap:12, marginTop:24 }}><Btn onClick={onApprove} color={C_ACTIVE}>? Approve</Btn><Btn onClick={onReject} color={G2} outline>? Reject</Btn></div>}
       </div>
     </div>
   )
 }
 
-// ─── Client Modal ─────────────────────────────────────────────────────────────
+// --- Client Modal -------------------------------------------------------------
 function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:520, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${statusColor(client.status)},${G5})` }} />
-        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>✕</button>
+        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>?</button>
         <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Client Profile</div>
         <div style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:6 }}>{client.name}</div>
         <div style={{ marginBottom:16, display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -228,7 +230,7 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
           <Badge label={client.industry} color={G3} bg={hex2rgba(G3,0.12)} border={hex2rgba(G3,0.38)} />
         </div>
         {client.description&&<div style={{ padding:'12px 14px', background:BB2, border:`1px solid ${BB}`, marginBottom:18, fontSize:13, color:W85, lineHeight:1.6, borderRadius:3, fontFamily:FD }}>{client.description}</div>}
-        {[{label:'Contact',value:client.contact},{label:'Email',value:client.email},{label:'Phone',value:client.phone},{label:'City',value:client.city},{label:'Website',value:client.website||'—'},{label:'Reg. Number',value:client.regNumber||'—'},{label:'Registered',value:client.registeredDate},{label:'Campaigns',value:`${client.jobsRun} campaigns`},{label:'Total Hours',value:`${client.totalHours} hrs`},{label:'Spend',value:client.budget}].map(r=>(
+        {[{label:'Contact',value:client.contact},{label:'Email',value:client.email},{label:'Phone',value:client.phone},{label:'City',value:client.city},{label:'Website',value:client.website||'â€”'},{label:'Reg. Number',value:client.regNumber||'â€”'},{label:'Registered',value:client.registeredDate},{label:'Campaigns',value:`${client.jobsRun} campaigns`},{label:'Total Hours',value:`${client.totalHours} hrs`},{label:'Spend',value:client.budget}].map(r=>(
           <div key={r.label} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:`1px solid ${BB}` }}>
             <span style={{ fontSize:12, color:W55, fontFamily:FD }}>{r.label}</span>
             <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD }}>{r.value}</span>
@@ -243,7 +245,7 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
   )
 }
 
-// ─── DASHBOARD TAB ────────────────────────────────────────────────────────────
+// --- DASHBOARD TAB ------------------------------------------------------------
 function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clients:any[]; msgs:any[]; time:Date; onRoute:(id:string)=>void }) {
   const h = time.getHours()
   const greeting = h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night'
@@ -258,10 +260,10 @@ function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clie
     { label:'Active Clients',    value:clients.filter(c=>c.status==='active').length,                     color:G4, sub:'business clients',      id:'clients'       },
   ]
   const quickActions = [
-    {label:'Registrations',icon:'▣',id:'registrations',color:GL},{label:'Messages',icon:'◆',id:'messages',color:G3},
-    {label:'Live Map',icon:'⊙',id:'map',color:G2},{label:'Clients',icon:'◉',id:'clients',color:GL},
-    {label:'Jobs',icon:'◎',id:'jobs',color:G4},{label:'Complaints',icon:'⚑',id:'reviews',color:GL},
-    {label:'Reports',icon:'▤',id:'reports',color:G3},{label:'Settings',icon:'⚙',id:'settings',color:G2},
+    {label:'Registrations',icon:'?',id:'registrations',color:GL},{label:'Messages',icon:'?',id:'messages',color:G3},
+    {label:'Live Map',icon:'?',id:'map',color:G2},{label:'Clients',icon:'?',id:'clients',color:GL},{label:'Supervisors',icon:'?',id:'supervisors',color:G3},
+    {label:'Jobs',icon:'?',id:'jobs',color:G4},{label:'Complaints',icon:'?',id:'reviews',color:GL},
+    {label:'Reports',icon:'?',id:'reports',color:G3},{label:'Settings',icon:'?',id:'settings',color:G2},
   ]
   return (
     <div className="hg-page" style={{ padding:'40px 48px' }}>
@@ -313,7 +315,7 @@ function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clie
   )
 }
 
-// ─── REGISTRATIONS TAB ────────────────────────────────────────────────────────
+// --- REGISTRATIONS TAB --------------------------------------------------------
 function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[]; onDetail:(r:any)=>void; onApprove:(id:string)=>void; onReject:(id:string)=>void }) {
   const [statusF,setStatusF]=useState('all')
   const [roleF,  setRoleF  ]=useState('all')
@@ -325,7 +327,7 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:24 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People · Registrations</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People Â· Registrations</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Registrations</h1>
           <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>Review and approve promoter and business applications.</p>
         </div>
@@ -352,10 +354,10 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
                 <td data-label="City" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD }}>{r.city}</td>
                 <td data-label="Date" className="hg-col-hide-md" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD }}>{r.date}</td>
                 <td data-label="Status" style={{ padding:'12px 16px' }}><Badge label={r.status} color={statusColor(r.status)} bg={statusBg(r.status)} border={statusBorder(r.status)} /></td>
-                <td data-label="Source" className="hg-col-hide-md" style={{ padding:'12px 16px' }}><span style={{ fontSize:10, fontWeight:700, color:r.source==='real'?GL:W55, fontFamily:FD }}>{r.source==='real'?'● Live':'○ Demo'}</span></td>
+                <td data-label="Source" className="hg-col-hide-md" style={{ padding:'12px 16px' }}><span style={{ fontSize:10, fontWeight:700, color:r.source==='real'?GL:W55, fontFamily:FD }}>{r.source==='real'?'? Live':'? Demo'}</span></td>
                 <td data-label="Actions" style={{ padding:'12px 16px' }}>
                   <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
-                    <button onClick={()=>onDetail(r)} style={{ fontSize:11, color:GL, background:'none', border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700 }}>View →</button>
+                    <button onClick={()=>onDetail(r)} style={{ fontSize:11, color:GL, background:'none', border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700 }}>View ?</button>
                     {isPending(r.status)&&<><button onClick={()=>onApprove(r.id)} style={{ fontSize:10, color:B, background:G3, border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700, padding:'5px 12px', borderRadius:3, letterSpacing:'0.06em' }}>Approve</button><button onClick={()=>onReject(r.id)} style={{ fontSize:10, color:C_REJECTED, background:hex2rgba(G5,0.35), border:`1px solid ${hex2rgba(G2,0.45)}`, cursor:'pointer', fontFamily:FD, fontWeight:700, padding:'5px 12px', borderRadius:3, letterSpacing:'0.06em' }}>Reject</button></>}
                   </div>
                 </td>
@@ -369,7 +371,7 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
   )
 }
 
-// ─── CLIENTS TAB ──────────────────────────────────────────────────────────────
+// --- CLIENTS TAB --------------------------------------------------------------
 function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.Dispatch<React.SetStateAction<any[]>> }) {
   const [statusF,setStatusF]=useState('all')
   const [search, setSearch ]=useState('')
@@ -390,7 +392,7 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:28 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People · Clients</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People Â· Clients</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Client Accounts</h1>
           <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>Businesses registered on the platform who book promoters.</p>
         </div>
@@ -405,14 +407,14 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
           {(['all','active','new','inactive'] as const).map(f=><FilterBtn key={f} label={f} active={statusF===f} color={f==='all'?GL:statusColor(f)} onClick={()=>setStatusF(f)} />)}
         </div>
         <div style={{ position:'relative' }}>
-          <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:W28, fontSize:12, pointerEvents:'none' }}>⌕</span>
-          <input placeholder="Search clients…" value={search} onChange={e=>setSearch(e.target.value)}
+          <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:W28, fontSize:12, pointerEvents:'none' }}>?</span>
+          <input placeholder="Search clientsâ€¦" value={search} onChange={e=>setSearch(e.target.value)}
             style={{ background:D2, border:`1px solid ${BB}`, padding:'7px 14px 7px 28px', color:W, fontFamily:FD, fontSize:11, outline:'none', borderRadius:3, width:200 }}
             onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
         </div>
       </div>
 
-      {/* Client cards grid — mobile friendly */}
+      {/* Client cards grid â€” mobile friendly */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:12 }}>
         {filtered.map((c,i)=>{
           const accent=avatarAccents[i%avatarAccents.length]
@@ -440,8 +442,8 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
                 ))}
               </div>
               <div style={{ marginTop:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <div style={{ fontSize:11, color:W55, fontFamily:FD }}>{c.contact} · {c.email}</div>
-                <span style={{ fontSize:11, color:GL, fontFamily:FD }}>View →</span>
+                <div style={{ fontSize:11, color:W55, fontFamily:FD }}>{c.contact} Â· {c.email}</div>
+                <span style={{ fontSize:11, color:GL, fontFamily:FD }}>View ?</span>
               </div>
             </div>
           )
@@ -456,7 +458,7 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
   )
 }
 
-// ─── LOGINS TAB ───────────────────────────────────────────────────────────────
+// --- LOGINS TAB ---------------------------------------------------------------
 function LoginsTab() {
   const [logins,setLogins]=useState<any[]>(MOCK_LOGINS)
   const [roleF, setRoleF ]=useState('all')
@@ -468,11 +470,11 @@ function LoginsTab() {
       const localLogins:any[]=JSON.parse(stored); if(!localLogins.length) return
       setLogins(prev=>{
         const existingIds=new Set(prev.map(l=>l.id))
-        const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'—'}))
+        const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'â€”'}))
         return [...fresh,...prev]
       })
     } catch {}
-    const onStorage=()=>{try{const stored=localStorage.getItem('hg_login_activity');if(!stored) return;const localLogins:any[]=JSON.parse(stored);setLogins(prev=>{const existingIds=new Set(prev.map(l=>l.id));const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'—'}));return fresh.length?[...fresh,...prev]:prev})}catch{}}
+    const onStorage=()=>{try{const stored=localStorage.getItem('hg_login_activity');if(!stored) return;const localLogins:any[]=JSON.parse(stored);setLogins(prev=>{const existingIds=new Set(prev.map(l=>l.id));const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'â€”'}));return fresh.length?[...fresh,...prev]:prev})}catch{}}
     window.addEventListener('storage',onStorage)
     return ()=>window.removeEventListener('storage',onStorage)
   },[])
@@ -484,9 +486,9 @@ function LoginsTab() {
   return (
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div style={{ marginBottom:24 }}>
-        <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Comms · Activity</div>
+        <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Comms Â· Activity</div>
         <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Login Activity</h1>
-        <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>All non-admin logins · <strong style={{ color:W85 }}>{logins.length}</strong> events recorded</p>
+        <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>All non-admin logins Â· <strong style={{ color:W85 }}>{logins.length}</strong> events recorded</p>
       </div>
 
       <div className="hg-stat-grid hg-stat-grid-3" style={{ background:BB, marginBottom:24 }}>
@@ -512,9 +514,9 @@ function LoginsTab() {
                 <td data-label="User" style={{ padding:'12px 16px' }}><div style={{ fontSize:13, fontWeight:700, color:W, fontFamily:FD }}>{l.name}</div><div style={{ fontSize:11, color:W55, fontFamily:FD }}>{l.email}</div></td>
                 <td data-label="Role" style={{ padding:'12px 16px' }}><Badge label={l.role} color={l.role==='promoter'?G3:GL} bg={hex2rgba(l.role==='promoter'?G3:GL,0.12)} border={hex2rgba(l.role==='promoter'?G3:GL,0.38)} /></td>
                 <td data-label="Time" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD, whiteSpace:'nowrap' }}>
-                  {l.time?new Date(l.time).toLocaleString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}
+                  {l.time?new Date(l.time).toLocaleString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'â€”'}
                 </td>
-                <td data-label="IP" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:MONO }}>{l.ip||'—'}</td>
+                <td data-label="IP" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:MONO }}>{l.ip||'â€”'}</td>
               </tr>
             ))}
           </tbody>
@@ -525,8 +527,8 @@ function LoginsTab() {
   )
 }
 
-// ─── REPORTS TAB ─────────────────────────────────────────────────────────────
-// ── Real download helpers ─────────────────────────────────────────────────────
+// --- REPORTS TAB -------------------------------------------------------------
+// -- Real download helpers -----------------------------------------------------
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a   = document.createElement('a')
@@ -553,11 +555,11 @@ function downloadPDF(htmlContent: string, filename: string) {
 const todayStr = () => new Date().toISOString().slice(0,10)
 
 const PAYROLL_MOCK = [
-  {id:'PAY-001',promoter:'Ayanda Dlamini', email:'ayanda@email.com', bank:'FNB',      job:'Red Bull — Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:0,  status:'pending' },
-  {id:'PAY-002',promoter:'Thabo Nkosi',    email:'thabo@email.com',  bank:'Capitec',  job:'Red Bull — Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:50, status:'pending' },
-  {id:'PAY-003',promoter:'Sipho Mhlongo',  email:'sipho@email.com',  bank:'ABSA',     job:'Nike — Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
-  {id:'PAY-004',promoter:'Zanele Motha',   email:'zanele@email.com', bank:'Standard', job:'Nike — Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
-  {id:'PAY-005',promoter:'Bongani Khumalo',email:'bongani@email.com',bank:'Nedbank',  job:'Savanna — Gateway',      date:'2026-03-06',hours:8,rate:115,deductions:100,status:'exported'},
+  {id:'PAY-001',promoter:'Ayanda Dlamini', email:'ayanda@email.com', bank:'FNB',      job:'Red Bull â€” Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:0,  status:'pending' },
+  {id:'PAY-002',promoter:'Thabo Nkosi',    email:'thabo@email.com',  bank:'Capitec',  job:'Red Bull â€” Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:50, status:'pending' },
+  {id:'PAY-003',promoter:'Sipho Mhlongo',  email:'sipho@email.com',  bank:'ABSA',     job:'Nike â€” Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
+  {id:'PAY-004',promoter:'Zanele Motha',   email:'zanele@email.com', bank:'Standard', job:'Nike â€” Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
+  {id:'PAY-005',promoter:'Bongani Khumalo',email:'bongani@email.com',bank:'Nedbank',  job:'Savanna â€” Gateway',      date:'2026-03-06',hours:8,rate:115,deductions:100,status:'exported'},
   {id:'PAY-006',promoter:'Lerato Mokoena', email:'lerato@email.com', bank:'FNB',      job:'Nedbank Golf Day',       date:'2026-03-05',hours:8,rate:150,deductions:0,  status:'paid'   },
 ]
 const gross=(r:any)=>r.hours*r.rate
@@ -571,10 +573,20 @@ function downloadExcel(rows: string[][], filename: string) {
 function buildTablePDF(title: string, headers: string[], rows: (string|number)[][]): string {
   const ths = headers.map(h=>`<th>${h}</th>`).join('')
   const trs = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-  return `<h1 style="font-family:Georgia;color:#6E6A5E;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">Campari · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
+  return `<h1 style="font-family:Georgia;color:#6E6A5E;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">HoneyGroup Â· Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
 }
 
 function ReportsTab({ regs }: { regs:any[] }) {
+  const [pos, setPos] = useState<PurchaseOrder[]>([])
+  const [posLoading, setPosLoading] = useState(true)
+
+  useEffect(() => {
+    purchaseOrdersService.getAll()
+      .then(setPos)
+      .catch(() => setPos([]))
+      .finally(() => setPosLoading(false))
+  }, [])
+
   const [hourlyRate,setHourlyRate]=useState('120')
   const [hours,     setHours     ]=useState('8')
   const [numPromos, setNumPromos ]=useState('6')
@@ -583,7 +595,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const flash=(msg:string)=>{setNotice(msg);setTimeout(()=>setNotice(''),4000)}
   const activeJobs=getActiveJobs(getAllJobsWithAdminJobs())
 
-  // ── Data builders ──────────────────────────────────────────────────────────
+  // -- Data builders ----------------------------------------------------------
   const payrollHeaders=['ID','Promoter','Email','Bank','Job','Date','Hours','Rate','Gross','Deductions','Net','Status']
   const payrollRows=PAYROLL_MOCK.map(r=>[r.id,r.promoter,r.email,r.bank,r.job,r.date,r.hours,r.rate,gross(r),r.deductions,net(r),r.status])
 
@@ -597,7 +609,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const getJobsData=()=>{
     const stored=localStorage.getItem('hg_admin_jobs'); const jobs=stored?JSON.parse(stored):[]
     const headers=['ID','Title','Client','Location','Date','Pay','Slots','Slots Left','Status']
-    const rows=jobs.length>0?jobs.map((j:any)=>[j.id,j.title,j.company||j.client,j.location||`${j.venue},${j.city}`,j.jobDate||j.date,j.pay||`R${j.hourlyRate}/hr`,j.slots||j.totalSlots,j.slotsLeft??(j.totalSlots-j.filledSlots),j.status]):[['No jobs data — add jobs first']]
+    const rows=jobs.length>0?jobs.map((j:any)=>[j.id,j.title,j.company||j.client,j.location||`${j.venue},${j.city}`,j.jobDate||j.date,j.pay||`R${j.hourlyRate}/hr`,j.slots||j.totalSlots,j.slotsLeft??(j.totalSlots-j.filledSlots),j.status]):[['No jobs data â€” add jobs first']]
     return {headers,rows}
   }
 
@@ -607,6 +619,40 @@ function ReportsTab({ regs }: { regs:any[] }) {
     const rows=users.length>0?users.map((u:any)=>[u.id,u.fullName||u.name,u.email,u.city,u.reliabilityScore??'',u.status,u.createdAt?.slice(0,10)??'']):[['Connect to API to export live data']]
     return {headers,rows}
   }
+
+  // -- Purchase Orders Register ----------------------------------------------
+  const poHeaders = ['PO Number','Client','Amount (R)','Committed (R)','Remaining (R)','% Committed','Status','Period Start','Period End']
+  const poRows = pos.map(p => [
+    p.poNumber, p.client?.name || 'â€”', p.amount, p.committedAmount,
+    p.amount - p.committedAmount, `${p.percentCommitted}%`, p.status,
+    p.periodStart ? new Date(p.periodStart).toLocaleDateString('en-ZA') : 'â€”',
+    p.periodEnd ? new Date(p.periodEnd).toLocaleDateString('en-ZA') : 'â€”',
+  ])
+
+  // -- Commitment Entries (CE) Ledger â€” flattened from all POs ----------------
+  const ceHeaders = ['CE Number','PO Number','Client','Job','Amount (R)','Status','Notes']
+  const ceRows = pos.flatMap(p =>
+    (p.commitments || []).map(ce => [
+      ce.ceNumber || ce.id.slice(0, 8), p.poNumber, p.client?.name || 'â€”',
+      ce.job?.title || 'â€”', ce.amount, ce.status, ce.notes || '',
+    ])
+  )
+
+  // -- Business Financial Summary â€” rollup per client across all their POs ----
+  const bizSummaryMap = new Map<string, { name:string; poCount:number; total:number; committed:number; remaining:number }>()
+  pos.forEach(p => {
+    const key = p.client?.id || p.client?.name || 'unknown'
+    const existing = bizSummaryMap.get(key) || { name: p.client?.name || 'Unknown', poCount: 0, total: 0, committed: 0, remaining: 0 }
+    existing.poCount += 1
+    existing.total += p.amount
+    existing.committed += p.committedAmount
+    existing.remaining += (p.amount - p.committedAmount)
+    bizSummaryMap.set(key, existing)
+  })
+  const bizSummaryHeaders = ['Business','Purchase Orders','Total Value (R)','Committed (R)','Remaining (R)']
+  const bizSummaryRows = Array.from(bizSummaryMap.values())
+    .sort((a, b) => b.total - a.total)
+    .map(b => [b.name, b.poCount, b.total, b.committed, b.remaining])
 
   const campaignSections=Object.entries(PAYROLL_MOCK.reduce((acc:any,r)=>{(acc[r.job]=acc[r.job]||[]).push(r);return acc},{})).map(([job,recs]:any)=>{
     const totalNet=recs.reduce((s:number,r:any)=>s+net(r),0)
@@ -620,51 +666,51 @@ function ReportsTab({ regs }: { regs:any[] }) {
   // Each card has: icon, title, desc, color, and an array of { label, action }
   const cards=[
     {
-      icon:'📄', title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
+      icon:'??', title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`campari-promotions-payroll-${todayStr()}.csv`);flash('✓ Payroll CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`campari-promotions-payroll-${todayStr()}.xls`);flash('✓ Payroll Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`campari-promotions-payroll-${todayStr()}`);flash('✓ Payroll PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.csv`);flash('? Payroll CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.xls`);flash('? Payroll Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`honeygroup-promotions-payroll-${todayStr()}`);flash('? Payroll PDF â€” print/save from your browser')}},
       ]
     },
     {
-      icon:'📋', title:'Campaign Client Report', desc:'Per-client attendance and payout summary grouped by job.', color:GL,
+      icon:'??', title:'Campaign Client Report', desc:'Per-client attendance and payout summary grouped by job.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`campari-promotions-campaign-${todayStr()}.csv`);flash('✓ Campaign CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`campari-promotions-campaign-${todayStr()}.xls`);flash('✓ Campaign Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report — Campari</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`campari-promotions-campaign-${todayStr()}`);flash('✓ Campaign PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.csv`);flash('? Campaign CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.xls`);flash('? Campaign Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report â€” HoneyGroup</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honeygroup-promotions-campaign-${todayStr()}`);flash('? Campaign PDF â€” print/save from your browser')}},
       ]
     },
     {
-      icon:'💼', title:'Jobs Register', desc:'All active and archived jobs with slots, rates, and status.', color:G4,
+      icon:'??', title:'Jobs Register', desc:'All active and archived jobs with slots, rates, and status.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`campari-promotions-jobs-${todayStr()}.csv`);flash('✓ Jobs CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`campari-promotions-jobs-${todayStr()}.xls`);flash('✓ Jobs Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`campari-promotions-jobs-${todayStr()}`);flash('✓ Jobs PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.csv`);flash('? Jobs CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.xls`);flash('? Jobs Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`honeygroup-promotions-jobs-${todayStr()}`);flash('? Jobs PDF â€” print/save from your browser')}},
       ]
     },
     {
-      icon:'👥', title:'Promoter Roster', desc:'Full promoter list with city, reliability scores, and onboarding status.', color:G3,
+      icon:'??', title:'Promoter Roster', desc:'Full promoter list with city, reliability scores, and onboarding status.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`campari-promotions-promoters-${todayStr()}.csv`);flash('✓ Promoters CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`campari-promotions-promoters-${todayStr()}.xls`);flash('✓ Promoters Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`campari-promotions-promoters-${todayStr()}`);flash('✓ Promoters PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.csv`);flash('? Promoters CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.xls`);flash('? Promoters Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`honeygroup-promotions-promoters-${todayStr()}`);flash('? Promoters PDF â€” print/save from your browser')}},
       ]
     },
     {
-      icon:'🏦', title:'EFT Batch File', desc:'Bank-ready payment batch — approved payroll records only.', color:GL,
+      icon:'??', title:'EFT Batch File', desc:'Bank-ready payment batch â€” approved payroll records only.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`campari-promotions-eft-${todayStr()}.csv`);flash(`✓ EFT CSV — ${eftApproved.length} records`)}},
-        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`campari-promotions-eft-${todayStr()}.xls`);flash(`✓ EFT Excel — ${eftApproved.length} records`)}},
-        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`campari-promotions-eft-${todayStr()}`);flash('✓ EFT PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.csv`);flash(`? EFT CSV â€” ${eftApproved.length} records`)}},
+        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.xls`);flash(`? EFT Excel â€” ${eftApproved.length} records`)}},
+        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`honeygroup-promotions-eft-${todayStr()}`);flash('? EFT PDF â€” print/save from your browser')}},
       ]
     },
     {
-      icon:'📊', title:'Attendance Summary', desc:'Shift-level check-in/out records with hours worked per promoter.', color:G4,
+      icon:'??', title:'Attendance Summary', desc:'Shift-level check-in/out records with hours worked per promoter.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`campari-promotions-attendance-${todayStr()}.csv`);flash('✓ Attendance CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`campari-promotions-attendance-${todayStr()}.xls`);flash('✓ Attendance Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`campari-promotions-attendance-${todayStr()}`);flash('✓ Attendance PDF — print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.csv`);flash('? Attendance CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.xls`);flash('? Attendance Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`honeygroup-promotions-attendance-${todayStr()}`);flash('? Attendance PDF â€” print/save from your browser')}},
       ]
     },
   ]
@@ -680,15 +726,21 @@ function ReportsTab({ regs }: { regs:any[] }) {
 
   return (
     <div style={{ padding:'40px 48px' }}>
-      <div style={{ marginBottom:24 }}>
-        <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System · Reporting</div>
-        <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Reports &amp; Exports</h1>
-        <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>Download platform data as CSV, Excel, or printable PDF directly to your device.</p>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+        <div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System - Reporting</div>
+          <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Reports &amp; Exports</h1>
+          <p style={{ fontSize:13, color:W55,marginTop:4, fontFamily:FD }}>Download platform data as CSV, Excel, or printable PDF directly to your device.</p>
+        </div>
+        <button onClick={() => window.location.href = '/admin/budget'}
+          style={{ padding:'11px 20px', background:hex2rgba(GL,0.14), border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.08em', cursor:'pointer', borderRadius:3, whiteSpace:'nowrap' }}>
+          Open Budget Tracking -&gt;
+        </button>
       </div>
 
       {notice&&<div style={{ padding:'12px 16px', background:hex2rgba(GL,0.10), border:`1px solid ${hex2rgba(GL,0.45)}`, borderRadius:4, marginBottom:20, fontSize:13, color:GL, fontFamily:FD, fontWeight:700 }}>{notice}</div>}
 
-      {/* Export cards — 3 columns, 3 buttons each */}
+      {/* Export cards â€” 3 columns, 3 buttons each */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:28 }}>
         {cards.map((card,i)=>(
           <div key={i}
@@ -705,7 +757,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
                   style={{ padding:'6px 12px', background:j===0?`linear-gradient(135deg,${card.color},${hex2rgba(card.color,0.8)})`:'transparent', border:`1px solid ${card.color}`, color:j===0?B:card.color, fontFamily:FD, fontSize:9, fontWeight:700, letterSpacing:'0.1em', cursor:'pointer', textTransform:'uppercase' as const, borderRadius:3, transition:'all 0.18s', whiteSpace:'nowrap' as const }}
                   onMouseEnter={e=>{e.currentTarget.style.opacity='0.82'}}
                   onMouseLeave={e=>{e.currentTarget.style.opacity='1'}}>
-                  ↓ {btn.label}
+                  ? {btn.label}
                 </button>
               ))}
             </div>
@@ -715,7 +767,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
 
       {/* Payout Calculator */}
       <div style={{ background:D2, border:`1px solid ${BB}`, borderRadius:4, padding:'24px', marginBottom:24 }}>
-        <div style={{ fontSize:10, letterSpacing:'0.28em', textTransform:'uppercase', color:GL, marginBottom:20, fontWeight:700, fontFamily:FD }}>◈ Promoter Payout Calculator</div>
+        <div style={{ fontSize:10, letterSpacing:'0.28em', textTransform:'uppercase', color:GL, marginBottom:20, fontWeight:700, fontFamily:FD }}>? Promoter Payout Calculator</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:16, marginBottom:16, alignItems:'flex-end' }}>
           {[{label:'Hourly Rate (R)',val:hourlyRate,set:setHourlyRate},{label:'Hours per Shift',val:hours,set:setHours},{label:'No. of Promoters',val:numPromos,set:setNumPromos}].map(f=>(
             <div key={f.label}>
@@ -730,14 +782,14 @@ function ReportsTab({ regs }: { regs:any[] }) {
           </div>
         </div>
         <div style={{ display:'flex', gap:8 }}>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`campari-promotions-estimate-${todayStr()}.csv`);flash('✓ Estimate CSV downloaded')}}
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.csv`);flash('? Estimate CSV downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${G3}`, color:G3, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(G3,0.15)}
-            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>↓ CSV</button>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`campari-promotions-estimate-${todayStr()}.xls`);flash('✓ Estimate Excel downloaded')}}
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>? CSV</button>
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.xls`);flash('? Estimate Excel downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(GL,0.15)}
-            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>↓ Excel</button>
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>? Excel</button>
         </div>
       </div>
 
@@ -760,11 +812,200 @@ function ReportsTab({ regs }: { regs:any[] }) {
   )
 }
 
-// ─── SETTINGS TAB// ─── SETTINGS TAB ─────────────────────────────────────────────────────────────
+// --- SETTINGS TAB// --- SETTINGS TAB -------------------------------------------------------------
+// --- SUPERVISORS TAB -----------------------------------------------------
+function SupervisorsTab() {
+  const [supervisors, setSupervisors] = useState<any[]>([])
+  const [businesses,  setBusinesses]  = useState<any[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [search,      setSearch]      = useState('')
+  const [showCreate,  setShowCreate]  = useState(false)
+  const [creating,    setCreating]    = useState(false)
+  const [createErr,   setCreateErr]   = useState('')
+  const [createdInfo, setCreatedInfo] = useState<any>(null)
+  const [form, setForm] = useState({ fullName: '', email: '', phone: '', city: '', workField: '', businessId: '' })
+  const [viewing, setViewing] = useState<any>(null)
+
+  const token = () => localStorage.getItem('hg_token')
+  const authHdr = () => { const t = token(); return t ? { Authorization: `Bearer ${t}` } : {} }
+
+  const load = async () => {
+    setLoading(true)
+    try {
+      const [supRes, bizRes] = await Promise.all([
+        fetch(`${API_URL}/users?role=SUPERVISOR`, { headers: authHdr() as any }),
+        fetch(`${API_URL}/users?role=BUSINESS`,   { headers: authHdr() as any }),
+      ])
+      if (supRes.ok) setSupervisors(await supRes.json())
+      if (bizRes.ok) setBusinesses(await bizRes.json())
+    } catch {}
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  const filtered = supervisors.filter(s =>
+    !search || s.fullName?.toLowerCase().includes(search.toLowerCase()) || s.email?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const businessName = (id: string) => businesses.find(b => b.id === id)?.fullName || 'Unassigned'
+
+  const createSupervisor = async () => {
+    setCreateErr(''); setCreatedInfo(null)
+    if (!form.fullName || !form.email || !form.businessId) {
+      setCreateErr('Full name, email, and assigned business are required.')
+      return
+    }
+    setCreating(true)
+    try {
+      const res = await fetch(`${API_URL}/users`, {
+        method: 'POST',
+        headers: { ...authHdr(), 'Content-Type': 'application/json' } as any,
+        body: JSON.stringify({ ...form, role: 'SUPERVISOR' }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setCreatedInfo(data)
+        setForm({ fullName: '', email: '', phone: '', city: '', workField: '', businessId: '' })
+        await load()
+      } else {
+        setCreateErr(data.error || 'Failed to create supervisor')
+      }
+    } catch { setCreateErr('Network error') }
+    setCreating(false)
+  }
+
+  return (
+    <div className="hg-page" style={{ padding: '40px 48px' }}>
+      <div className="hg-page-header" style={{ marginBottom: 24 }}>
+        <div>
+          <div style={{ fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>People - Supervisors</div>
+          <h1 style={{ fontFamily: FD, fontSize: 28, fontWeight: 700, color: W }}>Supervisors</h1>
+          <p style={{ fontSize: 13, color: W55, marginTop: 4, fontFamily: FD }}>Staff accounts that manage jobs and businesses on your behalf.</p>
+        </div>
+        <button onClick={() => { setShowCreate(true); setCreateErr(''); setCreatedInfo(null) }}
+          style={{ padding: '11px 22px', background: `linear-gradient(135deg,${GL},${G})`, border: 'none', color: B, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: 'pointer', borderRadius: 3, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+          + New Supervisor
+        </button>
+      </div>
+
+      <div className="hg-stat-grid hg-stat-grid-3" style={{ background: BB, marginBottom: 24 }}>
+        {[
+          { label: 'Total Supervisors', value: supervisors.length, color: GL },
+          { label: 'Active',            value: supervisors.filter(s => s.status === 'approved').length, color: G3 },
+          { label: 'Businesses Covered', value: new Set(supervisors.map(s => s.businessId).filter(Boolean)).size, color: G4 },
+        ].map((s, i) => <StatCard key={i} label={s.label} value={s.value} color={s.color} />)}
+      </div>
+
+      <div className="hg-filter-row" style={{ marginBottom: 18 }}>
+        <input placeholder="Search supervisors..." value={search} onChange={e => setSearch(e.target.value)}
+          style={{ background: D2, border: `1px solid ${BB}`, padding: '7px 14px', color: W, fontFamily: FD, fontSize: 11, outline: 'none', borderRadius: 3, width: 220 }}
+          onFocus={e => e.currentTarget.style.borderColor = GL} onBlur={e => e.currentTarget.style.borderColor = BB} />
+      </div>
+
+      <div className="hg-table-wrap" style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 4, overflow: 'hidden' }}>
+        <table className="hg-table-cards" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+          <thead><tr style={{ borderBottom: `1px solid ${BB}`, background: D1 }}>
+            {['Name', 'Assigned Business', 'Field', 'City', 'Status', 'Actions'].map(h => (
+              <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: W55, fontFamily: FD }}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {loading && <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: W55 }}>Loading...</td></tr>}
+            {!loading && filtered.length === 0 && <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: W55 }}>No supervisors yet.</td></tr>}
+            {filtered.map((s, i) => (
+              <tr key={s.id} style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${BB}` : 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.background = BB2)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <td style={{ padding: '12px 16px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: W, fontFamily: FD }}>{s.fullName}</div>
+                  <div style={{ fontSize: 11, color: W55, fontFamily: FD }}>{s.email}</div>
+                </td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: GL, fontFamily: FD }}>{businessName(s.businessId)}</td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: W55, fontFamily: FD }}>{s.workField || '-'}</td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: W55, fontFamily: FD }}>{s.city || '-'}</td>
+                <td style={{ padding: '12px 16px' }}>
+                  <Badge label={s.status || 'approved'} color={statusColor(s.status || 'approved')} bg={statusBg(s.status || 'approved')} border={statusBorder(s.status || 'approved')} />
+                </td>
+                <td style={{ padding: '12px 16px' }}>
+                  <button onClick={() => setViewing(s)} style={{ fontSize: 11, color: GL, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>View</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {viewing && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
+          onClick={e => e.target === e.currentTarget && setViewing(null)}>
+          <div style={{ background: D2, border: `1px solid ${BB}`, padding: 40, width: '100%', maxWidth: 460, borderRadius: 4, position: 'relative' }}>
+            <button onClick={() => setViewing(null)} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: W28, fontSize: 18 }}>x</button>
+            <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Supervisor</div>
+            <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 20 }}>{viewing.fullName}</div>
+            {[
+              { label: 'Email', value: viewing.email },
+              { label: 'Phone', value: viewing.phone || '-' },
+              { label: 'City', value: viewing.city || '-' },
+              { label: 'Field Supervised', value: viewing.workField || '-' },
+              { label: 'Assigned Business', value: businessName(viewing.businessId) },
+              { label: 'Status', value: viewing.status },
+              { label: 'Joined', value: viewing.createdAt ? new Date(viewing.createdAt).toLocaleDateString('en-ZA') : '-' },
+            ].map(r => (
+              <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${BB}` }}>
+                <span style={{ fontSize: 12, color: W55, fontFamily: FD }}>{r.label}</span>
+                <span style={{ fontSize: 12, color: W85, fontWeight: 700, fontFamily: FD }}>{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showCreate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 8, padding: 28, width: 440 }}>
+            <h3 style={{ fontFamily: FD, fontSize: 18, color: W, marginBottom: 18 }}>New Supervisor</h3>
+            {createErr && <p style={{ color: '#C4614A', fontSize: 12, marginBottom: 12 }}>{createErr}</p>}
+            {createdInfo && (
+              <div style={{ padding: '12px 14px', background: hex2rgba(G3, 0.12), border: `1px solid ${hex2rgba(G3, 0.4)}`, borderRadius: 4, marginBottom: 14 }}>
+                <p style={{ fontSize: 12, color: GL, fontWeight: 700, marginBottom: 4 }}>Supervisor created.</p>
+                {createdInfo.temporaryPassword && (
+                  <p style={{ fontSize: 11.5, color: W55 }}>Temporary password: <strong style={{ color: W }}>{createdInfo.temporaryPassword}</strong> - share this with them securely.</p>
+                )}
+              </div>
+            )}
+            <div style={{ display: 'grid', gap: 12 }}>
+              <input placeholder="Full Name" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="Phone (optional)" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="City (optional)" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <input placeholder="Field Supervised (e.g. Retail Activations)" value={form.workField} onChange={e => setForm(f => ({ ...f, workField: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
+              <select value={form.businessId} onChange={e => setForm(f => ({ ...f, businessId: e.target.value }))}
+                style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }}>
+                <option value="">Select business to assign...</option>
+                {businesses.map(b => <option key={b.id} value={b.id}>{b.fullName}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowCreate(false)} style={{ flex: 1, padding: '11px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Close</button>
+              <button onClick={createSupervisor} disabled={creating} style={{ flex: 1.4, padding: '11px 0', background: GL, border: 'none', color: B, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer', opacity: creating ? 0.6 : 1 }}>
+                {creating ? 'Creating...' : 'Create Supervisor'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 function SettingsTab() {
   const [saved,    setSaved   ]=useState(false)
-  const [platName, setPlatName]=useState('Campari Promotions')
-  const [email,    setEmail   ]=useState('admin@camparipromotions.co.za')
+  const [platName, setPlatName]=useState('HoneyGroup Promotions')
+  const [email,    setEmail   ]=useState('admin@honeygroup.co.za')
   const [otp,      setOtp     ]=useState("Africa's Talking")
   const [payment,  setPayment ]=useState('Paystack')
   const [geoR,     setGeoR    ]=useState('5')
@@ -784,12 +1025,12 @@ function SettingsTab() {
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:24 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System · Config</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System Â· Config</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Platform Settings</h1>
         </div>
-        <Btn onClick={save}>{saved?'✓ Saved':'Save Changes'}</Btn>
+        <Btn onClick={save}>{saved?'? Saved':'Save Changes'}</Btn>
       </div>
-      {saved&&<div style={{ padding:'12px 16px', background:hex2rgba(G3,0.1), border:`1px solid ${hex2rgba(G3,0.35)}`, marginBottom:20, fontSize:13, color:GL, fontWeight:700, borderRadius:3, fontFamily:FD }}>✓ Settings saved.</div>}
+      {saved&&<div style={{ padding:'12px 16px', background:hex2rgba(G3,0.1), border:`1px solid ${hex2rgba(G3,0.35)}`, marginBottom:20, fontSize:13, color:GL, fontWeight:700, borderRadius:3, fontFamily:FD }}>? Settings saved.</div>}
       <div className="hg-card-grid-2" style={{ gap:1 }}>
         {[{title:'General',fields:[{label:'Platform Name',value:platName,set:setPlatName,type:'text'},{label:'Support Email',value:email,set:setEmail,type:'email'}]},{title:'Geo & Radius',fields:[{label:'Check-in Radius (m)',value:geoR,set:setGeoR,type:'number'},{label:'Job Notification Radius (km)',value:jobR,set:setJobR,type:'number'}]}].map(section=>(
           <div key={section.title} style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
@@ -822,7 +1063,7 @@ function SettingsTab() {
   )
 }
 
-// ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
+// --- MAIN EXPORT --------------------------------------------------------------
 export default function AdminDashboard() {
   const navigate     = useNavigate()
   const [searchParams] = useSearchParams()
@@ -840,7 +1081,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const token = localStorage.getItem('hg_token')
     if (!token) { setRegs(MOCK_REGISTRATIONS); return }
-    // Fetch all users from DB — this is the real source of truth
+    // Fetch all users from DB â€” this is the real source of truth
     fetch(`${API_URL}/admin/registrations`,{headers:{Authorization:`Bearer ${token}`}})
       .then(r=>r.ok?r.json():[])
       .then((data:any[])=>{
@@ -896,11 +1137,14 @@ export default function AdminDashboard() {
     navigate('/admin?tab='+id)
   }
   const updateStatus=(id:string,status:'approved'|'rejected')=>{
+    // Grab role before the optimistic update mutates state, so we know whether
+    // this approval is a business (and therefore needs a starter PO).
+    const reg = regs.find(r=>r.id===id)
     // Optimistic UI update
     setRegs(p=>p.map(r=>r.id!==id?r:{...r,status}))
     setClients(prev=>prev.map(c=>c.id!==id?c:{...c,status:status==='approved'?'active':'inactive'}))
     setDetail(null)
-    // Call the real API — this updates the PostgreSQL database
+    // Call the real API â€” this updates the PostgreSQL database
     const token = localStorage.getItem('hg_token')
     if (token) {
       fetch(`${API_URL}/admin/users/${id}/approve`, {
@@ -909,6 +1153,22 @@ export default function AdminDashboard() {
         body: JSON.stringify({ decision: status }),
       }).catch(() => {})
     }
+
+    // -- Auto-create a starter Purchase Order for newly-approved businesses
+    // so they immediately have a budget reflected in Budget Tracking and on
+    // their own dashboard, with no separate manual step for the admin.
+    if (status === 'approved' && reg?.role === 'business') {
+      const today = new Date()
+      const periodStart = today.toISOString().slice(0,10)
+      const periodEnd = new Date(today.getFullYear(), today.getMonth()+3, today.getDate()).toISOString().slice(0,10)
+      purchaseOrdersService.create({
+        clientId: id,
+        amount: 10000,
+        periodStart,
+        periodEnd,
+        description: 'Auto-created starter PO on business approval',
+      }).catch(() => { /* admin can create one manually in Budget Tracking if this fails */ })
+    }
   }
 
   return (
@@ -916,6 +1176,7 @@ export default function AdminDashboard() {
       {tab==='dashboard'     && <DashboardTab     regs={regs} clients={clients} msgs={msgs} time={time} onRoute={handleRoute} />}
       {tab==='registrations' && <RegistrationsTab regs={regs} onDetail={setDetail} onApprove={id=>updateStatus(id,'approved')} onReject={id=>updateStatus(id,'rejected')} />}
       {tab==='clients'       && <ClientsTab       clients={clients} setClients={setClients} />}
+      {tab==='supervisors'   && <SupervisorsTab />}
       {tab==='logins'        && <LoginsTab />}
       {tab==='messages'      && <AdminChatTab />}
       {tab==='reports'       && <ReportsTab regs={regs} />}

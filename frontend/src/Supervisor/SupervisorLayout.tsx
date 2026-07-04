@@ -16,11 +16,13 @@ const FD    = "'Playfair Display', Georgia, serif"
 const FB    = "'DM Sans', system-ui, sans-serif"
 
 const NAV_ITEMS = [
-  { path: 'dashboard',          icon: '◈', label: 'Dashboard'   },
-  { path: 'activations',        icon: '◎', label: 'Activations' },
-  { path: 'activation-report',  icon: '▤', label: 'File Report' },
-  { path: 'reports',            icon: '▦', label: 'Reports'     },
-  { path: 'profile',            icon: '⬡', label: 'My Profile'  },
+  { path: 'dashboard',          label: 'Dashboard'   },
+  { path: 'clients',            label: 'Clients'     },
+  { path: 'activations',        label: 'Activations' },
+  { path: 'jobs',                label: 'Manage Jobs' },
+  { path: 'activation-report',  label: 'File Report' },
+  { path: 'reports',            label: 'Reports'     },
+  { path: 'profile',            label: 'My Profile'  },
 ]
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -72,13 +74,13 @@ export const SupervisorLayout: React.FC<{ children: ReactNode }> = ({ children }
         <div style={{ padding:collapsed?'24px 0':'24px 20px', borderBottom:`1px solid ${BB}`, display:'flex', alignItems:'center', justifyContent:collapsed?'center':'space-between' }}>
           {!collapsed && (
             <div style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}>
-              <span style={{ color:GL }}>CAMPARI</span>
+              <span style={{ color:GL }}>HONEYGROUP</span>
               <span style={{ color:W }}> GROUP</span>
             </div>
           )}
           <button onClick={()=>setCollapsed(c=>!c)} style={{ background:'none', border:'none', cursor:'pointer', color:WD, fontSize:12, padding:4, transition:'color 0.2s' }}
             onMouseEnter={e=>(e.currentTarget.style.color=GL)} onMouseLeave={e=>(e.currentTarget.style.color=WD)}>
-            {collapsed?'▶':'◀'}
+            {collapsed?'â–¶':'â—€'}
           </button>
         </div>
 
@@ -91,8 +93,9 @@ export const SupervisorLayout: React.FC<{ children: ReactNode }> = ({ children }
                 style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:collapsed?'12px 0':'11px 20px', justifyContent:collapsed?'center':'flex-start', background:active?'rgba(201,191,166,0.08)':'transparent', borderLeft:active?`3px solid ${GL}`:'3px solid transparent', border:'none', cursor:'pointer', transition:'all 0.2s', color:active?GL:WM, position:'relative' }}
                 onMouseEnter={e=>{ if(!active){e.currentTarget.style.background='rgba(170,160,135,0.06)';e.currentTarget.style.color=W} }}
                 onMouseLeave={e=>{ if(!active){e.currentTarget.style.background='transparent';e.currentTarget.style.color=WM} }}>
-                <span style={{ fontSize:14, flexShrink:0 }}>{item.icon}</span>
-                {!collapsed&&<span style={{ fontFamily:FD, fontSize:12, fontWeight:active?700:400, letterSpacing:'0.04em' }}>{item.label}</span>}
+                <span style={{ fontFamily:FD, fontSize:12, fontWeight:active?700:400, letterSpacing:'0.04em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                  {collapsed ? item.label.charAt(0) : item.label}
+                </span>
               </button>
             )
           })}
@@ -116,7 +119,7 @@ export const SupervisorLayout: React.FC<{ children: ReactNode }> = ({ children }
           <button onClick={handleLogout} title={collapsed?'Log Out':undefined}
             style={{ width:'100%', display:'flex', alignItems:'center', gap:8, justifyContent:collapsed?'center':'flex-start', background:'none', border:'none', cursor:'pointer', fontFamily:FB, fontSize:11, color:WD, padding:collapsed?'6px 0':'6px 2px', transition:'color 0.2s' }}
             onMouseEnter={e=>(e.currentTarget.style.color=GL)} onMouseLeave={e=>(e.currentTarget.style.color=WD)}>
-            <span style={{ fontSize:13 }}>⏻</span>
+            <span style={{ fontSize:13 }}>â»</span>
             {!collapsed&&<span>Log Out</span>}
           </button>
         </div>
@@ -141,7 +144,7 @@ export const SupervisorLayout: React.FC<{ children: ReactNode }> = ({ children }
         {children}
       </main>
 
-      {/* Floating chat bubble — connects to admin, promoters, and clients on supervised jobs */}
+      {/* Floating chat bubble â€” connects to admin, promoters, and clients on supervised jobs */}
       <FloatingChat />
     </div>
   )

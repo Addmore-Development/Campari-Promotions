@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '../AdminLayout';
 import { injectAdminMobileStyles } from '../adminMobileStyles';
+import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService';
 
 const G    = '#8F8A7C';
 const GL   = '#C9BFA6';
@@ -41,8 +42,10 @@ interface Job {
   hourlyRate: number; totalSlots: number; filledSlots: number;
   status: string; filters?: any; termsAndConditions?: string;
   applications?: any[]; createdAt?: string;
+  purchaseOrderId?: string;
 }
 interface Client { id?: string; name: string; email?: string; }
+interface PurchaseOrderOpt { id: string; poNumber: string; clientId?: string; amount: number; committedAmount: number; remainingAmount: number; client?: { id: string; name: string } }
 
 const EMPTY_FORM = {
   title: '', client: '', clientId: '', brand: '', venue: '',
@@ -52,10 +55,24 @@ const EMPTY_FORM = {
   date: '', endDate: '', startTime: '09:00', endTime: '17:00',
   hourlyRate: '', totalSlots: '4', filledSlots: '0',
   status: 'OPEN', filters: {} as any, termsAndConditions: '',
+  purchaseOrderId: '',
 };
 
 const STATUS_OPTS = ['OPEN', 'FILLED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
 const CATEGORY_OPTS = ['Brand Activation','Promotions','Events','Retail','Corporate','Exhibitions','Other'];
+
+// Estimate the job's total cost so it can be deducted from a linked PO as a
+// Commitment Entry: rate × slots × shift hours.
+function estimateJobCost(hourlyRate: number, totalSlots: number, startTime: string, endTime: string): number {
+  const toMinutes = (t: string) => {
+    const [h, m] = (t || '0:0').split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+  let mins = toMinutes(endTime) - toMinutes(startTime);
+  if (mins <= 0) mins += 24 * 60; // shift crosses midnight
+  const hours = mins / 60;
+  return Math.round(hourlyRate * totalSlots * hours);
+}
 
 const inp: React.CSSProperties = {
   width: '100%', background: 'rgba(248,248,248,0.05)',
@@ -301,6 +318,8 @@ const JobsPageContent: React.FC = () => {
   const [statusF,  setStatusF]  = useState('all');
   const [clients,  setClients]  = useState<Client[]>([]);
   const [deleting, setDeleting] = useState<string|null>(null);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderOpt[]>([]);
+  const [poNotice, setPoNotice] = useState('');
 
   useEffect(() => { injectAdminMobileStyles(); }, []);
 
@@ -351,7 +370,20 @@ const JobsPageContent: React.FC = () => {
     } catch {}
   };
 
-  useEffect(()=>{ loadJobs(); loadClients(); },[]);
+  // Approved businesses' purchase orders — used to link a job to a PO so its
+  // cost can be deducted from that client's budget automatically.
+  const loadPurchaseOrders = async () => {
+    try {
+      const data = await purchaseOrdersService.getAll();
+      setPurchaseOrders((data as any[]).map((p: any) => ({
+        id: p.id, poNumber: p.poNumber, clientId: p.clientId || p.client?.id,
+        amount: p.amount, committedAmount: p.committedAmount, remainingAmount: p.remainingAmount,
+        client: p.client,
+      })));
+    } catch { /* non-fatal — PO linking is optional */ }
+  };
+
+  useEffect(()=>{ loadJobs(); loadClients(); loadPurchaseOrders(); },[]);
 
   const F = (key: string, val: any) => setForm(f=>({...f,[key]:val}));
 
@@ -370,7 +402,7 @@ const JobsPageContent: React.FC = () => {
     return null;
   };
 
-  const openCreate = () => { setForm({...EMPTY_FORM}); setEditing(null); setError(''); setModal('create'); };
+  const openCreate = () => { setForm({...EMPTY_FORM}); setEditing(null); setError(''); setPoNotice(''); setModal('create'); };
   const openEdit = (job: Job) => {
     const hasCoords = job.lat && job.lng && !(job.lat === -26.2041 && job.lng === 28.0473);
     setForm({
@@ -384,14 +416,39 @@ const JobsPageContent: React.FC = () => {
       hourlyRate:String(job.hourlyRate||''),totalSlots:String(job.totalSlots||4),
       filledSlots:String(job.filledSlots||0),status:job.status||'OPEN',
       filters:job.filters||{},termsAndConditions:job.termsAndConditions||'',
+      purchaseOrderId: job.purchaseOrderId || '',
     });
-    setEditing(job); setError(''); setModal('edit');
+    setEditing(job); setError(''); setPoNotice(''); setModal('edit');
   };
+
+  // Purchase orders belonging to the currently-selected client
+  const clientPOs = purchaseOrders.filter(po => {
+    const selectedClient = clients.find(c => c.name === form.client);
+    const idMatch = !!selectedClient?.id && po.clientId === selectedClient.id;
+    const nameMatch = !!po.client?.name && po.client.name === form.client;
+    return idMatch || nameMatch;
+  });
 
   const save = async () => {
     if(!form.title||!form.client||!form.date){ setError('Title, client and date are required.'); return; }
     if(!form.hourlyRate||Number(form.hourlyRate)<=0){ setError('Hourly rate must be > 0.'); return; }
-    setSaving(true); setError('');
+
+    // ── PO is now mandatory: a job can only be posted for a business that
+    // has an active Purchase Order with enough remaining budget to cover it.
+    if (modal === 'create') {
+      if (!form.purchaseOrderId) {
+        setError("This business has no Purchase Order selected. They need a topped-up PO (Budget Tracking) before you can post a job for them.");
+        return;
+      }
+      const po = purchaseOrders.find(p => p.id === form.purchaseOrderId);
+      const est = estimateJobCost(Number(form.hourlyRate)||0, Number(form.totalSlots)||1, form.startTime, form.endTime);
+      if (!po || est > po.remainingAmount) {
+        setError(`Insufficient budget on ${po?.poNumber || 'the selected PO'} — this job costs R${est.toLocaleString('en-ZA')} but only R${(po?.remainingAmount||0).toLocaleString('en-ZA')} remains. Top up the PO in Budget Tracking first.`);
+        return;
+      }
+    }
+
+    setSaving(true); setError(''); setPoNotice('');
     const selectedClient = clients.find(c=>c.name===form.client);
     const fullAddress = buildAddress(form);
 
@@ -430,11 +487,40 @@ const JobsPageContent: React.FC = () => {
       termsAndConditions:form.termsAndConditions,
     };
     if(selectedClient?.id) body.clientId=selectedClient.id;
+    if(form.purchaseOrderId) body.purchaseOrderId=form.purchaseOrderId;
+
     try {
       const method=modal==='edit'&&editing?'PUT':'POST';
       const url=modal==='edit'&&editing?`${API}/jobs/${editing.id}`:`${API}/jobs`;
       const res=await fetch(url,{method,headers:{...authHdr(),'Content-Type':'application/json'} as any,body:JSON.stringify(body)});
-      if(res.ok){ await loadJobs(); setModal(null); }
+      if(res.ok){
+        const savedJob = await res.json().catch(() => null);
+
+        // ── Deduct this job's estimated cost from the linked PO ──────────────
+        // Only do this once, when the job is first created and a PO was
+        // selected — editing an existing job's PO link does not double-charge.
+        if (modal === 'create' && form.purchaseOrderId) {
+          const est = estimateJobCost(Number(form.hourlyRate)||0, Number(form.totalSlots)||1, form.startTime, form.endTime);
+          try {
+            await purchaseOrdersService.createCommitment({
+              purchaseOrderId: form.purchaseOrderId,
+              jobId: savedJob?.id,
+              amount: est,
+              notes: `Auto-created for job: ${form.title}`,
+              allowOverride: false,
+            });
+            setPoNotice(`✓ R${est.toLocaleString('en-ZA')} committed against the linked PO for this job.`);
+          } catch (ceErr: any) {
+            // Budget was already validated before the job was created, so this
+            // should only fire on a race with another concurrent job post.
+            setError(ceErr?.message || 'Job was created, but the budget commitment failed — check Budget Tracking.');
+          }
+          loadPurchaseOrders();
+        }
+
+        await loadJobs();
+        setModal(null);
+      }
       else{ const d=await res.json(); setError(d.error||'Failed to save job.'); }
     } catch { setError('Network error.'); }
     setSaving(false);
@@ -451,6 +537,8 @@ const JobsPageContent: React.FC = () => {
     const parts=[job.streetNumber&&job.streetName?`${job.streetNumber} ${job.streetName}`:job.streetName||'',job.suburb,job.city,job.postalCode].filter(Boolean);
     return parts.length>0?parts.join(', '):(job.address||job.venue||'—');
   };
+  const estimatedCost = estimateJobCost(Number(form.hourlyRate)||0, Number(form.totalSlots)||1, form.startTime, form.endTime);
+  const selectedPO = purchaseOrders.find(po => po.id === form.purchaseOrderId);
 
   return (
     <div className="hg-page" style={{ padding:'40px 48px' }}>
@@ -551,7 +639,7 @@ const JobsPageContent: React.FC = () => {
         <div className="hg-modal-overlay" style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:400,padding:16 }}>
           <div className="hg-modal-box" style={{ background:BC,border:`1px solid ${CORAL}`,padding:'28px 24px',maxWidth:360,width:'100%',borderRadius:3 }}>
             <h3 style={{ fontFamily:FD,fontSize:20,color:W,marginBottom:10 }}>Delete Job?</h3>
-            <p style={{ fontSize:13,color:WM,marginBottom:22 }}>This will permanently remove the job and all applications.</p>
+            <p style={{ fontSize:13,color:WM,marginBottom:22 }}>This will permanently remove the job and all applications. Any budget already deducted for it will need to be cancelled manually from Budget Tracking.</p>
             <div style={{ display:'flex',gap:10 }}>
               <button onClick={()=>setDeleting(null)} style={{ flex:1,padding:'11px',background:'transparent',border:`1px solid ${BB}`,color:WM,fontFamily:FB,fontSize:12,cursor:'pointer',borderRadius:2 }}>Cancel</button>
               <button onClick={()=>deleteJob(deleting)} style={{ flex:1,padding:'11px',background:CORAL,border:'none',color:W,fontFamily:FB,fontSize:12,fontWeight:700,cursor:'pointer',borderRadius:2 }}>Delete</button>
@@ -576,6 +664,7 @@ const JobsPageContent: React.FC = () => {
               <div style={{ fontSize:9,letterSpacing:'0.3em',textTransform:'uppercase',color:GL,marginBottom:8,fontWeight:700 }}>{modal==='create'?'New Job':'Edit Job'}</div>
               <h2 style={{ fontFamily:FD,fontSize:20,fontWeight:700,color:W,marginBottom:22 }}>{modal==='create'?'Create a New Job':`Editing: ${editing?.title}`}</h2>
               {error&&<div style={{ padding:'10px 12px',background:`${CORAL}12`,border:`1px solid ${CORAL}44`,marginBottom:16,fontSize:12,color:CORAL,borderRadius:2 }}>{error}</div>}
+              {poNotice&&<div style={{ padding:'10px 12px',background:`${GREEN}12`,border:`1px solid ${GREEN}44`,marginBottom:16,fontSize:12,color:GREEN,borderRadius:2 }}>{poNotice}</div>}
 
               <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
                 <div>
@@ -586,11 +675,32 @@ const JobsPageContent: React.FC = () => {
 
                 <div>
                   <label style={lbl}>Client *</label>
-                  <select style={sel} value={form.client} onChange={e=>{ const name=e.target.value; const found=clients.find(c=>c.name===name); setForm(f=>({...f,client:name,clientId:found?.id||''})); }}>
+                  <select style={sel} value={form.client} onChange={e=>{ const name=e.target.value; const found=clients.find(c=>c.name===name); setForm(f=>({...f,client:name,clientId:found?.id||'',purchaseOrderId:''})); }}>
                     <option value="">— Select client —</option>
                     <optgroup label="Registered Clients">{clients.map(c=><option key={c.id} value={c.name}>{c.name} ✓</option>)}</optgroup>
                     <optgroup label="Manual">{['Shoprite','Checkers','Pick n Pay','Woolworths','Vodacom','MTN','SAB','Other'].map(n=><option key={n} value={n}>{n}</option>)}</optgroup>
                   </select>
+                </div>
+
+                {/* ── Purchase Order link — deducts this job's cost from the client's PO budget ── */}
+                <div style={{ background:'rgba(170,160,135,0.04)',border:`1px solid ${BB}`,borderRadius:3,padding:'14px 12px' }}>
+                  <div style={{ fontSize:9,letterSpacing:'0.22em',textTransform:'uppercase',color:GL,fontWeight:700,marginBottom:10 }}>💳 Purchase Order (Budget Tracking) <span style={{ color:GL }}>*</span></div>
+                  <select style={sel} value={form.purchaseOrderId} onChange={e=>F('purchaseOrderId',e.target.value)}>
+                    <option value="">— Select a PO with available budget —</option>
+                    {clientPOs.map(po=>(
+                      <option key={po.id} value={po.id} disabled={po.remainingAmount<=0}>{po.poNumber} — R{po.remainingAmount.toLocaleString('en-ZA')} remaining{po.remainingAmount<=0?' (depleted)':''}{po.client?.name?` (${po.client.name})`:''}</option>
+                    ))}
+                  </select>
+                  {clientPOs.length===0 && (
+                    <p style={{ fontSize:11,color:CORAL,marginTop:8 }}>⚠ No purchase orders found for this client. You must create one in Budget Tracking before you can post a job for them.</p>
+                  )}
+                  {modal==='create' && form.purchaseOrderId && (
+                    <div style={{ marginTop:10,padding:'8px 10px',background:'rgba(201,191,166,0.06)',borderRadius:2 }}>
+                      <p style={{ fontSize:11,color:WM,lineHeight:1.6 }}>
+                        Estimated cost: <strong style={{ color:GL }}>R{estimatedCost.toLocaleString('en-ZA')}</strong> (rate × slots × shift hours) will be deducted from <strong style={{ color:GL }}>{selectedPO?.poNumber}</strong> when this job is created.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="hg-form-grid-2" style={{ gap:12 }}>
