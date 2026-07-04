@@ -30,6 +30,28 @@ const GLOBAL_CSS = `
   @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   @keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.2)} }
   .about-fade { animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+
+  /* ── RESPONSIVE OVERRIDES ─────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .about-caps-grid   { grid-template-columns: repeat(2,1fr) !important; }
+    .about-roles-grid  { grid-template-columns: 1fr !important; }
+    .about-mission-grid{ grid-template-columns: 1fr !important; gap: 48px !important; }
+    .about-px          { padding-left: 40px !important; padding-right: 40px !important; }
+  }
+  @media (max-width: 640px) {
+    .about-nav {
+      height: auto !important; flex-wrap: wrap !important;
+      padding-top: 12px !important; padding-bottom: 12px !important; gap: 10px !important;
+    }
+    .about-nav-actions { flex-wrap: wrap !important; gap: 8px !important; }
+    .about-px          { padding-left: 20px !important; padding-right: 20px !important; }
+    .about-stats-grid  { grid-template-columns: repeat(2,1fr) !important; }
+    .about-stat-cell   { border-right: none !important; border-bottom: 1px solid ${BB} !important; }
+    .about-caps-grid   { grid-template-columns: 1fr !important; }
+    .about-cta-flex    { flex-direction: column !important; align-items: flex-start !important; gap: 28px !important; }
+    .about-btn-row     { flex-wrap: wrap !important; width: 100% !important; }
+    .about-btn-row button { flex: 1 1 auto !important; }
+  }
 `
 
 export default function AboutPage() {
@@ -85,7 +107,7 @@ export default function AboutPage() {
       <style>{GLOBAL_CSS}</style>
 
       {/* ── NAV ── */}
-      <nav style={{
+      <nav className="about-nav about-px" style={{
         position: 'sticky', top: 0, zIndex: 200,
         background: '#000', height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -95,7 +117,7 @@ export default function AboutPage() {
           onClick={() => navigate('/')}>
           <span style={{ color: GL }}>HONEY</span><span style={{ color: W }}> GROUP</span>
         </div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="about-nav-actions" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button onClick={() => navigate('/jobs')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FD, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: W55, transition: 'color 0.2s' }}
             onMouseEnter={e => e.currentTarget.style.color = GL}
@@ -118,7 +140,7 @@ export default function AboutPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ background: D1, borderBottom: `1px solid ${BB}`, padding: '100px 80px 80px', position: 'relative', overflow: 'hidden' }}>
+      <section className="about-px" style={{ background: D1, borderBottom: `1px solid ${BB}`, padding: '100px 80px 80px', position: 'relative', overflow: 'hidden' }}>
         {/* Ghost watermark */}
         <div style={{
           position: 'absolute', top: '-0.1em', left: '-0.04em',
@@ -163,9 +185,9 @@ export default function AboutPage() {
             South Africa's premier promoter management platform. We connect brands with verified, reliable promoters across 12 cities — powered by GPS technology, smart payroll, and real-time operations.
           </p>
           {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 0, border: `1px solid ${BB}` }}>
+          <div className="about-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 0, border: `1px solid ${BB}` }}>
             {stats.map((s, i) => (
-              <div key={i} style={{
+              <div key={i} className="about-stat-cell" style={{
                 padding: '28px 32px',
                 borderRight: i < 3 ? `1px solid ${BB}` : 'none',
                 background: i === 1 ? `rgba(201,191,166,0.04)` : 'transparent',
@@ -179,7 +201,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── ROLES ── */}
-      <section style={{ padding: '80px 80px', background: B, borderBottom: `1px solid ${BB}` }}>
+      <section className="about-px" style={{ padding: '80px 80px', background: B, borderBottom: `1px solid ${BB}` }}>
         <div style={{ maxWidth: 1360, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 52, paddingBottom: 28, borderBottom: `1px solid ${BB}` }}>
             <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.44em', textTransform: 'uppercase', color: GL, fontFamily: FD }}>Who We Serve</span>
@@ -187,7 +209,7 @@ export default function AboutPage() {
               Three roles. <span style={{ color: GL }}>One platform.</span>
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2, perspective: '1000px' }}>
+          <div className="about-roles-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2, perspective: '1000px' }}>
             {roles.map((r, i) => (
               <div key={i}
                 style={{
@@ -229,7 +251,7 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 40, display: 'flex', gap: 12 }}>
+          <div className="about-btn-row" style={{ marginTop: 40, display: 'flex', gap: 12 }}>
             <button onClick={() => navigate('/register')}
               style={{ fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', background: GL, color: B, border: 'none', padding: '15px 40px', cursor: 'pointer', transition: 'all 0.3s' }}
               onMouseEnter={e => { e.currentTarget.style.background = G; e.currentTarget.style.transform = 'translateY(-2px)' }}
@@ -247,7 +269,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── CAPABILITIES ── */}
-      <section style={{ padding: '80px 80px 100px', background: D1, borderBottom: `1px solid ${BB}`, position: 'relative', overflow: 'hidden' }}>
+      <section className="about-px" style={{ padding: '80px 80px 100px', background: D1, borderBottom: `1px solid ${BB}`, position: 'relative', overflow: 'hidden' }}>
         {/* Diagonal texture */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
@@ -260,7 +282,7 @@ export default function AboutPage() {
               Platform <span style={{ color: GL }}>Capabilities</span>
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
+          <div className="about-caps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
             {caps.map((cap, i) => (
               <div key={i}
                 style={{
@@ -292,8 +314,8 @@ export default function AboutPage() {
       </section>
 
       {/* ── MISSION ── */}
-      <section style={{ padding: '100px 80px', background: B, borderBottom: `1px solid ${BB}` }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
+      <section className="about-px" style={{ padding: '100px 80px', background: B, borderBottom: `1px solid ${BB}` }}>
+        <div className="about-mission-grid" style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
               <div style={{ width: 40, height: 1, background: GL }} />
@@ -335,8 +357,8 @@ export default function AboutPage() {
       </section>
 
       {/* ── BOTTOM CTA ── */}
-      <section style={{ padding: '80px 80px', background: D1 }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40 }}>
+      <section className="about-px" style={{ padding: '80px 80px', background: D1 }}>
+        <div className="about-cta-flex" style={{ maxWidth: 1360, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40 }}>
           <div>
             <h2 style={{ fontFamily: FI, fontSize: 'clamp(28px,3.5vw,52px)', fontWeight: 900, fontStyle: 'italic', lineHeight: 0.95, marginBottom: 16 }}>
               Ready to join<br /><span style={{ color: GL }}>the platform?</span>
@@ -345,7 +367,7 @@ export default function AboutPage() {
               Register as a promoter today and get access to verified shifts across South Africa.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
+          <div className="about-btn-row" style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
             <button onClick={() => navigate('/register')}
               style={{ fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', background: GL, color: B, border: 'none', padding: '16px 44px', cursor: 'pointer', transition: 'all 0.3s' }}
               onMouseEnter={e => { e.currentTarget.style.background = G; e.currentTarget.style.transform = 'translateY(-2px)' }}
