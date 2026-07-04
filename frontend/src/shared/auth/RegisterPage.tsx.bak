@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /* ─── DESIGN TOKENS ──────────────────────────────────────────── */
@@ -585,7 +585,16 @@ export default function RegisterPage() {
     return Object.keys(errs).length === 0
   }
 
-  const nextStep = () => { if (validateStep()) setStep(s => Math.min(s + 1, TOTAL_STEPS - 1)) }
+  const nextStep = () => {
+  if (validateStep()) {
+    setStep(s => Math.min(s + 1, TOTAL_STEPS - 1))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    setTimeout(() => {
+      document.getElementById('reg-error-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
+  }
+}
   const prevStep = () => { setErrors({}); setStep(s => Math.max(s - 1, 0)) }
 
   /* ─── SUBMIT ──────────────────────────────────────────────── */
@@ -769,6 +778,19 @@ export default function RegisterPage() {
         {/* Card */}
         <div style={{ background: BLACK_CARD, border: `1px solid ${BLACK_BORDER}`, padding: '40px 40px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.6)' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BROWN}, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, ${BROWN})` }} />
+
+          {Object.keys(errors).length > 0 && (
+            <div id="reg-error-summary" style={{ marginBottom: 24, padding: '14px 18px', background: `${AMBER}18`, border: `1px solid ${AMBER}55` }}>
+              <p style={{ fontFamily: FB, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: AMBER, marginBottom: 8 }}>
+                Please fix the following before continuing:
+              </p>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {Object.entries(errors).map(([key, msg]) => (
+                  <li key={key} style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, marginBottom: 3 }}>{msg}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* PROMOTER STEP 0 */}
           {isPromoter && step === 0 && (

@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /* ─── DESIGN TOKENS ──────────────────────────────────────────── */
@@ -747,7 +747,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: GOLD }}>CAMPARI</span><span style={{ color: WHITE }}> PROMOTIONS</span>
+            <span style={{ color: GOLD }}>HONEYGROUP</span><span style={{ color: WHITE }}> PROMOTIONS</span>
           </div>
           <div style={{ width: 32, height: 1, background: GOLD, margin: '0 auto 16px' }} />
           <p style={{ fontFamily: FB, fontSize: 10, fontWeight: 600, letterSpacing: '0.38em', textTransform: 'uppercase', color: GOLD_DIM }}>Create Account</p>
@@ -930,7 +930,7 @@ export default function RegisterPage() {
 
               <div style={{ background: GOLD_FAINT, border: `1px solid ${GOLD}22`, padding: '14px 16px' }}>
                 <p style={{ fontFamily: FB, fontSize: 12, color: WHITE_MUTED, lineHeight: 1.7 }}>
-                  By creating an account you agree to Campari Promotions' Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
+                  By creating an account you agree to HoneyGroup Promotions' Terms of Service and Privacy Policy. Your account will be <span style={{ color: GOLD }}>pending review</span> until approved.
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { AdminLayout } from '../AdminLayout'
 import { injectAdminMobileStyles } from '../adminMobileStyles'
 import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService'
@@ -27,7 +27,7 @@ function hex2rgba(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
-const fmtZAR = (n: number) => `R${n.toLocaleString('en-ZA')}`
+const fmtZAR = (n: number) => `R${(n || 0).toLocaleString('en-ZA')}`
 
 interface ClientOpt { id: string; name: string }
 interface JobOpt { id: string; title: string }
@@ -72,11 +72,25 @@ export default function BudgetTracking() {
 
   useEffect(() => { injectAdminMobileStyles() }, [])
 
+  // ── Always pull the freshest list of approved businesses ───────────────────
+  // This is what feeds the "New Purchase Order" client dropdown and the
+  // Business Budgets overview below, so a newly-approved business shows up
+  // here immediately without needing a manual refresh.
+  const loadClients = async () => {
+    try { setClients(await apiFetch<ClientOpt[]>('/admin/clients')) } catch { /* non-fatal */ }
+  }
+
   useEffect(() => {
-    (async () => {
-      try { setClients(await apiFetch<ClientOpt[]>('/admin/clients')) } catch { /* non-fatal */ }
+    loadClients()
+    ;(async () => {
       try { setJobs((await apiFetch<any[]>('/jobs')).map(j => ({ id: j.id, title: j.title }))) } catch { /* non-fatal */ }
     })()
+    // Re-check for newly-approved businesses periodically, and whenever the
+    // admin comes back to this tab (e.g. after approving someone elsewhere).
+    const onFocus = () => loadClients()
+    window.addEventListener('focus', onFocus)
+    const interval = setInterval(loadClients, 30000)
+    return () => { window.removeEventListener('focus', onFocus); clearInterval(interval) }
   }, [])
 
   const loadPOs = async () => {
@@ -90,6 +104,25 @@ export default function BudgetTracking() {
   }
 
   useEffect(() => { loadPOs() }, [])
+
+  // ── Aggregate every approved business (client), even ones with no PO yet ───
+  // so they show up in a "Business Budgets" list with their totals (R0 until
+  // a PO is created for them).
+  const businessSummaries = useMemo(() => {
+    const byClientId = new Map<string, { id: string; name: string; poCount: number; total: number; committed: number; remaining: number }>()
+    clients.forEach(c => byClientId.set(c.id, { id: c.id, name: c.name, poCount: 0, total: 0, committed: 0, remaining: 0 }))
+    pos.forEach(p => {
+      const cid = p.clientId || p.client?.id
+      if (!cid) return
+      const existing = byClientId.get(cid) || { id: cid, name: p.client?.name || 'Unknown', poCount: 0, total: 0, committed: 0, remaining: 0 }
+      existing.poCount += 1
+      existing.total += p.amount
+      existing.committed += p.committedAmount
+      existing.remaining += (p.amount - p.committedAmount)
+      byClientId.set(cid, existing)
+    })
+    return Array.from(byClientId.values()).sort((a, b) => b.total - a.total)
+  }, [clients, pos])
 
   const createPO = async () => {
     setPoError('')
@@ -172,9 +205,9 @@ export default function BudgetTracking() {
           <div>
             <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Finance</div>
             <h1 style={{ fontFamily: FD, fontSize: 26, fontWeight: 700, color: W, marginBottom: 4 }}>Purchase Orders &amp; Budget Tracking</h1>
-            <p style={{ fontSize: 13, color: W28 }}>Track client POs and each Commitment Entry (CE) released against them, so budgets never run over.</p>
+            <p style={{ fontSize: 13, color: W28 }}>Track client POs and each Commitment Entry (CE) released against them, so budgets never run over. Approved businesses appear here automatically — creating a job also deducts its estimated cost from the linked PO.</p>
           </div>
-          <button onClick={() => setShowNewPO(true)} style={{ padding: '11px 22px', background: hex2rgba(GL, 0.18), border: `1px solid ${GL}`, color: GL, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          <button onClick={async () => { await loadClients(); setShowNewPO(true) }} style={{ padding: '11px 22px', background: hex2rgba(GL, 0.18), border: `1px solid ${GL}`, color: GL, borderRadius: 4, fontFamily: FD, fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
             + New Purchase Order
           </button>
         </div>
@@ -192,6 +225,38 @@ export default function BudgetTracking() {
           <div style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 6, padding: '16px 18px' }}>
             <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: W28, fontFamily: FD, marginBottom: 8 }}>Remaining</div>
             <div style={{ fontSize: 26, fontWeight: 700, fontFamily: FD, color: totalRemaining < 0 ? CORAL : GREEN }}>{fmtZAR(totalRemaining)}</div>
+          </div>
+        </div>
+
+        {/* ── Business Budgets — every approved business, even with no PO yet ── */}
+        <div style={{ marginBottom: 26 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GL, fontFamily: FD, marginBottom: 10 }}>
+            Business Budgets ({businessSummaries.length})
+          </div>
+          <div style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 6, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: BB2 }}>
+                  {['Business', 'POs', 'Total Value', 'Committed', 'Remaining'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: W28, fontFamily: FD, borderBottom: `1px solid ${BB}` }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {businessSummaries.length === 0 && (
+                  <tr><td colSpan={5} style={{ padding: 20, textAlign: 'center', color: W28 }}>No approved businesses yet.</td></tr>
+                )}
+                {businessSummaries.map(b => (
+                  <tr key={b.id}>
+                    <td style={{ padding: '10px 14px', borderBottom: `1px solid ${BB2}`, color: W, fontSize: 13, fontWeight: 600 }}>{b.name}</td>
+                    <td style={{ padding: '10px 14px', borderBottom: `1px solid ${BB2}`, color: W55, fontSize: 12.5 }}>{b.poCount}</td>
+                    <td style={{ padding: '10px 14px', borderBottom: `1px solid ${BB2}`, color: GL, fontSize: 12.5, fontWeight: 700 }}>{fmtZAR(b.total)}</td>
+                    <td style={{ padding: '10px 14px', borderBottom: `1px solid ${BB2}`, color: AMBER, fontSize: 12.5 }}>{fmtZAR(b.committed)}</td>
+                    <td style={{ padding: '10px 14px', borderBottom: `1px solid ${BB2}`, color: b.remaining < 0 ? CORAL : GREEN, fontSize: 12.5, fontWeight: 700 }}>{fmtZAR(b.remaining)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -314,6 +379,9 @@ export default function BudgetTracking() {
                 <option value="">Select client…</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
+              {clients.length === 0 && (
+                <p style={{ fontSize: 11, color: W28 }}>No approved businesses found yet. Approve a business in Registrations first.</p>
+              )}
               <input placeholder="PO Number (leave blank to auto-generate)" value={poForm.poNumber} onChange={e => setPoForm(f => ({ ...f, poNumber: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
               <input placeholder="Amount (R)" type="number" value={poForm.amount} onChange={e => setPoForm(f => ({ ...f, amount: e.target.value }))} style={{ background: BB2, border: `1px solid ${BB}`, color: W, padding: '10px 12px', borderRadius: 4, fontFamily: FD, fontSize: 12 }} />
               <div style={{ display: 'flex', gap: 8 }}>

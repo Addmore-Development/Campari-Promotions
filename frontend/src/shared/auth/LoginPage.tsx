@@ -295,7 +295,7 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <FloatingInput
-              label="Email Address" type="email" placeholder="you@camparipromotions.co.za"
+              label="Email Address" type="email" placeholder="you@honeygroup.co.za"
               value={email} onChange={setEmail}
               focused={focusedField === 'email'}
               onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}

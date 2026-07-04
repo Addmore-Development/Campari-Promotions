@@ -230,7 +230,7 @@ function TermsModal({ job, onAccept, onClose }: { job:any; onAccept:()=>void; on
         <div onScroll={e=>{const el=e.currentTarget;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setScrolled(true)}}
           style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
           {!scrolled&&<div style={{ background:'rgba(201,191,166,0.06)', border:`1px solid rgba(201,191,166,0.22)`, padding:'10px 14px', marginBottom:16, fontSize:11, color:G, display:'flex', alignItems:'center', gap:8, fontFamily:FB }}>↓ Please scroll through all terms before accepting</div>}
-          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard Campari Promotions Promoter Terms & Conditions apply.'}</div>
+          <div style={{ whiteSpace:'pre-line', fontSize:13, lineHeight:1.85, color:WM, fontFamily:FB }}>{job.terms||'Standard HoneyGroup Promotions Promoter Terms & Conditions apply.'}</div>
         </div>
         <div style={{ padding:'16px 24px 22px', borderTop:`1px solid ${BB}`, flexShrink:0 }}>
           <label style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer', marginBottom:16 }}>
@@ -374,7 +374,7 @@ export default function JobsPage() {
       <nav className="jobs-nav" style={{ position:'sticky', top:0, zIndex:100, background:'rgba(4,4,3,0.97)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${BB}`, padding:'14px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <button onClick={()=>navigate('/')} style={{ background:'none', border:'none', cursor:'pointer', color:WM, fontFamily:FB, fontSize:13, display:'flex', alignItems:'center', gap:6 }}
           onMouseEnter={e=>e.currentTarget.style.color=W} onMouseLeave={e=>e.currentTarget.style.color=WM}>← Home</button>
-        <div className="jobs-nav-title" style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}><span style={{ color:G }}>CAMPARI</span><span style={{ color:W }}> PROMOTIONS</span></div>
+        <div className="jobs-nav-title" style={{ fontFamily:FD, fontSize:16, fontWeight:700 }}><span style={{ color:G }}>HONEYGROUP</span><span style={{ color:W }}> PROMOTIONS</span></div>
         <div style={{ display:'flex', gap:8 }}>
           {session
             ? <button onClick={()=>navigate(session.role==='promoter'?'/promoter/dashboard':'/')} style={{ padding:'8px 16px', background:G, border:'none', color:B, fontFamily:FB, fontSize:11, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer', borderRadius:2 }}>Dashboard</button>

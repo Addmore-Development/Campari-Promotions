@@ -329,7 +329,7 @@ export const ViewEarnings: React.FC = () => {
         <p style={{ fontFamily: FB, fontSize: 11, color: WD, lineHeight: 1.6 }}>
           Payments are transferred directly by your client after shift completion.
           Once marked as paid, please allow up to <strong style={{ color: WM }}>3 business days</strong> for funds to reflect in your bank account.
-          For queries, contact Campari Promotions support via the chat widget.
+          For queries, contact HoneyGroup Promotions support via the chat widget.
         </p>
       </div>
     </div>

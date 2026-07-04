@@ -616,7 +616,7 @@ export default function BusinessPayroll() {
               const blob = new Blob([csv], { type: 'text/csv' })
               const url  = URL.createObjectURL(blob)
               const a    = document.createElement('a')
-              a.href = url; a.download = 'campari-promotions-payroll.csv'; a.click()
+              a.href = url; a.download = 'honeygroup-promotions-payroll.csv'; a.click()
               URL.revokeObjectURL(url)
             }}
             style={{ fontFamily: FD, fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${hex2rgba(GL, 0.4)}`, color: GL, padding: '8px 18px', cursor: 'pointer', borderRadius: 2, flexShrink: 0 }}
@@ -626,7 +626,7 @@ export default function BusinessPayroll() {
           </button>
           <button
             onClick={() => downloadPDF(
-              'Payroll Report', 'Campari Promotions · Promoter Payout Overview',
+              'Payroll Report', 'HoneyGroup Promotions · Promoter Payout Overview',
               ['Promoter','Job','Date','Rate','Hours','Gross','Net','Status'],
               sorted.map(r => [
                 r.promoterName, r.jobTitle,
@@ -656,7 +656,7 @@ export default function BusinessPayroll() {
           {ledger.length > 0 && (
             <div style={{ display: 'flex', gap: 8 }}>
               <button
-                onClick={() => downloadCSV('campari-promotions-balance-activity.csv',
+                onClick={() => downloadCSV('honeygroup-promotions-balance-activity.csv',
                   ['Date','Type','Description','Amount'],
                   ledger.map(e => [
                     new Date(e.createdAt).toLocaleString('en-ZA'),
@@ -669,7 +669,7 @@ export default function BusinessPayroll() {
               </button>
               <button
                 onClick={() => downloadPDF(
-                  'Balance Activity Report', 'Campari Promotions · Campaign Funding Ledger',
+                  'Balance Activity Report', 'HoneyGroup Promotions · Campaign Funding Ledger',
                   ['Date', 'Type', 'Description', 'Amount'],
                   ledger.map(e => [
                     new Date(e.createdAt).toLocaleDateString('en-ZA'),

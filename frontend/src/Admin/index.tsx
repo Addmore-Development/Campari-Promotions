@@ -66,7 +66,7 @@ export default function AdminDashboard() {
       <aside style={{ width: 220, background: BC, borderRight: `1px solid ${BB}`, display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 100 }}>
         <div style={{ padding: '28px 24px', borderBottom: `1px solid ${BB}` }}>
           <div style={{ fontFamily: FD, fontSize: 17, fontWeight: 700 }}>
-            <span style={{ color: G }}>CAMPARI</span><span style={{ color: W }}> GROUP</span>
+            <span style={{ color: G }}>HONEYGROUP</span><span style={{ color: W }}> GROUP</span>
           </div>
           <div style={{ fontSize: 9, letterSpacing: '0.3em', color: WD, marginTop: 4, textTransform: 'uppercase' }}>Admin Console</div>
         </div>

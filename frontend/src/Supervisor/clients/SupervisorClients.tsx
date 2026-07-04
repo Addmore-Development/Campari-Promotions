@@ -1,0 +1,291 @@
+// Supervisor/clients/SupervisorClients.tsx
+// Shows the supervisor's assigned business with full contact info, plus a
+// table of every job tied to that client, and a button to create a new job
+// pre-locked to that client.
+import React, { useEffect, useState } from 'react'
+
+const G    = '#8F8A7C'
+const GL   = '#C9BFA6'
+const G3   = '#443F36'
+const B    = '#050504'
+const BC   = '#080807'
+const D2   = '#0D0D0A'
+const D3   = '#14140E'
+const BB   = 'rgba(170,160,135,0.14)'
+const W    = '#F8F8F8'
+const WM   = 'rgba(248,248,248,0.65)'
+const WD   = 'rgba(248,248,248,0.28)'
+const FD   = "'Playfair Display', Georgia, serif"
+const FB   = "'DM Sans', system-ui, sans-serif"
+const TEAL  = '#4AABB8'
+const CORAL = '#C4614A'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+function authHdr() {
+  const t = localStorage.getItem('hg_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
+interface Job {
+  id: string; title: string; client: string; clientId?: string
+  venue: string; date: string; hourlyRate: number
+  totalSlots: number; filledSlots: number; status: string
+}
+
+const EMPTY_FORM = {
+  title: '', venue: '', city: '', date: '', endDate: '',
+  startTime: '09:00', endTime: '17:00', hourlyRate: '', totalSlots: '4',
+  status: 'OPEN', termsAndConditions: '',
+}
+
+const STATUS_OPTS = ['OPEN', 'FILLED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+
+export const SupervisorClients: React.FC = () => {
+  const [business, setBusiness] = useState<any>(null)
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState<'create' | 'edit' | null>(null)
+  const [editing, setEditing] = useState<Job | null>(null)
+  const [form, setForm] = useState({ ...EMPTY_FORM })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  const loadAll = async () => {
+    setLoading(true)
+    try {
+      const meRes = await fetch(`${API}/auth/me`, { headers: authHdr() as any })
+      const me = meRes.ok ? await meRes.json() : null
+      const biz = me?.business || null
+      setBusiness(biz)
+
+      if (biz) {
+        const jobsRes = await fetch(`${API}/jobs`, { headers: authHdr() as any })
+        const allJobs: Job[] = jobsRes.ok ? await jobsRes.json() : []
+        setJobs(allJobs.filter(j => j.clientId === biz.id || j.client === biz.fullName))
+      }
+    } catch {}
+    setLoading(false)
+  }
+
+  useEffect(() => { loadAll() }, [])
+
+  useEffect(() => {
+    if (modal === 'edit' && editing) {
+      setForm({
+        title: editing.title, venue: editing.venue || '', city: '',
+        date: editing.date ? editing.date.slice(0, 10) : '', endDate: '',
+        startTime: '09:00', endTime: '17:00',
+        hourlyRate: String(editing.hourlyRate || ''), totalSlots: String(editing.totalSlots || 4),
+        status: editing.status || 'OPEN', termsAndConditions: '',
+      })
+    }
+  }, [modal, editing])
+
+  const totalJobs   = jobs.length
+  const openJobs    = jobs.filter(j => j.status === 'OPEN').length
+  const filledJobs  = jobs.filter(j => j.status === 'FILLED').length
+
+  if (loading) {
+    return <div style={{ padding:'40px 24px', textAlign:'center', color:WD, fontFamily:FB }}>Loading client…</div>
+  }
+
+  if (!business) {
+    return (
+      <div style={{ padding: '32px 36px 80px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Clients</div>
+          <h1 style={{ fontFamily: FD, fontSize: 26, fontWeight: 700, color: W }}>Your Client</h1>
+        </div>
+        <div style={{ padding: '48px 24px', textAlign: 'center', color: WD, fontFamily: FB, border: `1px dashed ${BB}`, borderRadius: 6 }}>
+          You haven't been assigned to a business yet. Once admin assigns you, it'll show up here.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ padding: '32px 36px 80px' }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Clients</div>
+        <h1 style={{ fontFamily: FD, fontSize: 26, fontWeight: 700, color: W }}>Your Client</h1>
+        <p style={{ fontSize: 12.5, color: WM, marginTop: 4, fontFamily: FB }}>Everything about the business you supervise campaigns for.</p>
+      </div>
+
+      {/* Business profile card */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, padding: '22px 24px', background: BC, border: `1px solid ${BB}`, borderRadius: 6 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 10, flexShrink: 0, background: `linear-gradient(135deg,${GL}44,${G}33)`, border: `1px solid ${GL}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: GL, fontFamily: FD }}>
+          {(business.fullName || business.companyName || 'B').charAt(0)}
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontFamily: FD, fontSize: 18, fontWeight: 700, color: W }}>{business.fullName || business.companyName}</div>
+          <div style={{ fontSize: 12, color: WM, fontFamily: FB, marginTop: 2 }}>
+            {business.email}{business.phone ? ` · ${business.phone}` : ''}{business.city ? ` · ${business.city}` : ''}
+          </div>
+          {business.industry && <div style={{ fontSize: 11.5, color: GL, fontFamily: FB, marginTop: 4 }}>{business.industry}</div>}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 24 }}>
+        {[
+          { label: 'Total Jobs', value: totalJobs,  color: GL },
+          { label: 'Open',       value: openJobs,   color: TEAL },
+          { label: 'Filled',     value: filledJobs, color: G },
+        ].map(s => (
+          <div key={s.label} style={{ background: D2, padding: '16px 18px', position: 'relative', border: `1px solid ${BB}`, borderRadius: 4 }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${s.color},${s.color}44)` }} />
+            <div style={{ fontFamily: FD, fontSize: 24, fontWeight: 700, color: W }}>{s.value}</div>
+            <div style={{ fontSize: 9, color: WM, marginTop: 4, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Jobs table header + new job button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+        <div style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD }}>Jobs for this client</div>
+        <button onClick={() => { setForm({ ...EMPTY_FORM }); setEditing(null); setError(''); setModal('create') }}
+          style={{ padding: '10px 20px', background: `linear-gradient(135deg,${GL},${G})`, border: 'none', color: B, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: 'pointer', borderRadius: 3, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+          + New Job for {business.fullName || business.companyName}
+        </button>
+      </div>
+
+      <div style={{ background: D2, border: `1px solid ${BB}`, borderRadius: 2, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${BB}` }}>
+              {['Title', 'Venue', 'Date', 'Rate', 'Slots', 'Status', 'Actions'].map(h => (
+                <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: WD }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {jobs.map((job, i, arr) => (
+              <tr key={job.id} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${BB}` : 'none' }}>
+                <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700, color: W }}>{job.title}</td>
+                <td style={{ padding: '12px 14px', fontSize: 12, color: W }}>{job.venue || '—'}</td>
+                <td style={{ padding: '12px 14px', fontSize: 12, color: WM, whiteSpace: 'nowrap' }}>
+                  {job.date ? new Date(job.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
+                </td>
+                <td style={{ padding: '12px 14px', fontSize: 13, color: GL, fontWeight: 700 }}>R{job.hourlyRate}/hr</td>
+                <td style={{ padding: '12px 14px', fontSize: 12, color: W }}>{job.filledSlots}/{job.totalSlots}</td>
+                <td style={{ padding: '12px 14px' }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: job.status === 'OPEN' ? GL : job.status === 'FILLED' ? G : job.status === 'CANCELLED' ? CORAL : WD, background: 'rgba(255,255,255,0.05)', padding: '3px 9px', borderRadius: 2 }}>{job.status}</span>
+                </td>
+                <td style={{ padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => { setEditing(job); setModal('edit') }} style={{ fontSize: 11, color: GL, background: 'none', border: 'none', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => setDeleting(job.id)} style={{ fontSize: 11, color: CORAL, background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {jobs.length === 0 && <div style={{ padding: 48, textAlign: 'center', color: WD, fontSize: 13 }}>No jobs yet for this client.</div>}
+      </div>
+
+      {/* Delete confirm */}
+      {deleting && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 16 }}>
+          <div style={{ background: BC, border: `1px solid ${CORAL}`, padding: '28px 24px', maxWidth: 360, width: '100%', borderRadius: 3 }}>
+            <h3 style={{ fontFamily: FD, fontSize: 20, color: W, marginBottom: 10 }}>Delete Job?</h3>
+            <p style={{ fontSize: 13, color: WM, marginBottom: 22 }}>This will permanently remove the job and all applications.</p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setDeleting(null)} style={{ flex: 1, padding: '11px', background: 'transparent', border: `1px solid ${BB}`, color: WM, fontFamily: FB, fontSize: 12, cursor: 'pointer', borderRadius: 2 }}>Cancel</button>
+              <button onClick={async () => { try { await fetch(`${API}/jobs/${deleting}`, { method: 'DELETE', headers: authHdr() as any }); await loadAll(); setDeleting(null) } catch { setError('Failed to delete job.') } }}
+                style={{ flex: 1, padding: '11px', background: CORAL, border: 'none', color: W, fontFamily: FB, fontSize: 12, fontWeight: 700, cursor: 'pointer', borderRadius: 2 }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create / Edit modal — client is locked to this business */}
+      {(modal === 'create' || modal === 'edit') && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }}
+          onClick={e => e.target === e.currentTarget && setModal(null)}>
+          <div style={{ background: BC, border: `1px solid ${BB}`, width: '100%', maxWidth: 560, maxHeight: '92vh', overflowY: 'auto', position: 'relative', borderRadius: 3 }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${G3},${GL},${G3})` }} />
+            <button onClick={() => setModal(null)} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: WM, fontSize: 18 }}>×</button>
+            <div style={{ padding: '32px 24px 28px' }}>
+              <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700 }}>{modal === 'create' ? 'New Job' : 'Edit Job'}</div>
+              <h2 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 6 }}>{modal === 'create' ? `Create a job for ${business.fullName || business.companyName}` : `Editing: ${editing?.title}`}</h2>
+              <p style={{ fontSize: 11.5, color: WD, fontFamily: FB, marginBottom: 22 }}>Client is locked to this business.</p>
+              {error && <div style={{ padding: '10px 12px', background: `${CORAL}12`, border: `1px solid ${CORAL}44`, marginBottom: 16, fontSize: 12, color: CORAL, borderRadius: 2 }}>{error}</div>}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Job Title *</label>
+                  <input style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                    value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Brand Ambassador – Pick n Pay" />
+                </div>
+                <div>
+                  <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Venue</label>
+                  <input style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                    value={form.venue} onChange={e => setForm(f => ({ ...f, venue: e.target.value }))} placeholder="e.g. Sandton City Mall" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Start Date *</label>
+                    <input type="date" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} /></div>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>End Date</label>
+                    <input type="date" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} /></div>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Start Time</label>
+                    <input type="time" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} /></div>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>End Time</label>
+                    <input type="time" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} /></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Hourly Rate (R)</label>
+                    <input type="number" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.hourlyRate} onChange={e => setForm(f => ({ ...f, hourlyRate: e.target.value }))} placeholder="125" /></div>
+                  <div><label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Total Slots</label>
+                    <input type="number" style={{ width: '100%', background: 'rgba(248,248,248,0.05)', border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, boxSizing: 'border-box' }}
+                      value={form.totalSlots} onChange={e => setForm(f => ({ ...f, totalSlots: e.target.value }))} placeholder="4" /></div>
+                </div>
+                <div>
+                  <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: WM, display: 'block', marginBottom: 7 }}>Status</label>
+                  <select style={{ width: '100%', background: D3, border: `1px solid ${BB}`, padding: '10px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 2, cursor: 'pointer' }}
+                    value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                    {STATUS_OPTS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                <button onClick={async () => {
+                  if (!form.title || !form.date) { setError('Title and date are required.'); return }
+                  if (!form.hourlyRate || Number(form.hourlyRate) <= 0) { setError('Hourly rate must be > 0.'); return }
+                  setSaving(true); setError('')
+                  const body: any = {
+                    title: form.title, client: business.fullName || business.companyName,
+                    brand: business.fullName || business.companyName,
+                    clientId: business.id,
+                    venue: form.venue, city: form.city, date: form.date, endDate: form.endDate || undefined,
+                    startTime: form.startTime, endTime: form.endTime, hourlyRate: Number(form.hourlyRate) || 0,
+                    totalSlots: Number(form.totalSlots) || 1, status: form.status,
+                    termsAndConditions: form.termsAndConditions,
+                  }
+                  try {
+                    const method = modal === 'edit' && editing ? 'PUT' : 'POST'
+                    const url = modal === 'edit' && editing ? `${API}/jobs/${editing.id}` : `${API}/jobs`
+                    const res = await fetch(url, { method, headers: { ...authHdr(), 'Content-Type': 'application/json' } as any, body: JSON.stringify(body) })
+                    if (res.ok) { await loadAll(); setModal(null) }
+                    else { const d = await res.json(); setError(d.error || 'Failed to save job.') }
+                  } catch { setError('Network error.') }
+                  setSaving(false)
+                }} disabled={saving}
+                  style={{ padding: '13px', background: saving ? BB : `linear-gradient(135deg,${GL},${G})`, border: 'none', color: saving ? WM : B, fontFamily: FD, fontSize: 12, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', borderRadius: 2 }}>
+                  {saving ? 'Saving…' : modal === 'create' ? 'Create Job' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default SupervisorClients

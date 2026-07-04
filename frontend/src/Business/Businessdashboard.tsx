@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
+﻿import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { purchaseOrdersService } from '../shared/services/purchaseOrdersService'
 
 // ─── Strict Brown/Gold/Yellow Palette ────────────────────────────────────────
 const BLK  = '#020201'
@@ -19,6 +20,7 @@ const W4   = 'rgba(248,248,248,0.40)'
 const W2   = 'rgba(248,248,248,0.20)'
 const FD   = "'Playfair Display', Georgia, serif"
 const FB   = "'DM Sans', system-ui, sans-serif"
+const CORAL = '#C4614A'
 
 function hex2rgba(hex: string, a: number) {
   const h = hex.replace('#', '')
@@ -87,6 +89,8 @@ function StatCard({ label, value, sub, color, delay = 0 }: {
   )
 }
 
+interface PoSummary { total: number; committed: number; remaining: number; poCount: number }
+
 export default function BusinessDashboard() {
   const navigate = useNavigate()
   const [session,     setSession]     = useState<any>(null)
@@ -97,6 +101,47 @@ export default function BusinessDashboard() {
   const [prevStatus,  setPrevStatus]  = useState<string | null>(null)
 
   const [applications, setApplications] = useState<any[]>([])
+
+  // ─── Purchase Order budget summary — replaces the old self-funded credit
+  // balance. Only Admin can create/top-up a PO for this business; this page
+  // just reflects the totals across all of this business's active POs.
+  const [poSummary, setPoSummary] = useState<PoSummary>({ total: 0, committed: 0, remaining: 0, poCount: 0 })
+  const [poLoading, setPoLoading] = useState(true)
+
+  const loadPOSummary = useCallback(async () => {
+    try {
+      // Scoped server-side to the caller's own business — no manual summing
+      // of other clients' purchase orders.
+      const summary = await purchaseOrdersService.getMyBudget()
+      setPoSummary({
+        total:     summary.totalBudget,
+        committed: summary.totalCommitted,
+        remaining: summary.totalRemaining,
+        poCount:   summary.purchaseOrders?.length || 0,
+      })
+    } catch { /* offline */ }
+    setPoLoading(false)
+  }, [])
+
+  useEffect(() => { loadPOSummary() }, [loadPOSummary])
+
+  // Refresh whenever a job (and its auto-created Commitment Entry) is posted
+  // elsewhere in the portal — keeps the "hg_credit_updated" event name for
+  // compatibility with existing dispatchers (BusinessJobs, BusinessLayout).
+  useEffect(() => {
+    const onUpdate = () => loadPOSummary()
+    window.addEventListener('hg_credit_updated', onUpdate)
+    return () => window.removeEventListener('hg_credit_updated', onUpdate)
+  }, [loadPOSummary])
+
+  // Also poll every 30s as a fallback — the admin who creates the business's
+  // starter PO, tops it up, or posts a job against it is on a different
+  // browser session, so no local event fires here. This mirrors the same
+  // polling fallback used for profile-status updates below.
+  useEffect(() => {
+    const pollInterval = setInterval(() => loadPOSummary(), 30_000)
+    return () => clearInterval(pollInterval)
+  }, [loadPOSummary])
 
   // ─── Fetch fresh profile from API ──────────────────────────────────────────
   const refreshProfile = useCallback(async () => {
@@ -243,13 +288,13 @@ export default function BusinessDashboard() {
         </div>
       </div>
 
-      {/* ── Campaign Funding Balance — clear, obvious, impossible to miss ── */}
+      {/* ── Purchase Order Budget — set by your account manager, not self-funded ── */}
       {(() => {
-        const balance = profile?.creditBalance ?? 0
-        const isCritical = balance <= 0
-        const isLow      = !isCritical && balance < 2000
-        const stateColor = isCritical ? '#C4614A' : isLow ? '#D8B26A' : GL
-        const stateLabel = isCritical ? 'No funds available' : isLow ? 'Running low' : 'Healthy'
+        const { total, committed, remaining, poCount } = poSummary
+        const isCritical = poCount > 0 && remaining <= 0
+        const isLow      = poCount > 0 && !isCritical && remaining < 2000
+        const stateColor = poCount === 0 ? W4 : isCritical ? CORAL : isLow ? '#D8B26A' : GL
+        const stateLabel = poCount === 0 ? 'No budget yet' : isCritical ? 'Budget exhausted' : isLow ? 'Running low' : 'Healthy'
         return (
           <div style={{
             marginBottom: 28, background: BLK2, border: `1px solid ${hex2rgba(stateColor, 0.4)}`,
@@ -259,26 +304,24 @@ export default function BusinessDashboard() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GD3}, ${stateColor}, ${GD3})` }} />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <span style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: W4, fontFamily: FD, fontWeight: 700 }}>Campaign Funding Balance</span>
+                <span style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: W4, fontFamily: FD, fontWeight: 700 }}>Purchase Order Budget</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 9px', borderRadius: 20, background: hex2rgba(stateColor, 0.12), border: `1px solid ${hex2rgba(stateColor, 0.4)}` }}>
                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: stateColor }} />
                   <span style={{ fontSize: 9, fontWeight: 700, color: stateColor, fontFamily: FD, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{stateLabel}</span>
                 </span>
               </div>
               <div style={{ fontFamily: FD, fontSize: 44, fontWeight: 700, color: W, lineHeight: 1 }}>
-                R {balance.toLocaleString('en-ZA')}
+                {poLoading ? '—' : `R ${remaining.toLocaleString('en-ZA')}`}
               </div>
               <p style={{ fontSize: 12, color: W4, marginTop: 8, fontFamily: FB }}>
-                {isCritical
-                  ? "You're out of funds — top up before posting your next campaign."
-                  : isLow
-                  ? 'Your balance is getting low. Top up to avoid interruptions when booking new campaigns.'
-                  : 'Available to fund new campaigns. Every job you post draws from this balance automatically.'}
+                {poCount === 0
+                  ? 'Your account manager hasn\u2019t set up a purchase order yet. Contact them to get a budget allocated so you can post jobs.'
+                  : `Remaining across ${poCount} purchase order${poCount > 1 ? 's' : ''} \u00b7 R${total.toLocaleString('en-ZA')} total \u00b7 R${committed.toLocaleString('en-ZA')} committed to jobs.`}
               </p>
             </div>
             <button onClick={() => navigate('/business/payroll')}
               style={{ padding: '13px 26px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', cursor: 'pointer', borderRadius: 3, whiteSpace: 'nowrap', flexShrink: 0 }}>
-              {isLow || isCritical ? '+ Top Up Now' : '+ Add Funds'}
+              View Budget Breakdown →
             </button>
           </div>
         )

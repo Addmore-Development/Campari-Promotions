@@ -975,7 +975,7 @@ export default function LandingPage() {
 
             {/* Contact + social */}
             <div style={{ paddingTop: 8 }}>
-              {[{ label: 'Partnership Opportunities', email: 'partnerships@camparipromotions.co.za' }, { label: 'Career Opportunities', email: 'careers@camparipromotions.co.za' }, { label: 'Press', email: 'press@camparipromotions.co.za' }].map(c => (
+              {[{ label: 'Partnership Opportunities', email: 'partnerships@honeygroup.co.za' }, { label: 'Career Opportunities', email: 'careers@honeygroup.co.za' }, { label: 'Press', email: 'press@honeygroup.co.za' }].map(c => (
                 <div key={c.label} style={{ marginBottom: 32 }}>
                   <h4 style={{ fontFamily: FD, fontSize: 16, fontWeight: 700, color: W, marginBottom: 6 }}>{c.label}</h4>
                   <a href={`mailto:${c.email}`} style={{ fontFamily: FD, fontSize: 13, color: GL, textDecoration: 'underline', textUnderlineOffset: 3 }}>{c.email}</a>
