@@ -319,7 +319,7 @@ export function AdminChatTab() {
                       <Avatar name={r.requester?.fullName || 'User'} role={(r.requester?.role || 'user').toLowerCase()} />
                       <div>
                         <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.requester?.fullName}</div>
-                        <div style={{ fontSize: 9, color: WD, fontFamily: FD, textTransform: 'capitalize' }}>{(r.requester?.role || '').toLowerCase()}</div>
+                        <div style={{ fontSize: 9, color: W55, fontFamily: FD, textTransform: 'capitalize' }}>{(r.requester?.role || '').toLowerCase()}</div>
                       </div>
                     </div>
                     <p style={{ fontSize: 10.5, color: W28, marginBottom: 8, fontFamily: FD }}>wants to send you a message</p>
