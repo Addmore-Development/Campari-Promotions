@@ -246,12 +246,13 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
 }
 
 // --- DASHBOARD TAB ------------------------------------------------------------
-function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clients:any[]; msgs:any[]; time:Date; onRoute:(id:string)=>void }) {
+function DashboardTab({ regs, clients, msgs, time, onRoute, pendingChatRequests }: { regs:any[]; clients:any[]; msgs:any[]; time:Date; onRoute:(id:string)=>void; pendingChatRequests?:any[] }) {
   const h = time.getHours()
   const greeting = h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night'
   const unread = msgs.filter(m=>!m.read).length
   const activeJobs = getActiveJobs(getAllJobsWithAdminJobs())
   const liveActivity = buildLiveActivity(regs)
+  const pendingRequestCount = pendingChatRequests?.length || 0
   const stats = [
     { label:'Active Promoters',  value:regs.filter(r=>r.role==='promoter'&&r.status==='approved').length, color:G3, sub:'registered',            id:'registrations' },
     { label:'Active Jobs',       value:activeJobs.length,                                                 color:GL, sub:'live on jobs board',    id:'jobs'          },
@@ -278,6 +279,23 @@ function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clie
           <div style={{ fontSize:11, color:W55, marginTop:4, fontFamily:FD }}>{time.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})}</div>
         </div>
       </div>
+      {pendingRequestCount > 0 && (
+        <div onClick={()=>onRoute('messages')} role="button"
+          style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap',
+            background:'rgba(201,191,166,0.10)', border:`1px solid ${hex2rgba(GL,0.4)}`, borderRadius:6,
+            padding:'14px 20px', marginBottom:24, cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:15 }}>💬</span>
+            <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>New Message Requests</span>
+            <span style={{ fontSize:12, color:W55, fontFamily:FD }}>
+              {pendingRequestCount} supervisor{pendingRequestCount!==1?'s are':' is'} waiting for you to accept their first message
+            </span>
+          </div>
+          <span style={{ padding:'6px 14px', borderRadius:4, border:`1px solid ${hex2rgba(GL,0.5)}`, background:hex2rgba(GL,0.14), color:GL, fontFamily:FD, fontWeight:700, fontSize:11 }}>
+            Review →
+          </span>
+        </div>
+      )}
       <div className="hg-stat-grid hg-stat-grid-5 hg-dash-stats" style={{ background:BB, marginBottom:28 }}>
         {stats.map((s,i)=><StatCard key={i} label={s.label} value={s.value} sub={s.sub} color={s.color} onClick={()=>onRoute(s.id)} />)}
       </div>
@@ -1074,9 +1092,27 @@ export default function AdminDashboard() {
   const [clients,    setClients] = useState<any[]>(INITIAL_MOCK_CLIENTS)
   const [msgs,       setMsgs   ] = useState<any[]>(INIT_MESSAGES)
   const [detailItem, setDetail ] = useState<any>(null)
+  const [pendingChatRequests, setPendingChatRequests] = useState<any[]>([])
 
   useEffect(() => { injectAdminMobileStyles() }, [])
   useEffect(() => { const t=setInterval(()=>setTime(new Date()),1000); return ()=>clearInterval(t) }, [])
+
+  // ── Supervisor / promoter / business message requests — fetched immediately
+  //    on login (not lazily when the Messages tab is opened), and polled so a
+  //    request sent while the admin is already in the dashboard shows up fast.
+  useEffect(() => {
+    const token = localStorage.getItem('hg_token')
+    if (!token) return
+    const loadPendingChatRequests = () => {
+      fetch(`${API_URL}/chat/requests`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : [])
+        .then((data: any[]) => setPendingChatRequests(Array.isArray(data) ? data : []))
+        .catch(() => {})
+    }
+    loadPendingChatRequests()
+    const poll = setInterval(loadPendingChatRequests, 15000)
+    return () => clearInterval(poll)
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('hg_token')
@@ -1173,7 +1209,7 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      {tab==='dashboard'     && <DashboardTab     regs={regs} clients={clients} msgs={msgs} time={time} onRoute={handleRoute} />}
+      {tab==='dashboard'     && <DashboardTab     regs={regs} clients={clients} msgs={msgs} time={time} onRoute={handleRoute} pendingChatRequests={pendingChatRequests} />}
       {tab==='registrations' && <RegistrationsTab regs={regs} onDetail={setDetail} onApprove={id=>updateStatus(id,'approved')} onReject={id=>updateStatus(id,'rejected')} />}
       {tab==='clients'       && <ClientsTab       clients={clients} setClients={setClients} />}
       {tab==='supervisors'   && <SupervisorsTab />}

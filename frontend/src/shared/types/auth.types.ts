@@ -14,5 +14,6 @@ export interface AuthContextType {
   isLoading:       boolean
   login:           (email: string, password: string) => Promise<void>
   logout:          () => void
+  clearSession?:   () => void
   syncSession?:    () => void
 }

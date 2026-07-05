@@ -5,6 +5,7 @@ export interface JobFilters {
   gender?: 'male' | 'female' | 'any';
   minHeight?: number; // cm
   requiredAttributes?: string[];
+  languages?: string[] | string;
 }
 
 export interface Job {

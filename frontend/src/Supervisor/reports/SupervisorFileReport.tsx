@@ -32,6 +32,45 @@ function hexA(hex: string, a: number) {
   return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${a})`
 }
 
+// ── Lightweight inline SVG bar chart — no chart library dependency ─────────
+function BarChart({ data, width = 640, height = 220, valueFormatter }: {
+  data: { label: string; value: number; color: string }[]
+  width?: number; height?: number
+  valueFormatter?: (v: number) => string
+}) {
+  const max = Math.max(1, ...data.map(d => d.value))
+  const padding = { top: 24, right: 16, bottom: 40, left: 16 }
+  const chartW = width - padding.left - padding.right
+  const chartH = height - padding.top - padding.bottom
+  const barGap = 18
+  const barW = data.length > 0 ? Math.min(64, (chartW - barGap * (data.length - 1)) / data.length) : 0
+  const fmt = valueFormatter || ((v: number) => String(v))
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+      {/* baseline */}
+      <line x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} stroke={BB} strokeWidth={1} />
+      {data.map((d, i) => {
+        const barH = max > 0 ? (d.value / max) * chartH : 0
+        const x = padding.left + i * (barW + barGap)
+        const y = height - padding.bottom - barH
+        return (
+          <g key={d.label}>
+            <rect x={x} y={y} width={barW} height={Math.max(barH, 1)} rx={3} fill={d.color} opacity={0.9} />
+            <text x={x + barW / 2} y={y - 8} textAnchor="middle" fontSize="12" fontWeight={700} fill={W} fontFamily={FD}>
+              {fmt(d.value)}
+            </text>
+            <text x={x + barW / 2} y={height - padding.bottom + 18} textAnchor="middle" fontSize="9.5" fill={WM} fontFamily={FB}
+              style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {d.label.length > 14 ? `${d.label.slice(0, 13)}…` : d.label}
+            </text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 export const SupervisorFileReport: React.FC = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -60,6 +99,13 @@ export const SupervisorFileReport: React.FC = () => {
       )
     }
 
+    const reportsSubmitted = jobs.filter(j => j.activationReport?.status === 'submitted').length
+    const reportsDraft     = jobs.filter(j => j.activationReport?.status === 'draft').length
+    const reportsMissing   = jobs.length - reportsSubmitted - reportsDraft
+    const topCampaigns = jobs
+      .filter(j => j.activationReport && (j.activationReport.unitsServed || j.activationReport.conversions))
+      .slice(0, 6)
+
     return (
       <div style={{ padding: '32px 36px 80px' }}>
         <div style={{ marginBottom: 24 }}>
@@ -69,6 +115,36 @@ export const SupervisorFileReport: React.FC = () => {
             Select one of your assigned campaigns to file or update its activation report and see who worked it.
           </p>
         </div>
+
+        {/* ── Statistics — bar graph overview of report progress ────────────── */}
+        {jobs.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: topCampaigns.length > 0 ? '1fr 1fr' : '1fr', gap: 16, marginBottom: 28 }}>
+            <div style={{ background: BC, border: `1px solid ${BB}`, borderRadius: 6, padding: '18px 22px' }}>
+              <div style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: GL, fontWeight: 700, marginBottom: 14, fontFamily: FD }}>
+                Report Status Overview
+              </div>
+              <BarChart
+                data={[
+                  { label: 'Submitted',    value: reportsSubmitted, color: GREEN },
+                  { label: 'Draft',        value: reportsDraft,     color: AMBER },
+                  { label: 'Not Started',  value: reportsMissing,   color: WD },
+                ]}
+                width={320} height={200}
+              />
+            </div>
+            {topCampaigns.length > 0 && (
+              <div style={{ background: BC, border: `1px solid ${BB}`, borderRadius: 6, padding: '18px 22px' }}>
+                <div style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: GL, fontWeight: 700, marginBottom: 14, fontFamily: FD }}>
+                  Units Served by Campaign
+                </div>
+                <BarChart
+                  data={topCampaigns.map(j => ({ label: j.title, value: j.activationReport?.unitsServed || 0, color: GL }))}
+                  width={320} height={200}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gap: 12 }}>
           {jobs.map(j => {

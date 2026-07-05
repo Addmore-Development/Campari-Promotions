@@ -57,6 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/'
   }
 
+  // Clears the session/token without the hard redirect that `logout` does —
+  // used when a login attempt succeeds against the API but fails our own
+  // role-tab check, so we can show an error in place instead of bouncing away.
+  const clearSession = (): void => {
+    authService.logout()
+    setUser(null)
+  }
+
   if (loading) {
     return (
       <div style={{
@@ -80,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role:            user?.role ?? null,
         login,
         logout,
+        clearSession,
         syncSession,
         isAuthenticated: !!user,
         isLoading:       loading,

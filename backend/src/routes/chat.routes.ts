@@ -22,7 +22,7 @@ router.get('/unread',           protect, getUnreadCount);
 router.get('/admin',            protect, getAdminUser);
 router.get('/users',            protect, getChatableUsers);
 
-// ── Instagram-DM-style message request gating (Supervisor -> Admin) ────────
+// â”€â”€ Instagram-DM-style message request gating (Supervisor/Promoter/Business -> Admin) â”€â”€
 router.get('/requests/mine',              protect, getMyChatRequestStatus);
 router.get('/requests',                   protect, getPendingChatRequests);
 router.post('/requests/:supervisorId/respond', protect, respondToChatRequest);

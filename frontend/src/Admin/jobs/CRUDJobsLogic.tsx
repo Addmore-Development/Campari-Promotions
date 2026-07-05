@@ -906,10 +906,44 @@ const JobsPageContent: React.FC = () => {
 
                 <div><label style={lbl}>Status</label><select style={sel} value={form.status} onChange={e=>F('status',e.target.value)}>{STATUS_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
 
-                <div className="hg-form-grid-3" style={{ gap:12 }}>
+                <div className="hg-form-grid-2" style={{ gap:12 }}>
                   <div><label style={lbl}>Gender</label><select style={sel} value={form.filters?.gender||''} onChange={e=>F('filters',{...form.filters,gender:e.target.value})}>{['Any Gender','Female','Male','Non-binary'].map(g=><option key={g} value={g}>{g}</option>)}</select></div>
                   <div><label style={lbl}>Min Height</label><input type="number" style={inp} value={form.filters?.minHeight||''} onChange={e=>F('filters',{...form.filters,minHeight:e.target.value})} placeholder="160" onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} /></div>
-                  <div><label style={lbl}>Language</label><select style={sel} value={form.filters?.languages||''} onChange={e=>F('filters',{...form.filters,languages:e.target.value})}>{['Any','English','Zulu','Xhosa','Sotho','Afrikaans'].map(l=><option key={l} value={l}>{l}</option>)}</select></div>
+                </div>
+
+                <div>
+                  <label style={lbl}>Languages <span style={{ color:WM,fontWeight:400,textTransform:'none',letterSpacing:0 }}>(select one or more)</span></label>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                    {['Any','English','Zulu','Xhosa','Sotho','Afrikaans','Tswana','Venda','Tsonga','Ndebele','Swati'].map(l=>{
+                      const selectedLangs: string[] = Array.isArray(form.filters?.languages)
+                        ? form.filters.languages
+                        : (form.filters?.languages ? [form.filters.languages] : []);
+                      const active = selectedLangs.includes(l);
+                      const toggle = () => {
+                        let next: string[];
+                        if (l === 'Any') {
+                          next = active ? [] : ['Any'];
+                        } else if (active) {
+                          next = selectedLangs.filter(x => x !== l);
+                        } else {
+                          next = [...selectedLangs.filter(x => x !== 'Any'), l];
+                        }
+                        F('filters', { ...form.filters, languages: next });
+                      };
+                      return (
+                        <button key={l} type="button" onClick={toggle}
+                          style={{
+                            padding:'7px 14px', borderRadius:20, fontSize:11, fontFamily:FB, fontWeight:600,
+                            cursor:'pointer', letterSpacing:'0.04em',
+                            background: active ? `rgba(201,191,166,0.18)` : D3,
+                            border: `1px solid ${active ? GL : BB}`,
+                            color: active ? GL : WM,
+                          }}>
+                          {l}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div><label style={lbl}>Terms & Conditions</label><textarea style={{ ...inp,minHeight:72,resize:'vertical' } as any} value={form.termsAndConditions} onChange={e=>F('termsAndConditions',e.target.value)} placeholder="Optional terms…" onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} /></div>

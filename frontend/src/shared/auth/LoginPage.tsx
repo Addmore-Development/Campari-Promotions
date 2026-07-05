@@ -117,7 +117,7 @@ function FloatingInput({
 
 export default function LoginPage() {
   const navigate                   = useNavigate()
-  const { login }                  = useAuth()
+  const { login, clearSession }    = useAuth()
   const [role, setRole]            = useState<Role>('promoter')
   const [email, setEmail]          = useState('')
   const [password, setPassword]    = useState('')
@@ -175,6 +175,17 @@ export default function LoginPage() {
       // Read the role that came back from the API — stored in hg_session by authService
       const raw = localStorage.getItem('hg_session')
       const actualRole: string = raw ? (JSON.parse(raw).role || role) : role
+
+      // Enforce that the account's real role matches the tab the person selected.
+      // Without this, e.g. an admin's credentials would still log in successfully
+      // while the "Promoter" tab was active, just silently redirecting to /admin.
+      if (actualRole !== role) {
+        clearSession?.()
+        setError(`This account is registered as ${ROLE_CONFIG[actualRole as Role]?.label ?? actualRole}. Please switch to the "${ROLE_CONFIG[actualRole as Role]?.label ?? actualRole}" tab to log in.`)
+        setLoading(false)
+        return
+      }
+
       const redirect = DASHBOARD_ROUTE[actualRole as Role] ?? DASHBOARD_ROUTE[role]
       setSuccess(true)
       setTimeout(() => navigate(redirect), 900)

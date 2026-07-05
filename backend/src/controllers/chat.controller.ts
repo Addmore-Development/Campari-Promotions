@@ -3,7 +3,7 @@ import { prisma } from '../config';
 import { AuthRequest } from '../middleware/auth';
 import { supabaseAdmin } from '../config/supabase';
 
-// ── GET threads for the current user ────────────────────────────────────────
+// â”€â”€ GET threads for the current user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getMyThreads = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
@@ -55,7 +55,7 @@ export const getMyThreads = async (req: AuthRequest, res: Response): Promise<voi
   }
 };
 
-// ── GET messages between two users ──────────────────────────────────────────
+// â”€â”€ GET messages between two users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getThreadMessages = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId  = req.user!.id;
@@ -85,17 +85,20 @@ export const getThreadMessages = async (req: AuthRequest, res: Response): Promis
   }
 };
 
-// ── SUPERVISOR -> ADMIN message-request gating (Instagram-DM style) ────────
-// The supervisor's first message to an admin creates a pending ChatRequest.
-// Everything the supervisor sends after that is blocked until an admin
-// accepts it. Once accepted, the thread behaves like any normal chat.
-async function checkSupervisorAdminGate(senderId: string, senderRole: string, receiverRole: string): Promise<{ blocked: boolean; reason?: string; isFirstMessage?: boolean }> {
-  if (senderRole !== 'SUPERVISOR' || receiverRole !== 'ADMIN') return { blocked: false };
+// â”€â”€ SUPERVISOR/PROMOTER/BUSINESS -> ADMIN message-request gating (Instagram-DM style) â”€â”€
+// The first message any of those roles sends to an admin creates a pending
+// ChatRequest. Everything that user sends after that is blocked until an
+// admin accepts it. Once accepted, the thread behaves like any normal chat.
+// Admin never needs to request anything â€” admin can message anyone freely.
+const GATED_SENDER_ROLES = ['SUPERVISOR', 'PROMOTER', 'BUSINESS'];
 
-  const existing = await prisma.chatRequest.findUnique({ where: { supervisorId: senderId } });
+async function checkFirstMessageGate(senderId: string, senderRole: string, receiverRole: string): Promise<{ blocked: boolean; reason?: string; isFirstMessage?: boolean }> {
+  if (!GATED_SENDER_ROLES.includes(senderRole) || receiverRole !== 'ADMIN') return { blocked: false };
+
+  const existing = await prisma.chatRequest.findUnique({ where: { requesterId: senderId } });
 
   if (!existing) {
-    await prisma.chatRequest.create({ data: { supervisorId: senderId, status: 'pending' } });
+    await prisma.chatRequest.create({ data: { requesterId: senderId, status: 'pending' } });
     return { blocked: false, isFirstMessage: true };
   }
 
@@ -109,7 +112,7 @@ async function checkSupervisorAdminGate(senderId: string, senderRole: string, re
   return { blocked: true, reason: 'Your message request was declined by admin.' };
 }
 
-// ── POST send a message ─────────────────────────────────────────────────────
+// â”€â”€ POST send a message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const sendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const senderId             = req.user!.id;
@@ -131,11 +134,11 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // If this is a supervisor messaging an admin, and they've already sent
-    // their one allowed "request" message and it's still pending/declined,
-    // block further sends until an admin accepts.
-    if (senderRole === 'SUPERVISOR' && receiver.role === 'ADMIN') {
-      const gate = await checkSupervisorAdminGate(senderId, senderRole, receiver.role);
+    // If this is a supervisor/promoter/business messaging an admin, and
+    // they've already sent their one allowed "request" message and it's
+    // still pending/declined, block further sends until an admin accepts.
+    if (GATED_SENDER_ROLES.includes(senderRole) && receiver.role === 'ADMIN') {
+      const gate = await checkFirstMessageGate(senderId, senderRole, receiver.role);
       if (gate.blocked) {
         res.status(403).json({ error: gate.reason, requestGated: true });
         return;
@@ -150,7 +153,7 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
       },
     });
 
-    // Push live to anyone subscribed to this thread — non-fatal, chat still
+    // Push live to anyone subscribed to this thread â€” non-fatal, chat still
     // works via the existing REST polling if this fails or Realtime isn't set up.
     try {
       const threadChannel = [senderId, receiverId].sort().join('__');
@@ -170,24 +173,24 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
   }
 };
 
-// ── GET the current supervisor's own chat-request status ──────────────────
+// â”€â”€ GET the current user's own chat-request status (supervisor/promoter/business) â”€â”€
 export const getMyChatRequestStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (req.user!.role !== 'SUPERVISOR') { res.json({ status: 'n/a' }); return; }
-    const request = await prisma.chatRequest.findUnique({ where: { supervisorId: req.user!.id } });
+    if (!GATED_SENDER_ROLES.includes(req.user!.role)) { res.json({ status: 'n/a' }); return; }
+    const request = await prisma.chatRequest.findUnique({ where: { requesterId: req.user!.id } });
     res.json({ status: request?.status || 'none' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch chat request status' });
   }
 };
 
-// ── ADMIN: list pending supervisor message requests ────────────────────────
+// â”€â”€ ADMIN: list pending message requests (from supervisors, promoters, businesses) â”€â”€
 export const getPendingChatRequests = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (req.user!.role !== 'ADMIN') { res.status(403).json({ error: 'Admins only' }); return; }
     const requests = await prisma.chatRequest.findMany({
       where: { status: 'pending' },
-      include: { supervisor: { select: { id: true, fullName: true, email: true, phone: true } } },
+      include: { requester: { select: { id: true, fullName: true, email: true, phone: true, role: true } } },
       orderBy: { createdAt: 'desc' },
     });
     res.json(requests);
@@ -196,18 +199,18 @@ export const getPendingChatRequests = async (req: AuthRequest, res: Response): P
   }
 };
 
-// ── ADMIN: accept or decline a supervisor's message request ────────────────
+// â”€â”€ ADMIN: accept or decline a message request â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const respondToChatRequest = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (req.user!.role !== 'ADMIN') { res.status(403).json({ error: 'Admins only' }); return; }
-    const { supervisorId } = req.params;
+    const { supervisorId: requesterId } = req.params; // route param kept as :supervisorId for URL back-compat
     const { accept } = req.body; // boolean
 
-    const existing = await prisma.chatRequest.findUnique({ where: { supervisorId } });
-    if (!existing) { res.status(404).json({ error: 'No pending request from this supervisor' }); return; }
+    const existing = await prisma.chatRequest.findUnique({ where: { requesterId } });
+    if (!existing) { res.status(404).json({ error: 'No pending request from this user' }); return; }
 
     const updated = await prisma.chatRequest.update({
-      where: { supervisorId },
+      where: { requesterId },
       data: {
         status: accept ? 'accepted' : 'declined',
         respondedAt: new Date(),
@@ -222,7 +225,7 @@ export const respondToChatRequest = async (req: AuthRequest, res: Response): Pro
   }
 };
 
-// ── GET unread count ────────────────────────────────────────────────────────
+// â”€â”€ GET unread count â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getUnreadCount = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const count = await prisma.chatMessage.count({
@@ -234,17 +237,17 @@ export const getUnreadCount = async (req: AuthRequest, res: Response): Promise<v
   }
 };
 
-// ── SUPERVISOR: re-send a message request after a decline ─────────────────
+// â”€â”€ SUPERVISOR: re-send a message request after a decline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const resendChatRequest = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (req.user!.role !== 'SUPERVISOR') { res.status(403).json({ error: 'Supervisors only' }); return; }
-    const existing = await prisma.chatRequest.findUnique({ where: { supervisorId: req.user!.id } });
+    if (!GATED_SENDER_ROLES.includes(req.user!.role)) { res.status(403).json({ error: 'Not available for this role' }); return; }
+    const existing = await prisma.chatRequest.findUnique({ where: { requesterId: req.user!.id } });
     if (!existing || existing.status !== 'declined') {
       res.status(400).json({ error: 'No declined request to resend' });
       return;
     }
     const updated = await prisma.chatRequest.update({
-      where: { supervisorId: req.user!.id },
+      where: { requesterId: req.user!.id },
       data: { status: 'pending', respondedAt: null, respondedBy: null },
     });
     res.json(updated);
@@ -253,7 +256,7 @@ export const resendChatRequest = async (req: AuthRequest, res: Response): Promis
   }
 };
 
-// ── GET admin user ──────────────────────────────────────────────────────────
+// â”€â”€ GET admin user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getAdminUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const admin = await prisma.user.findFirst({
@@ -267,20 +270,20 @@ export const getAdminUser = async (req: AuthRequest, res: Response): Promise<voi
   }
 };
 
-// ── GET chatable users — ROLE AWARE ─────────────────────────────────────────
-// ADMIN      → ALL promoters + ALL businesses + ALL supervisors (no filter needed)
-// BUSINESS   → admin + promoters who have ANY shift on ANY of their jobs
+// â”€â”€ GET chatable users â€” ROLE AWARE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ADMIN      â†’ ALL promoters + ALL businesses + ALL supervisors (no filter needed)
+// BUSINESS   â†’ admin + promoters who have ANY shift on ANY of their jobs
 //              + supervisors assigned to ANY of their jobs
-// PROMOTER   → admin + businesses whose jobs they have ANY shift on
+// PROMOTER   â†’ admin + businesses whose jobs they have ANY shift on
 //              + supervisors assigned to the jobs they have a shift on
-// SUPERVISOR → admin + promoters with a shift on a job they supervise
+// SUPERVISOR â†’ admin + promoters with a shift on a job they supervise
 //              + businesses (clients) of the jobs they supervise
 export const getChatableUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const role   = req.user!.role; // 'ADMIN' | 'BUSINESS' | 'PROMOTER' | 'SUPERVISOR'
 
-    // ── ADMIN: return every non-admin user ───────────────────────────────────
+    // â”€â”€ ADMIN: return every non-admin user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (role === 'ADMIN') {
       const users = await prisma.user.findMany({
         where:   { role: { in: ['PROMOTER', 'BUSINESS', 'SUPERVISOR'] } },
@@ -291,14 +294,14 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    // ── Shared: always include admin ─────────────────────────────────────────
+    // â”€â”€ Shared: always include admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const adminUser = await prisma.user.findFirst({
       where:  { role: 'ADMIN' },
       select: { id: true, fullName: true, role: true, status: true },
     });
 
-    // ── BUSINESS: admin + promoters who have shifts on their jobs
-    //             + supervisors assigned to their jobs ──────────────────────
+    // â”€â”€ BUSINESS: admin + promoters who have shifts on their jobs
+    //             + supervisors assigned to their jobs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (role === 'BUSINESS') {
       // Find all jobs where this user is the client
       const myJobs = await prisma.job.findMany({
@@ -344,8 +347,8 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    // ── PROMOTER: admin + businesses whose jobs they have shifts on
-    //             + supervisors of the jobs they have shifts on ─────────────
+    // â”€â”€ PROMOTER: admin + businesses whose jobs they have shifts on
+    //             + supervisors of the jobs they have shifts on â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (role === 'PROMOTER') {
       const myShifts = await prisma.shift.findMany({
         where:  { promoterId: userId },
@@ -393,35 +396,24 @@ export const getChatableUsers = async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    // ── SUPERVISOR: admin + promoters with a shift on a job they supervise
-    //               + businesses (clients) of the jobs they supervise ───────
+    // â”€â”€ SUPERVISOR: admin + ALL promoters (so they can reach out to anyone,
+    //               not just promoters already shifted onto their jobs)
+    //               + businesses (clients) of the jobs they supervise â”€â”€â”€â”€â”€â”€â”€
     if (role === 'SUPERVISOR') {
       const myJobs = await prisma.job.findMany({
         where:  { supervisorId: userId },
-        select: { id: true, clientId: true },
+        select: { clientId: true },
       });
-      const myJobIds  = myJobs.map(j => j.id);
       const clientIds = [
         ...new Set(myJobs.map(j => j.clientId).filter((id): id is string => Boolean(id))),
       ];
 
       const [promoters, businesses] = await Promise.all([
-        myJobIds.length > 0
-          ? prisma.shift.findMany({
-              where:    { jobId: { in: myJobIds } },
-              select:   { promoterId: true },
-              distinct: ['promoterId'],
-            }).then(shifts => {
-              const pIds = shifts.map(s => s.promoterId);
-              return pIds.length > 0
-                ? prisma.user.findMany({
-                    where:   { id: { in: pIds } },
-                    select:  { id: true, fullName: true, role: true, status: true },
-                    orderBy: { fullName: 'asc' },
-                  })
-                : [];
-            })
-          : Promise.resolve([]),
+        prisma.user.findMany({
+          where:   { role: 'PROMOTER' },
+          select:  { id: true, fullName: true, role: true, status: true },
+          orderBy: { fullName: 'asc' },
+        }),
         clientIds.length > 0
           ? prisma.user.findMany({
               where:   { id: { in: clientIds }, role: 'BUSINESS' },

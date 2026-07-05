@@ -178,15 +178,15 @@ export function AdminChatTab() {
     } catch {}
   }, [])
 
-  const respondToRequest = async (supervisorId: string, accept: boolean) => {
+  const respondToRequest = async (requesterId: string, accept: boolean) => {
     try {
-      const res = await fetch(`${API}/chat/requests/${supervisorId}/respond`, {
+      const res = await fetch(`${API}/chat/requests/${requesterId}/respond`, {
         method: 'POST',
         headers: { ...authHdr(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ accept }),
       })
       if (res.ok) {
-        setPendingRequests(prev => prev.filter(r => r.supervisorId !== supervisorId))
+        setPendingRequests(prev => prev.filter(r => r.requesterId !== requesterId))
         loadThreads()
       }
     } catch {}
@@ -316,16 +316,19 @@ export function AdminChatTab() {
                 {pendingRequests.map((r: any) => (
                   <div key={r.id} style={{ background: BB2, border: `1px solid ${BB}`, borderRadius: 4, padding: '8px 10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <Avatar name={r.supervisor?.fullName || 'Supervisor'} role="supervisor" />
-                      <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.supervisor?.fullName}</div>
+                      <Avatar name={r.requester?.fullName || 'User'} role={(r.requester?.role || 'user').toLowerCase()} />
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.requester?.fullName}</div>
+                        <div style={{ fontSize: 9, color: WD, fontFamily: FD, textTransform: 'capitalize' }}>{(r.requester?.role || '').toLowerCase()}</div>
+                      </div>
                     </div>
                     <p style={{ fontSize: 10.5, color: W28, marginBottom: 8, fontFamily: FD }}>wants to send you a message</p>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => respondToRequest(r.supervisorId, true)}
+                      <button onClick={() => respondToRequest(r.requesterId, true)}
                         style={{ flex: 1, padding: '5px 0', background: `linear-gradient(135deg,${GL},${G})`, border: 'none', color: B, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
                         Accept
                       </button>
-                      <button onClick={() => respondToRequest(r.supervisorId, false)}
+                      <button onClick={() => respondToRequest(r.requesterId, false)}
                         style={{ flex: 1, padding: '5px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
                         Decline
                       </button>
@@ -509,6 +512,8 @@ export function FloatingChat() {
   const [pickerSearch, setPickerSearch] = useState('')
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [initDone,     setInitDone    ] = useState(false)
+  const [requestStatus, setRequestStatus] = useState<'none' | 'pending' | 'accepted' | 'declined' | 'n/a'>('n/a')
+  const [gateError,    setGateError   ] = useState<string | null>(null)
   const bottomRef  = useRef<HTMLDivElement>(null)
   const pollRef    = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -565,6 +570,26 @@ export function FloatingChat() {
     } catch {}
   }, [activeUser, open])
 
+  // ── When chatting with admin, track our own message-request status so we
+  //    can show "waiting for approval" instead of silently failing sends ───
+  const loadRequestStatus = useCallback(async () => {
+    if (!activeUser || activeUser.role !== 'admin') { setRequestStatus('n/a'); return }
+    try {
+      const res = await fetch(`${API}/chat/requests/mine`, { headers: authHdr() })
+      if (res.ok) {
+        const data = await res.json()
+        setRequestStatus(data.status || 'none')
+      }
+    } catch {}
+  }, [activeUser])
+
+  useEffect(() => {
+    loadRequestStatus()
+    if (activeUser?.role !== 'admin') return
+    const ref = setInterval(loadRequestStatus, 6000)
+    return () => clearInterval(ref)
+  }, [activeUser, loadRequestStatus])
+
   // ── Poll every 4 s once we have an active user ───────────────────────────
   useEffect(() => {
     if (!initDone || !activeUser) return
@@ -584,6 +609,7 @@ export function FloatingChat() {
   const send = async () => {
     if (!draft.trim() || !activeUser || sending) return
     setSending(true)
+    setGateError(null)
     try {
       const res = await fetch(`${API}/chat/send`, {
         method:  'POST',
@@ -593,14 +619,27 @@ export function FloatingChat() {
       if (res.ok) {
         setDraft('')
         await loadMessages()
+        if (activeUser.role === 'admin') loadRequestStatus()
       } else {
         const e = await res.json().catch(() => ({}))
-        console.error('[FloatingChat] send failed:', e)
+        if (e.requestGated) {
+          setGateError(e.error || 'Your message request is awaiting admin approval.')
+          loadRequestStatus()
+        } else {
+          console.error('[FloatingChat] send failed:', e)
+        }
       }
     } catch (err) {
       console.error('[FloatingChat] send error:', err)
     }
     setSending(false)
+  }
+
+  const resendRequest = async () => {
+    try {
+      const res = await fetch(`${API}/chat/requests/resend`, { method: 'POST', headers: authHdr() })
+      if (res.ok) { setGateError(null); loadRequestStatus() }
+    } catch {}
   }
 
   const openPicker = () => {
@@ -612,6 +651,7 @@ export function FloatingChat() {
   const switchUser = (u: ChatUser) => {
     setActiveUser(u)
     setMessages([])
+    setGateError(null)
     setShowPicker(false)
     setPickerSearch('')
   }
@@ -706,20 +746,45 @@ export function FloatingChat() {
             <div ref={bottomRef} />
           </div>
 
+          {/* Message-request status banner — only relevant when talking to admin */}
+          {activeUser?.role === 'admin' && requestStatus === 'pending' && (
+            <div style={{ padding: '8px 14px', background: 'rgba(201,191,166,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: GL, fontFamily: FD, flexShrink: 0 }}>
+              Message request sent — waiting for admin to accept. You can send one message until then.
+            </div>
+          )}
+          {activeUser?.role === 'admin' && requestStatus === 'declined' && (
+            <div style={{ padding: '8px 14px', background: 'rgba(200,90,90,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: '#D98A8A', fontFamily: FD, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexShrink: 0 }}>
+              <span>Your message request was declined.</span>
+              <button onClick={resendRequest} style={{ background: 'none', border: `1px solid #D98A8A`, color: '#D98A8A', borderRadius: 3, padding: '3px 10px', fontSize: 10, cursor: 'pointer', fontFamily: FD, whiteSpace: 'nowrap' }}>
+                Send new request
+              </button>
+            </div>
+          )}
+          {gateError && requestStatus !== 'declined' && (
+            <div style={{ padding: '8px 14px', background: 'rgba(201,191,166,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: GL, fontFamily: FD, flexShrink: 0 }}>
+              {gateError}
+            </div>
+          )}
+
           {/* Input */}
           <div style={{ padding: '10px 14px', borderTop: `1px solid ${BB}`, display: 'flex', gap: 8, flexShrink: 0, background: D3 }}>
             <input
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-              placeholder={`Message ${activeUser?.fullName || 'Support'}…`}
+              placeholder={
+                activeUser?.role === 'admin' && requestStatus === 'pending' ? 'Waiting for admin to accept…' :
+                activeUser?.role === 'admin' && requestStatus === 'declined' ? 'Request declined' :
+                `Message ${activeUser?.fullName || 'Support'}…`
+              }
+              disabled={activeUser?.role === 'admin' && requestStatus === 'declined'}
               style={{ flex: 1, background: BB2, border: `1px solid ${BB}`, padding: '9px 12px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 20, boxSizing: 'border-box' as const }}
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB}
             />
             <button
               onClick={send}
-              disabled={!draft.trim() || sending}
+              disabled={!draft.trim() || sending || (activeUser?.role === 'admin' && requestStatus === 'declined')}
               style={{ width: 38, height: 38, borderRadius: '50%', background: draft.trim()&&!sending?`linear-gradient(135deg,${GL},${G})`:BB, border: 'none', cursor: draft.trim()&&!sending?'pointer':'default', color: draft.trim()&&!sending?B:W28, fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}>
               {sending ? '…' : '↑'}
             </button>

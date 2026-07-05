@@ -34,17 +34,26 @@ export const SupervisorDashboard: React.FC<Props> = ({ onNavigate }) => {
   const [business, setBusiness] = useState<any>(null)
 
   useEffect(() => {
-    jobsService.getSupervisorJobs().then(async j => {
-      setJobs(j)
-      setLoading(false)
-      const entries = await Promise.all(j.map(async (job: any) => {
-        try {
-          const apps = await jobsService.getApplicationsForJob(job.id)
-          return [job.id, apps.filter((a: any) => a.status === 'STANDBY').length] as const
-        } catch { return [job.id, 0] as const }
-      }))
-      setPendingCounts(Object.fromEntries(entries))
-    })
+    const load = () => {
+      jobsService.getSupervisorJobs().then(async j => {
+        setJobs(j)
+        setLoading(false)
+        const entries = await Promise.all(j.map(async (job: any) => {
+          try {
+            const apps = await jobsService.getApplicationsForJob(job.id)
+            return [job.id, apps.filter((a: any) => a.status === 'STANDBY').length] as const
+          } catch { return [job.id, 0] as const }
+        }))
+        setPendingCounts(Object.fromEntries(entries))
+      })
+    }
+    load()
+    // Poll + refetch on focus so a job the admin just assigned to this
+    // supervisor shows up here without needing a manual page reload.
+    const poll = setInterval(load, 15000)
+    const onFocus = () => load()
+    window.addEventListener('focus', onFocus)
+    return () => { clearInterval(poll); window.removeEventListener('focus', onFocus) }
   }, [])
 
   useEffect(() => {
