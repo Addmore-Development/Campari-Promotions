@@ -219,7 +219,7 @@ function Bubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
 }
 
 // ─── Render a message list with date dividers ──────────────────────────────────
-function MessageList({ messages, myId, bottomRef }: { messages: Message[]; myId: string; bottomRef: React.RefObject<HTMLDivElement> }) {
+function MessageList({ messages, myId, bottomRef }: { messages: Message[]; myId: string; bottomRef: React.RefObject<HTMLDivElement | null> }) {
   let lastDay = ''
   return (
     <>
