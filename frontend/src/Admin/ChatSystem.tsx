@@ -255,11 +255,11 @@ export function AdminChatTab({
   const [messages,     setMessages    ] = useState<Message[]>([])
   const [draft,        setDraft       ] = useState('')
   const [search,       setSearch      ] = useState('')
-  const [filterRole,   setFilterRole  ] = useState<'all'|'promoter'|'business'>('all')
+  const [filterRole,   setFilterRole  ] = useState<'all'|'promoter'|'business'|'supervisor'>('all')
   const [chatUsers,    setChatUsers   ] = useState<ChatUser[]>([])
   const [showNew,      setShowNew     ] = useState(false)
   const [newSearch,    setNewSearch   ] = useState('')
-  const [newFilter,    setNewFilter   ] = useState<'all'|'promoter'|'business'>('all')
+  const [newFilter,    setNewFilter   ] = useState<'all'|'promoter'|'business'|'supervisor'>('all')
   const [sending,      setSending     ] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
@@ -305,7 +305,9 @@ export function AdminChatTab({
         return users
       }
     } catch {}
-    setLoadingUsers(false)
+    finally {
+      setLoadingUsers(false)
+    }
     return [] as ChatUser[]
   }, [])
 
@@ -518,7 +520,7 @@ export function AdminChatTab({
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB} />
             <div style={{ display: 'flex', gap: 4 }}>
-              {(['all','promoter','business'] as const).map(r => (
+              {(['all','promoter','business','supervisor'] as const).map(r => (
                 <button key={r} onClick={() => setFilterRole(r)}
                   style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(201,191,166,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 20 }}>
                   {r}
@@ -631,10 +633,10 @@ export function AdminChatTab({
 
             {/* Role filter */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
-              {(['all','promoter','business'] as const).map(r => (
+              {(['all','promoter','business','supervisor'] as const).map(r => (
                 <button key={r} onClick={() => setNewFilter(r)}
                   style={{ flex: 1, padding: '6px', border: `1px solid ${newFilter===r?GL:BB}`, background: newFilter===r?'rgba(201,191,166,0.14)':'transparent', color: newFilter===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: newFilter===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
-                  {r === 'all' ? 'All Users' : r === 'promoter' ? 'Promoters' : 'Businesses'}
+                  {r === 'all' ? 'All Users' : r === 'promoter' ? 'Promoters' : r === 'business' ? 'Businesses' : 'Supervisors'}
                 </button>
               ))}
             </div>
