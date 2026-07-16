@@ -111,10 +111,10 @@ const INIT_MESSAGES = [
 ]
 
 const STATIC_ACTIVITY = [
-  { time:'14m ago', msg:'Job #JB-204 filled â€” 8/8 slots taken',       type:'job',     ts: Date.now() - 14*60*1000 },
+  { time:'14m ago', msg:'Job #JB-204 filled — 8/8 slots taken',        type:'job',     ts: Date.now() - 14*60*1000 },
   { time:'22m ago', msg:'Sipho Mhlongo submitted ID document',         type:'doc',     ts: Date.now() - 22*60*1000 },
-  { time:'31m ago', msg:'Payroll batch calculated â€” R12,400',          type:'payment', ts: Date.now() - 31*60*1000 },
-  { time:'45m ago', msg:'Lerato Mokoena flagged late â€” Rosebank Mall', type:'flag',    ts: Date.now() - 45*60*1000 },
+  { time:'31m ago', msg:'Payroll batch calculated — R12,400',          type:'payment', ts: Date.now() - 31*60*1000 },
+  { time:'45m ago', msg:'Lerato Mokoena flagged late — Rosebank Mall', type:'flag',    ts: Date.now() - 45*60*1000 },
 ]
 const TYPE_CLR: Record<string,string> = { checkin:GL, apply:G3, job:G4, doc:G2, payment:GL, flag:'#8A8474', approve:GL, reject:G2 }
 
@@ -138,11 +138,11 @@ function buildLiveActivity(regs: any[]): { time:string; msg:string; type:string;
     const role = r.role === 'business' ? 'Business' : 'Promoter'
 
     if (r.status === 'approved') {
-      events.push({ ts, type: 'approve', msg: `${name} approved ? â€” ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'approve', msg: `${name} approved — ${role}`, time: timeAgo(ts) })
     } else if (r.status === 'rejected') {
-      events.push({ ts, type: 'reject', msg: `${name} rejected â€” ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'reject', msg: `${name} rejected — ${role}`, time: timeAgo(ts) })
     } else {
-      events.push({ ts, type: 'apply', msg: `New registration: ${name} â€” ${role}`, time: timeAgo(ts) })
+      events.push({ ts, type: 'apply', msg: `New registration: ${name} — ${role}`, time: timeAgo(ts) })
     }
   })
 
@@ -199,7 +199,7 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:480, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${accent},${G5})` }} />
-        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>?</button>
+        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>✕</button>
         <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>{isPromoter?'Promoter':'Business'} Application</div>
         <div style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:8 }}>{item.name}</div>
         <div style={{ marginBottom:20 }}><Badge label={item.status} color={statusColor(item.status)} bg={statusBg(item.status)} border={statusBorder(item.status)} /></div>
@@ -209,7 +209,7 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
             <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD }}>{r.value}</span>
           </div>
         ))}
-        {pending&&<div style={{ display:'flex', gap:12, marginTop:24 }}><Btn onClick={onApprove} color={C_ACTIVE}>? Approve</Btn><Btn onClick={onReject} color={G2} outline>? Reject</Btn></div>}
+        {pending&&<div style={{ display:'flex', gap:12, marginTop:24 }}><Btn onClick={onApprove} color={C_ACTIVE}>Approve</Btn><Btn onClick={onReject} color={G2} outline>Reject</Btn></div>}
       </div>
     </div>
   )
@@ -222,7 +222,7 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:520, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${statusColor(client.status)},${G5})` }} />
-        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>?</button>
+        <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>✕</button>
         <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Client Profile</div>
         <div style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:6 }}>{client.name}</div>
         <div style={{ marginBottom:16, display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -230,7 +230,7 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
           <Badge label={client.industry} color={G3} bg={hex2rgba(G3,0.12)} border={hex2rgba(G3,0.38)} />
         </div>
         {client.description&&<div style={{ padding:'12px 14px', background:BB2, border:`1px solid ${BB}`, marginBottom:18, fontSize:13, color:W85, lineHeight:1.6, borderRadius:3, fontFamily:FD }}>{client.description}</div>}
-        {[{label:'Contact',value:client.contact},{label:'Email',value:client.email},{label:'Phone',value:client.phone},{label:'City',value:client.city},{label:'Website',value:client.website||'â€”'},{label:'Reg. Number',value:client.regNumber||'â€”'},{label:'Registered',value:client.registeredDate},{label:'Campaigns',value:`${client.jobsRun} campaigns`},{label:'Total Hours',value:`${client.totalHours} hrs`},{label:'Spend',value:client.budget}].map(r=>(
+        {[{label:'Contact',value:client.contact},{label:'Email',value:client.email},{label:'Phone',value:client.phone},{label:'City',value:client.city},{label:'Website',value:client.website||'—'},{label:'Reg. Number',value:client.regNumber||'—'},{label:'Registered',value:client.registeredDate},{label:'Campaigns',value:`${client.jobsRun} campaigns`},{label:'Total Hours',value:`${client.totalHours} hrs`},{label:'Spend',value:client.budget}].map(r=>(
           <div key={r.label} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:`1px solid ${BB}` }}>
             <span style={{ fontSize:12, color:W55, fontFamily:FD }}>{r.label}</span>
             <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD }}>{r.value}</span>
@@ -261,10 +261,10 @@ function DashboardTab({ regs, clients, msgs, time, onRoute, pendingChatRequests 
     { label:'Active Clients',    value:clients.filter(c=>c.status==='active').length,                     color:G4, sub:'business clients',      id:'clients'       },
   ]
   const quickActions = [
-    {label:'Registrations',icon:'?',id:'registrations',color:GL},{label:'Messages',icon:'?',id:'messages',color:G3},
-    {label:'Live Map',icon:'?',id:'map',color:G2},{label:'Clients',icon:'?',id:'clients',color:GL},{label:'Supervisors',icon:'?',id:'supervisors',color:G3},
-    {label:'Jobs',icon:'?',id:'jobs',color:G4},{label:'Complaints',icon:'?',id:'reviews',color:GL},
-    {label:'Reports',icon:'?',id:'reports',color:G3},{label:'Settings',icon:'?',id:'settings',color:G2},
+    {label:'Registrations',id:'registrations',color:GL},{label:'Messages',id:'messages',color:G3},
+    {label:'Live Map',id:'map',color:G2},{label:'Clients',id:'clients',color:GL},{label:'Supervisors',id:'supervisors',color:G3},
+    {label:'Jobs',id:'jobs',color:G4},{label:'Complaints',id:'reviews',color:GL},
+    {label:'Reports',id:'reports',color:G3},{label:'Settings',id:'settings',color:G2},
   ]
   return (
     <div className="hg-page" style={{ padding:'40px 48px' }}>
@@ -307,7 +307,7 @@ function DashboardTab({ regs, clients, msgs, time, onRoute, pendingChatRequests 
               <button key={a.id} onClick={()=>onRoute(a.id)} style={{ padding:'14px 12px', background:D3, border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:8, transition:'all 0.2s', fontFamily:FD }}
                 onMouseEnter={e=>{e.currentTarget.style.background=GM;e.currentTarget.style.transform='translateY(-1px)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background=D3;e.currentTarget.style.transform='translateY(0)'}}>
-                <span style={{ fontSize:14, color:a.color }}>{a.icon}</span>
+                <span style={{ width:4, height:4, borderRadius:'50%', background:a.color, flexShrink:0 }} />
                 <span style={{ fontSize:12, color:W, fontWeight:700, fontFamily:FD }}>{a.label}</span>
               </button>
             ))}
@@ -345,7 +345,7 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:24 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People Â· Registrations</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People · Registrations</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Registrations</h1>
           <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>Review and approve promoter and business applications.</p>
         </div>
@@ -372,10 +372,10 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
                 <td data-label="City" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD }}>{r.city}</td>
                 <td data-label="Date" className="hg-col-hide-md" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD }}>{r.date}</td>
                 <td data-label="Status" style={{ padding:'12px 16px' }}><Badge label={r.status} color={statusColor(r.status)} bg={statusBg(r.status)} border={statusBorder(r.status)} /></td>
-                <td data-label="Source" className="hg-col-hide-md" style={{ padding:'12px 16px' }}><span style={{ fontSize:10, fontWeight:700, color:r.source==='real'?GL:W55, fontFamily:FD }}>{r.source==='real'?'? Live':'? Demo'}</span></td>
+                <td data-label="Source" className="hg-col-hide-md" style={{ padding:'12px 16px' }}><span style={{ fontSize:10, fontWeight:700, color:r.source==='real'?GL:W55, fontFamily:FD }}>{r.source==='real'?'Live':'Demo'}</span></td>
                 <td data-label="Actions" style={{ padding:'12px 16px' }}>
                   <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
-                    <button onClick={()=>onDetail(r)} style={{ fontSize:11, color:GL, background:'none', border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700 }}>View ?</button>
+                    <button onClick={()=>onDetail(r)} style={{ fontSize:11, color:GL, background:'none', border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700 }}>View →</button>
                     {isPending(r.status)&&<><button onClick={()=>onApprove(r.id)} style={{ fontSize:10, color:B, background:G3, border:'none', cursor:'pointer', fontFamily:FD, fontWeight:700, padding:'5px 12px', borderRadius:3, letterSpacing:'0.06em' }}>Approve</button><button onClick={()=>onReject(r.id)} style={{ fontSize:10, color:C_REJECTED, background:hex2rgba(G5,0.35), border:`1px solid ${hex2rgba(G2,0.45)}`, cursor:'pointer', fontFamily:FD, fontWeight:700, padding:'5px 12px', borderRadius:3, letterSpacing:'0.06em' }}>Reject</button></>}
                   </div>
                 </td>
@@ -410,7 +410,7 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:28 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People Â· Clients</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>People · Clients</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Client Accounts</h1>
           <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>Businesses registered on the platform who book promoters.</p>
         </div>
@@ -425,14 +425,13 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
           {(['all','active','new','inactive'] as const).map(f=><FilterBtn key={f} label={f} active={statusF===f} color={f==='all'?GL:statusColor(f)} onClick={()=>setStatusF(f)} />)}
         </div>
         <div style={{ position:'relative' }}>
-          <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:W28, fontSize:12, pointerEvents:'none' }}>?</span>
-          <input placeholder="Search clientsâ€¦" value={search} onChange={e=>setSearch(e.target.value)}
-            style={{ background:D2, border:`1px solid ${BB}`, padding:'7px 14px 7px 28px', color:W, fontFamily:FD, fontSize:11, outline:'none', borderRadius:3, width:200 }}
+          <input placeholder="Search clients…" value={search} onChange={e=>setSearch(e.target.value)}
+            style={{ background:D2, border:`1px solid ${BB}`, padding:'7px 14px', color:W, fontFamily:FD, fontSize:11, outline:'none', borderRadius:3, width:200 }}
             onFocus={e=>e.currentTarget.style.borderColor=GL} onBlur={e=>e.currentTarget.style.borderColor=BB} />
         </div>
       </div>
 
-      {/* Client cards grid â€” mobile friendly */}
+      {/* Client cards grid — mobile friendly */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:12 }}>
         {filtered.map((c,i)=>{
           const accent=avatarAccents[i%avatarAccents.length]
@@ -460,8 +459,8 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
                 ))}
               </div>
               <div style={{ marginTop:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <div style={{ fontSize:11, color:W55, fontFamily:FD }}>{c.contact} Â· {c.email}</div>
-                <span style={{ fontSize:11, color:GL, fontFamily:FD }}>View ?</span>
+                <div style={{ fontSize:11, color:W55, fontFamily:FD }}>{c.contact} · {c.email}</div>
+                <span style={{ fontSize:11, color:GL, fontFamily:FD }}>View →</span>
               </div>
             </div>
           )
@@ -488,11 +487,11 @@ function LoginsTab() {
       const localLogins:any[]=JSON.parse(stored); if(!localLogins.length) return
       setLogins(prev=>{
         const existingIds=new Set(prev.map(l=>l.id))
-        const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'â€”'}))
+        const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'—'}))
         return [...fresh,...prev]
       })
     } catch {}
-    const onStorage=()=>{try{const stored=localStorage.getItem('hg_login_activity');if(!stored) return;const localLogins:any[]=JSON.parse(stored);setLogins(prev=>{const existingIds=new Set(prev.map(l=>l.id));const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'â€”'}));return fresh.length?[...fresh,...prev]:prev})}catch{}}
+    const onStorage=()=>{try{const stored=localStorage.getItem('hg_login_activity');if(!stored) return;const localLogins:any[]=JSON.parse(stored);setLogins(prev=>{const existingIds=new Set(prev.map(l=>l.id));const fresh=localLogins.filter(l=>!existingIds.has(l.id)).map(l=>({id:l.id,name:l.name,email:l.email,role:l.role?.toLowerCase()||'promoter',time:l.loginAt,ip:'—'}));return fresh.length?[...fresh,...prev]:prev})}catch{}}
     window.addEventListener('storage',onStorage)
     return ()=>window.removeEventListener('storage',onStorage)
   },[])
@@ -504,9 +503,9 @@ function LoginsTab() {
   return (
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div style={{ marginBottom:24 }}>
-        <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Comms Â· Activity</div>
+        <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>Comms · Activity</div>
         <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Login Activity</h1>
-        <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>All non-admin logins Â· <strong style={{ color:W85 }}>{logins.length}</strong> events recorded</p>
+        <p style={{ fontSize:13, color:W55, marginTop:4, fontFamily:FD }}>All non-admin logins · <strong style={{ color:W85 }}>{logins.length}</strong> events recorded</p>
       </div>
 
       <div className="hg-stat-grid hg-stat-grid-3" style={{ background:BB, marginBottom:24 }}>
@@ -532,9 +531,9 @@ function LoginsTab() {
                 <td data-label="User" style={{ padding:'12px 16px' }}><div style={{ fontSize:13, fontWeight:700, color:W, fontFamily:FD }}>{l.name}</div><div style={{ fontSize:11, color:W55, fontFamily:FD }}>{l.email}</div></td>
                 <td data-label="Role" style={{ padding:'12px 16px' }}><Badge label={l.role} color={l.role==='promoter'?G3:GL} bg={hex2rgba(l.role==='promoter'?G3:GL,0.12)} border={hex2rgba(l.role==='promoter'?G3:GL,0.38)} /></td>
                 <td data-label="Time" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:FD, whiteSpace:'nowrap' }}>
-                  {l.time?new Date(l.time).toLocaleString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'â€”'}
+                  {l.time?new Date(l.time).toLocaleString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}
                 </td>
-                <td data-label="IP" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:MONO }}>{l.ip||'â€”'}</td>
+                <td data-label="IP" className="hg-col-hide-sm" style={{ padding:'12px 16px', fontSize:12, color:W55, fontFamily:MONO }}>{l.ip||'—'}</td>
               </tr>
             ))}
           </tbody>
@@ -573,11 +572,11 @@ function downloadPDF(htmlContent: string, filename: string) {
 const todayStr = () => new Date().toISOString().slice(0,10)
 
 const PAYROLL_MOCK = [
-  {id:'PAY-001',promoter:'Ayanda Dlamini', email:'ayanda@email.com', bank:'FNB',      job:'Red Bull â€” Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:0,  status:'pending' },
-  {id:'PAY-002',promoter:'Thabo Nkosi',    email:'thabo@email.com',  bank:'Capitec',  job:'Red Bull â€” Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:50, status:'pending' },
-  {id:'PAY-003',promoter:'Sipho Mhlongo',  email:'sipho@email.com',  bank:'ABSA',     job:'Nike â€” Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
-  {id:'PAY-004',promoter:'Zanele Motha',   email:'zanele@email.com', bank:'Standard', job:'Nike â€” Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
-  {id:'PAY-005',promoter:'Bongani Khumalo',email:'bongani@email.com',bank:'Nedbank',  job:'Savanna â€” Gateway',      date:'2026-03-06',hours:8,rate:115,deductions:100,status:'exported'},
+  {id:'PAY-001',promoter:'Ayanda Dlamini', email:'ayanda@email.com', bank:'FNB',      job:'Red Bull — Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:0,  status:'pending' },
+  {id:'PAY-002',promoter:'Thabo Nkosi',    email:'thabo@email.com',  bank:'Capitec',  job:'Red Bull — Sandton',     date:'2026-03-08',hours:8,rate:120,deductions:50, status:'pending' },
+  {id:'PAY-003',promoter:'Sipho Mhlongo',  email:'sipho@email.com',  bank:'ABSA',     job:'Nike — Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
+  {id:'PAY-004',promoter:'Zanele Motha',   email:'zanele@email.com', bank:'Standard', job:'Nike — Mall of Africa',  date:'2026-03-07',hours:8,rate:135,deductions:0,  status:'approved'},
+  {id:'PAY-005',promoter:'Bongani Khumalo',email:'bongani@email.com',bank:'Nedbank',  job:'Savanna — Gateway',      date:'2026-03-06',hours:8,rate:115,deductions:100,status:'exported'},
   {id:'PAY-006',promoter:'Lerato Mokoena', email:'lerato@email.com', bank:'FNB',      job:'Nedbank Golf Day',       date:'2026-03-05',hours:8,rate:150,deductions:0,  status:'paid'   },
 ]
 const gross=(r:any)=>r.hours*r.rate
@@ -591,7 +590,7 @@ function downloadExcel(rows: string[][], filename: string) {
 function buildTablePDF(title: string, headers: string[], rows: (string|number)[][]): string {
   const ths = headers.map(h=>`<th>${h}</th>`).join('')
   const trs = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')
-  return `<h1 style="font-family:Georgia;color:#6E6A5E;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">HoneyGroup Â· Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
+  return `<h1 style="font-family:Georgia;color:#6E6A5E;margin-bottom:6px">${title}</h1><p style="font-size:11px;color:#666;margin-bottom:16px">HoneyGroup · Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`
 }
 
 function ReportsTab({ regs }: { regs:any[] }) {
@@ -627,7 +626,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const getJobsData=()=>{
     const stored=localStorage.getItem('hg_admin_jobs'); const jobs=stored?JSON.parse(stored):[]
     const headers=['ID','Title','Client','Location','Date','Pay','Slots','Slots Left','Status']
-    const rows=jobs.length>0?jobs.map((j:any)=>[j.id,j.title,j.company||j.client,j.location||`${j.venue},${j.city}`,j.jobDate||j.date,j.pay||`R${j.hourlyRate}/hr`,j.slots||j.totalSlots,j.slotsLeft??(j.totalSlots-j.filledSlots),j.status]):[['No jobs data â€” add jobs first']]
+    const rows=jobs.length>0?jobs.map((j:any)=>[j.id,j.title,j.company||j.client,j.location||`${j.venue},${j.city}`,j.jobDate||j.date,j.pay||`R${j.hourlyRate}/hr`,j.slots||j.totalSlots,j.slotsLeft??(j.totalSlots-j.filledSlots),j.status]):[['No jobs data — add jobs first']]
     return {headers,rows}
   }
 
@@ -641,22 +640,22 @@ function ReportsTab({ regs }: { regs:any[] }) {
   // -- Purchase Orders Register ----------------------------------------------
   const poHeaders = ['PO Number','Client','Amount (R)','Committed (R)','Remaining (R)','% Committed','Status','Period Start','Period End']
   const poRows = pos.map(p => [
-    p.poNumber, p.client?.name || 'â€”', p.amount, p.committedAmount,
+    p.poNumber, p.client?.name || '—', p.amount, p.committedAmount,
     p.amount - p.committedAmount, `${p.percentCommitted}%`, p.status,
-    p.periodStart ? new Date(p.periodStart).toLocaleDateString('en-ZA') : 'â€”',
-    p.periodEnd ? new Date(p.periodEnd).toLocaleDateString('en-ZA') : 'â€”',
+    p.periodStart ? new Date(p.periodStart).toLocaleDateString('en-ZA') : '—',
+    p.periodEnd ? new Date(p.periodEnd).toLocaleDateString('en-ZA') : '—',
   ])
 
-  // -- Commitment Entries (CE) Ledger â€” flattened from all POs ----------------
+  // -- Commitment Entries (CE) Ledger — flattened from all POs ----------------
   const ceHeaders = ['CE Number','PO Number','Client','Job','Amount (R)','Status','Notes']
   const ceRows = pos.flatMap(p =>
     (p.commitments || []).map(ce => [
-      ce.ceNumber || ce.id.slice(0, 8), p.poNumber, p.client?.name || 'â€”',
-      ce.job?.title || 'â€”', ce.amount, ce.status, ce.notes || '',
+      ce.ceNumber || ce.id.slice(0, 8), p.poNumber, p.client?.name || '—',
+      ce.job?.title || '—', ce.amount, ce.status, ce.notes || '',
     ])
   )
 
-  // -- Business Financial Summary â€” rollup per client across all their POs ----
+  // -- Business Financial Summary — rollup per client across all their POs ----
   const bizSummaryMap = new Map<string, { name:string; poCount:number; total:number; committed:number; remaining:number }>()
   pos.forEach(p => {
     const key = p.client?.id || p.client?.name || 'unknown'
@@ -681,54 +680,54 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const inp:React.CSSProperties={ width:'100%', background:BB2, border:`1px solid ${BB}`, padding:'11px 14px', fontFamily:FD, fontSize:14, color:W, outline:'none', borderRadius:3, boxSizing:'border-box' as any }
   const lbl:React.CSSProperties={ fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase' as any, color:W55, display:'block', marginBottom:8, fontFamily:FD }
 
-  // Each card has: icon, title, desc, color, and an array of { label, action }
+  // Each card has: title, desc, color, and an array of { label, action }
   const cards=[
     {
-      icon:'??', title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
+      title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.csv`);flash('? Payroll CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.xls`);flash('? Payroll Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`honeygroup-promotions-payroll-${todayStr()}`);flash('? Payroll PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.csv`);flash('Payroll CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-payroll-${todayStr()}.xls`);flash('Payroll Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Full Payroll Register',payrollHeaders,payrollRows),`honeygroup-promotions-payroll-${todayStr()}`);flash('Payroll PDF — print/save from your browser')}},
       ]
     },
     {
-      icon:'??', title:'Campaign Client Report', desc:'Per-client attendance and payout summary grouped by job.', color:GL,
+      title:'Campaign Client Report', desc:'Per-client attendance and payout summary grouped by job.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.csv`);flash('? Campaign CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.xls`);flash('? Campaign Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report â€” HoneyGroup</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honeygroup-promotions-campaign-${todayStr()}`);flash('? Campaign PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.csv`);flash('Campaign CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([payrollHeaders,...payrollRows] as string[][],`honeygroup-promotions-campaign-${todayStr()}.xls`);flash('Campaign Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(`<h1 style="font-family:Georgia;color:#6E6A5E">Campaign Report — HoneyGroup</h1><p style="font-size:11px;color:#666">Generated ${new Date().toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${campaignSections}`,`honeygroup-promotions-campaign-${todayStr()}`);flash('Campaign PDF — print/save from your browser')}},
       ]
     },
     {
-      icon:'??', title:'Jobs Register', desc:'All active and archived jobs with slots, rates, and status.', color:G4,
+      title:'Jobs Register', desc:'All active and archived jobs with slots, rates, and status.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.csv`);flash('? Jobs CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.xls`);flash('? Jobs Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`honeygroup-promotions-jobs-${todayStr()}`);flash('? Jobs PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getJobsData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.csv`);flash('Jobs CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getJobsData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-jobs-${todayStr()}.xls`);flash('Jobs Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getJobsData();downloadPDF(buildTablePDF('Jobs Register',d.headers,d.rows),`honeygroup-promotions-jobs-${todayStr()}`);flash('Jobs PDF — print/save from your browser')}},
       ]
     },
     {
-      icon:'??', title:'Promoter Roster', desc:'Full promoter list with city, reliability scores, and onboarding status.', color:G3,
+      title:'Promoter Roster', desc:'Full promoter list with city, reliability scores, and onboarding status.', color:G3,
       btns:[
-        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.csv`);flash('? Promoters CSV downloaded')}},
-        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.xls`);flash('? Promoters Excel downloaded')}},
-        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`honeygroup-promotions-promoters-${todayStr()}`);flash('? Promoters PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{const d=getPromotersData();downloadCSV([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.csv`);flash('Promoters CSV downloaded')}},
+        {label:'Excel', fn:()=>{const d=getPromotersData();downloadExcel([d.headers,...d.rows] as string[][],`honeygroup-promotions-promoters-${todayStr()}.xls`);flash('Promoters Excel downloaded')}},
+        {label:'PDF',   fn:()=>{const d=getPromotersData();downloadPDF(buildTablePDF('Promoter Roster',d.headers,d.rows),`honeygroup-promotions-promoters-${todayStr()}`);flash('Promoters PDF — print/save from your browser')}},
       ]
     },
     {
-      icon:'??', title:'EFT Batch File', desc:'Bank-ready payment batch â€” approved payroll records only.', color:GL,
+      title:'EFT Batch File', desc:'Bank-ready payment batch — approved payroll records only.', color:GL,
       btns:[
-        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.csv`);flash(`? EFT CSV â€” ${eftApproved.length} records`)}},
-        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.xls`);flash(`? EFT Excel â€” ${eftApproved.length} records`)}},
-        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`honeygroup-promotions-eft-${todayStr()}`);flash('? EFT PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadCSV([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.csv`);flash(`EFT CSV — ${eftApproved.length} records`)}},
+        {label:'Excel', fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadExcel([eftHeaders,...eftRows] as string[][],`honeygroup-promotions-eft-${todayStr()}.xls`);flash(`EFT Excel — ${eftApproved.length} records`)}},
+        {label:'PDF',   fn:()=>{if(!eftApproved.length){flash('No approved records');return}downloadPDF(buildTablePDF('EFT Batch File',eftHeaders,eftRows),`honeygroup-promotions-eft-${todayStr()}`);flash('EFT PDF — print/save from your browser')}},
       ]
     },
     {
-      icon:'??', title:'Attendance Summary', desc:'Shift-level check-in/out records with hours worked per promoter.', color:G4,
+      title:'Attendance Summary', desc:'Shift-level check-in/out records with hours worked per promoter.', color:G4,
       btns:[
-        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.csv`);flash('? Attendance CSV downloaded')}},
-        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.xls`);flash('? Attendance Excel downloaded')}},
-        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`honeygroup-promotions-attendance-${todayStr()}`);flash('? Attendance PDF â€” print/save from your browser')}},
+        {label:'CSV',   fn:()=>{downloadCSV([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.csv`);flash('Attendance CSV downloaded')}},
+        {label:'Excel', fn:()=>{downloadExcel([attendanceHeaders,...attendanceRows] as string[][],`honeygroup-promotions-attendance-${todayStr()}.xls`);flash('Attendance Excel downloaded')}},
+        {label:'PDF',   fn:()=>{downloadPDF(buildTablePDF('Attendance Summary',attendanceHeaders,attendanceRows),`honeygroup-promotions-attendance-${todayStr()}`);flash('Attendance PDF — print/save from your browser')}},
       ]
     },
   ]
@@ -752,13 +751,13 @@ function ReportsTab({ regs }: { regs:any[] }) {
         </div>
         <button onClick={() => window.location.href = '/admin/budget'}
           style={{ padding:'11px 20px', background:hex2rgba(GL,0.14), border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, letterSpacing:'0.08em', cursor:'pointer', borderRadius:3, whiteSpace:'nowrap' }}>
-          Open Budget Tracking -&gt;
+          Open Budget Tracking →
         </button>
       </div>
 
       {notice&&<div style={{ padding:'12px 16px', background:hex2rgba(GL,0.10), border:`1px solid ${hex2rgba(GL,0.45)}`, borderRadius:4, marginBottom:20, fontSize:13, color:GL, fontFamily:FD, fontWeight:700 }}>{notice}</div>}
 
-      {/* Export cards â€” 3 columns, 3 buttons each */}
+      {/* Export cards — 3 columns, 3 buttons each */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:28 }}>
         {cards.map((card,i)=>(
           <div key={i}
@@ -766,8 +765,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
             onMouseEnter={e=>(e.currentTarget.style.borderColor=hex2rgba(card.color,0.5))}
             onMouseLeave={e=>(e.currentTarget.style.borderColor=BB)}>
             <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${card.color},${hex2rgba(card.color,0.3)})` }} />
-            <div style={{ fontSize:20, marginBottom:10 }}>{card.icon}</div>
-            <div style={{ fontSize:13, fontWeight:700, color:W, fontFamily:FD, marginBottom:6 }}>{card.title}</div>
+            <div style={{ fontSize:13, fontWeight:700, color:W, fontFamily:FD, marginTop:10, marginBottom:6 }}>{card.title}</div>
             <div style={{ fontSize:12, color:W55, fontFamily:FD, lineHeight:1.6, marginBottom:14 }}>{card.desc}</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {card.btns.map((btn,j)=>(
@@ -775,7 +773,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
                   style={{ padding:'6px 12px', background:j===0?`linear-gradient(135deg,${card.color},${hex2rgba(card.color,0.8)})`:'transparent', border:`1px solid ${card.color}`, color:j===0?B:card.color, fontFamily:FD, fontSize:9, fontWeight:700, letterSpacing:'0.1em', cursor:'pointer', textTransform:'uppercase' as const, borderRadius:3, transition:'all 0.18s', whiteSpace:'nowrap' as const }}
                   onMouseEnter={e=>{e.currentTarget.style.opacity='0.82'}}
                   onMouseLeave={e=>{e.currentTarget.style.opacity='1'}}>
-                  ? {btn.label}
+                  {btn.label}
                 </button>
               ))}
             </div>
@@ -785,7 +783,7 @@ function ReportsTab({ regs }: { regs:any[] }) {
 
       {/* Payout Calculator */}
       <div style={{ background:D2, border:`1px solid ${BB}`, borderRadius:4, padding:'24px', marginBottom:24 }}>
-        <div style={{ fontSize:10, letterSpacing:'0.28em', textTransform:'uppercase', color:GL, marginBottom:20, fontWeight:700, fontFamily:FD }}>? Promoter Payout Calculator</div>
+        <div style={{ fontSize:10, letterSpacing:'0.28em', textTransform:'uppercase', color:GL, marginBottom:20, fontWeight:700, fontFamily:FD }}>Promoter Payout Calculator</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:16, marginBottom:16, alignItems:'flex-end' }}>
           {[{label:'Hourly Rate (R)',val:hourlyRate,set:setHourlyRate},{label:'Hours per Shift',val:hours,set:setHours},{label:'No. of Promoters',val:numPromos,set:setNumPromos}].map(f=>(
             <div key={f.label}>
@@ -800,14 +798,14 @@ function ReportsTab({ regs }: { regs:any[] }) {
           </div>
         </div>
         <div style={{ display:'flex', gap:8 }}>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.csv`);flash('? Estimate CSV downloaded')}}
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`],['Generated',new Date().toISOString()]];downloadCSV([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.csv`);flash('Estimate CSV downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${G3}`, color:G3, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(G3,0.15)}
-            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>? CSV</button>
-          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.xls`);flash('? Estimate Excel downloaded')}}
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>CSV</button>
+          <button onClick={()=>{const h=['Description','Value'];const r=[['Hourly Rate',`R${hourlyRate}`],['Hours Per Shift',`${hours}h`],['No. of Promoters',numPromos],['Total Payout',`R${calcTotal.toLocaleString('en-ZA')}`]];downloadExcel([h,...r] as string[][],`honeygroup-promotions-estimate-${todayStr()}.xls`);flash('Estimate Excel downloaded')}}
             style={{ padding:'9px 16px', background:'transparent', border:`1px solid ${GL}`, color:GL, fontFamily:FD, fontSize:11, fontWeight:700, cursor:'pointer', borderRadius:3, letterSpacing:'0.08em', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background=hex2rgba(GL,0.15)}
-            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>? Excel</button>
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>Excel</button>
         </div>
       </div>
 
@@ -830,7 +828,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
   )
 }
 
-// --- SETTINGS TAB// --- SETTINGS TAB -------------------------------------------------------------
 // --- SUPERVISORS TAB -----------------------------------------------------
 function SupervisorsTab() {
   const [supervisors, setSupervisors] = useState<any[]>([])
@@ -957,7 +954,7 @@ function SupervisorsTab() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
           onClick={e => e.target === e.currentTarget && setViewing(null)}>
           <div style={{ background: D2, border: `1px solid ${BB}`, padding: 40, width: '100%', maxWidth: 460, borderRadius: 4, position: 'relative' }}>
-            <button onClick={() => setViewing(null)} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: W28, fontSize: 18 }}>x</button>
+            <button onClick={() => setViewing(null)} style={{ position: 'absolute', top: 16, right: 20, background: 'none', border: 'none', cursor: 'pointer', color: W28, fontSize: 18 }}>✕</button>
             <div style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Supervisor</div>
             <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 20 }}>{viewing.fullName}</div>
             {[
@@ -1043,12 +1040,12 @@ function SettingsTab() {
     <div className="hg-page" style={{ padding:'40px 48px' }}>
       <div className="hg-page-header" style={{ marginBottom:24 }}>
         <div>
-          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System Â· Config</div>
+          <div style={{ fontSize:9, letterSpacing:'0.38em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>System · Config</div>
           <h1 style={{ fontFamily:FD, fontSize:28, fontWeight:700, color:W }}>Platform Settings</h1>
         </div>
-        <Btn onClick={save}>{saved?'? Saved':'Save Changes'}</Btn>
+        <Btn onClick={save}>{saved?'Saved':'Save Changes'}</Btn>
       </div>
-      {saved&&<div style={{ padding:'12px 16px', background:hex2rgba(G3,0.1), border:`1px solid ${hex2rgba(G3,0.35)}`, marginBottom:20, fontSize:13, color:GL, fontWeight:700, borderRadius:3, fontFamily:FD }}>? Settings saved.</div>}
+      {saved&&<div style={{ padding:'12px 16px', background:hex2rgba(G3,0.1), border:`1px solid ${hex2rgba(G3,0.35)}`, marginBottom:20, fontSize:13, color:GL, fontWeight:700, borderRadius:3, fontFamily:FD }}>Settings saved.</div>}
       <div className="hg-card-grid-2" style={{ gap:1 }}>
         {[{title:'General',fields:[{label:'Platform Name',value:platName,set:setPlatName,type:'text'},{label:'Support Email',value:email,set:setEmail,type:'email'}]},{title:'Geo & Radius',fields:[{label:'Check-in Radius (m)',value:geoR,set:setGeoR,type:'number'},{label:'Job Notification Radius (km)',value:jobR,set:setJobR,type:'number'}]}].map(section=>(
           <div key={section.title} style={{ background:'rgba(9,9,7,0.6)', padding:24 }}>
@@ -1117,7 +1114,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const token = localStorage.getItem('hg_token')
     if (!token) { setRegs(MOCK_REGISTRATIONS); return }
-    // Fetch all users from DB â€” this is the real source of truth
+    // Fetch all users from DB — this is the real source of truth
     fetch(`${API_URL}/admin/registrations`,{headers:{Authorization:`Bearer ${token}`}})
       .then(r=>r.ok?r.json():[])
       .then((data:any[])=>{
@@ -1180,7 +1177,7 @@ export default function AdminDashboard() {
     setRegs(p=>p.map(r=>r.id!==id?r:{...r,status}))
     setClients(prev=>prev.map(c=>c.id!==id?c:{...c,status:status==='approved'?'active':'inactive'}))
     setDetail(null)
-    // Call the real API â€” this updates the PostgreSQL database
+    // Call the real API — this updates the PostgreSQL database
     const token = localStorage.getItem('hg_token')
     if (token) {
       fetch(`${API_URL}/admin/users/${id}/approve`, {
