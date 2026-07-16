@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// ChatSystem.tsx — API-backed real-time chat, role-aware
+// ChatSystem.tsx — API-backed real-time chat, role-aware, WhatsApp-style UI
 //
 // Exports:
 //   AdminChatTab  — full-page chat for admin dashboard Messages tab
@@ -25,6 +25,7 @@ const W55 = 'rgba(248,248,248,0.55)'
 const W28 = 'rgba(248,248,248,0.65)'
 const FD  = "'Playfair Display', Georgia, serif"
 const FB  = "'DM Sans', system-ui, sans-serif"
+const READ_BLUE = '#5AA9E6'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -44,11 +45,90 @@ function formatTime(iso: string): string {
   return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })
 }
 
+function formatBubbleTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })
+}
+
+function dayLabel(iso: string): string {
+  const d = new Date(iso)
+  const now = new Date()
+  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const diffDays = Math.round((startOf(now) - startOf(d)) / 86400000)
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7)   return d.toLocaleDateString('en-ZA', { weekday: 'long' })
+  return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
+}
+
 function roleColor(role: string) {
   const r = role?.toLowerCase()
   if (r === 'promoter') return G3
   if (r === 'admin')    return GL
   return GL
+}
+
+// Inject the small bit of CSS needed for bubble tails + wallpaper pattern —
+// kept minimal and scoped by class name so it never collides with page styles.
+function injectChatStyles() {
+  if (document.getElementById('hg-chat-styles')) return
+  const el = document.createElement('style')
+  el.id = 'hg-chat-styles'
+  el.textContent = `
+    .hg-chat-wallpaper {
+      background-color: ${D1};
+      background-image:
+        radial-gradient(rgba(201,191,166,0.05) 1px, transparent 1px),
+        radial-gradient(rgba(201,191,166,0.035) 1px, transparent 1px);
+      background-size: 28px 28px, 28px 28px;
+      background-position: 0 0, 14px 14px;
+    }
+    .hg-bubble-mine {
+      position: relative;
+      border-radius: 14px 14px 3px 14px;
+    }
+    .hg-bubble-mine::after {
+      content: '';
+      position: absolute;
+      right: -7px;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      background: inherit;
+      clip-path: polygon(0 0, 0% 100%, 100% 100%);
+    }
+    .hg-bubble-theirs {
+      position: relative;
+      border-radius: 14px 14px 14px 3px;
+    }
+    .hg-bubble-theirs::after {
+      content: '';
+      position: absolute;
+      left: -7px;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      background: inherit;
+      border-left: inherit;
+      border-top: inherit;
+      border-bottom: inherit;
+      clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+    }
+    @keyframes hg-msg-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hg-msg-anim { animation: hg-msg-in 0.18s ease; }
+    .hg-typing-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: ${W55};
+      animation: hg-typing-bounce 1.1s infinite ease-in-out;
+    }
+    @keyframes hg-typing-bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+  `
+  document.head.appendChild(el)
 }
 
 interface Thread {
@@ -92,32 +172,83 @@ function Avatar({ name, role, size = 32 }: { name: string; role: string; size?: 
   )
 }
 
+// ─── Read receipt ticks (WhatsApp-style) ───────────────────────────────────────
+function Ticks({ read }: { read: boolean }) {
+  return (
+    <svg width="15" height="10" viewBox="0 0 15 10" style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 3 }}>
+      <path d="M0.5 5.2 L3.6 8.3 L9.2 1.4" fill="none" stroke={read ? READ_BLUE : 'rgba(248,248,248,0.55)'} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.8 5.2 L7.9 8.3 L13.5 1.4" fill="none" stroke={read ? READ_BLUE : 'rgba(248,248,248,0.55)'} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+// ─── Date divider ───────────────────────────────────────────────────────────────
+function DateDivider({ label }: { label: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', margin: '6px 0 10px' }}>
+      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', color: W55, background: 'rgba(20,20,14,0.75)', border: `1px solid ${BB}`, padding: '4px 14px', borderRadius: 20, fontFamily: FD }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
 // ─── Message bubble ───────────────────────────────────────────────────────────
 function Bubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   return (
-    <div style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
-      <div style={{
-        maxWidth: '72%', padding: '10px 14px',
-        borderRadius: isMine ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+    <div className="hg-msg-anim" style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
+      <div className={isMine ? 'hg-bubble-mine' : 'hg-bubble-theirs'} style={{
+        maxWidth: '72%', padding: '9px 14px 7px',
         background: isMine ? `linear-gradient(135deg,${G5},${G2})` : D2,
         border:     isMine ? 'none' : `1px solid ${BB}`,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
       }}>
         {!isMine && (
           <div style={{ fontSize: 9, fontWeight: 700, color: G3, marginBottom: 4, letterSpacing: '0.1em', fontFamily: FD }}>
             {msg.sender?.fullName || 'Unknown'}
           </div>
         )}
-        <div style={{ fontSize: 13, color: W, lineHeight: 1.6, fontFamily: FB }}>{msg.text}</div>
-        <div style={{ fontSize: 9, color: isMine ? 'rgba(248,248,248,0.4)' : W28, marginTop: 4, textAlign: 'right', fontFamily: FD }}>
-          {formatTime(msg.createdAt)}
+        <div style={{ fontSize: 13, color: W, lineHeight: 1.55, fontFamily: FB, wordBreak: 'break-word' }}>{msg.text}</div>
+        <div style={{ fontSize: 9.5, color: isMine ? 'rgba(248,248,248,0.55)' : W28, marginTop: 3, textAlign: 'right', fontFamily: FD, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          {formatBubbleTime(msg.createdAt)}
+          {isMine && <Ticks read={msg.read} />}
         </div>
       </div>
     </div>
   )
 }
 
+// ─── Render a message list with date dividers ──────────────────────────────────
+function MessageList({ messages, myId, bottomRef }: { messages: Message[]; myId: string; bottomRef: React.RefObject<HTMLDivElement> }) {
+  let lastDay = ''
+  return (
+    <>
+      {messages.map(m => {
+        const label = dayLabel(m.createdAt)
+        const showDivider = label !== lastDay
+        lastDay = label
+        return (
+          <React.Fragment key={m.id}>
+            {showDivider && <DateDivider label={label} />}
+            <Bubble msg={m} isMine={m.senderId === myId} />
+          </React.Fragment>
+        )
+      })}
+      <div ref={bottomRef} />
+    </>
+  )
+}
+
 // ─── ADMIN CHAT TAB ───────────────────────────────────────────────────────────
-export function AdminChatTab() {
+export function AdminChatTab({
+  initialContactId,
+  initialContactName,
+  initialContactEmail,
+}: {
+  initialContactId?: string
+  initialContactName?: string
+  initialContactEmail?: string
+} = {}) {
   const [myId,         setMyId        ] = useState('')
   const [threads,      setThreads     ] = useState<Thread[]>([])
   const [activeThread, setActiveThread] = useState<Thread | null>(null)
@@ -134,6 +265,9 @@ export function AdminChatTab() {
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const pollRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const deepLinkHandled = useRef(false)
+
+  useEffect(() => { injectChatStyles() }, [])
 
   // Load own ID once
   useEffect(() => {
@@ -165,9 +299,14 @@ export function AdminChatTab() {
     setLoadingUsers(true)
     try {
       const res = await fetch(`${API}/chat/users`, { headers: authHdr() })
-      if (res.ok) setChatUsers(await res.json())
+      if (res.ok) {
+        const users: ChatUser[] = await res.json()
+        setChatUsers(users)
+        return users
+      }
     } catch {}
     setLoadingUsers(false)
+    return [] as ChatUser[]
   }, [])
 
   // ── Instagram-DM-style message requests from supervisors ──────────────────
@@ -211,6 +350,41 @@ export function AdminChatTab() {
     await loadMessages(t.otherId)
     setThreads(prev => prev.map(x => x.threadId === t.threadId ? { ...x, unread: 0 } : x))
   }
+
+  // ── Deep-link: opened from Clients tab "Message Client" button ────────────
+  // Waits for threads + chat users to be available, then either jumps to an
+  // existing thread with that contact or starts a fresh one.
+  useEffect(() => {
+    if (!initialContactId || deepLinkHandled.current) return
+    let cancelled = false
+    ;(async () => {
+      // Prefer an existing thread if one already exists with this contact
+      const existing = threads.find(t => t.otherId === initialContactId)
+      if (existing) {
+        deepLinkHandled.current = true
+        selectThread(existing)
+        return
+      }
+      // Otherwise confirm this is a real chatable user, then start a new thread
+      const users = chatUsers.length ? chatUsers : await loadChatUsers()
+      if (cancelled) return
+      const match = users.find(u => u.id === initialContactId)
+      deepLinkHandled.current = true
+      const t: Thread = {
+        threadId:    initialContactId,
+        otherId:     initialContactId,
+        otherName:   match?.fullName || initialContactName || 'Client',
+        otherRole:   (match?.role || 'business').toLowerCase(),
+        lastMessage: '',
+        lastTime:    new Date().toISOString(),
+        unread:      0,
+      }
+      setActiveThread(t)
+      loadMessages(initialContactId)
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialContactId, threads, chatUsers])
 
   const send = async () => {
     if (!draft.trim() || !activeThread || sending) return
@@ -340,13 +514,13 @@ export function AdminChatTab() {
           )}
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0 }}>
             <input placeholder="Search conversations…" value={search} onChange={e => setSearch(e.target.value)}
-              style={{ ...inp, marginBottom: 10, fontSize: 12 }}
+              style={{ ...inp, marginBottom: 10, fontSize: 12, borderRadius: 20 }}
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB} />
             <div style={{ display: 'flex', gap: 4 }}>
               {(['all','promoter','business'] as const).map(r => (
                 <button key={r} onClick={() => setFilterRole(r)}
-                  style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(201,191,166,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
+                  style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(201,191,166,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 20 }}>
                   {r}
                 </button>
               ))}
@@ -377,8 +551,13 @@ export function AdminChatTab() {
                   </div>
                   <span style={{ fontSize: 9, color: W28, fontFamily: FD, flexShrink: 0 }}>{formatTime(t.lastTime)}</span>
                 </div>
-                <div style={{ fontSize: 11, color: t.unread>0?W55:W28, fontFamily: FD, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 40 }}>
-                  {t.lastMessage || 'Start a conversation…'}
+                <div style={{ fontSize: 11, color: t.unread>0?W55:W28, fontFamily: FD, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.lastMessage || 'Start a conversation…'}</span>
+                  {t.unread > 0 && (
+                    <span style={{ flexShrink: 0, minWidth: 16, height: 16, borderRadius: 8, background: GL, color: B, fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                      {t.unread > 9 ? '9+' : t.unread}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -386,7 +565,7 @@ export function AdminChatTab() {
         </div>
 
         {/* ── Conversation panel ── */}
-        <div style={{ background: D1, display: 'flex', flexDirection: 'column' }}>
+        <div className="hg-chat-wallpaper" style={{ display: 'flex', flexDirection: 'column' }}>
           {!activeThread ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
               <div style={{ fontSize: 32, color: W28 }}>◆</div>
@@ -407,16 +586,13 @@ export function AdminChatTab() {
               </div>
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {messages.length === 0 && (
                   <div style={{ textAlign: 'center', color: W28, fontSize: 12, fontFamily: FD, marginTop: 40 }}>
                     No messages yet. Say hello!
                   </div>
                 )}
-                {messages.map(m => (
-                  <Bubble key={m.id} msg={m} isMine={m.senderId === myId} />
-                ))}
-                <div ref={bottomRef} />
+                <MessageList messages={messages} myId={myId} bottomRef={bottomRef} />
               </div>
 
               {/* Input */}
@@ -426,15 +602,15 @@ export function AdminChatTab() {
                   onChange={e => setDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
                   placeholder={`Message ${activeThread.otherName}…`}
-                  style={{ ...inp, flex: 1, width: 'auto' }}
+                  style={{ ...inp, flex: 1, width: 'auto', borderRadius: 20 }}
                   onFocus={e => e.currentTarget.style.borderColor = GL}
                   onBlur={e => e.currentTarget.style.borderColor = BB}
                 />
                 <button
                   onClick={send}
                   disabled={!draft.trim() || sending}
-                  style={{ padding: '10px 22px', background: draft.trim()&&!sending?`linear-gradient(135deg,${GL},${G})`:BB, border: 'none', color: draft.trim()&&!sending?B:W28, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: draft.trim()&&!sending?'pointer':'default', borderRadius: 3, letterSpacing: '0.08em', flexShrink: 0 }}>
-                  {sending ? '…' : 'Send ↑'}
+                  style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: draft.trim()&&!sending?`linear-gradient(135deg,${GL},${G})`:BB, border: 'none', color: draft.trim()&&!sending?B:W28, fontFamily: FD, fontSize: 16, fontWeight: 700, cursor: draft.trim()&&!sending?'pointer':'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                  {sending ? '…' : '↑'}
                 </button>
               </div>
             </>
@@ -464,7 +640,7 @@ export function AdminChatTab() {
             </div>
 
             <input placeholder="Search by name…" value={newSearch} onChange={e => setNewSearch(e.target.value)}
-              style={{ ...inp, marginBottom: 12 }}
+              style={{ ...inp, marginBottom: 12, borderRadius: 20 }}
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB} />
 
@@ -516,6 +692,8 @@ export function FloatingChat() {
   const [gateError,    setGateError   ] = useState<string | null>(null)
   const bottomRef  = useRef<HTMLDivElement>(null)
   const pollRef    = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => { injectChatStyles() }, [])
 
   // ── Initialise: get own ID, default to admin ─────────────────────────────
   useEffect(() => {
@@ -733,17 +911,14 @@ export function FloatingChat() {
           )}
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="hg-chat-wallpaper" style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {messages.length === 0 && !showPicker && (
               <div style={{ textAlign: 'center', color: W28, fontSize: 12, fontFamily: FD, marginTop: 60 }}>
                 <div style={{ fontSize: 28, marginBottom: 12 }}>◆</div>
                 Start a conversation with {activeUser?.fullName || 'Support'}.
               </div>
             )}
-            {messages.map(m => (
-              <Bubble key={m.id} msg={m} isMine={m.senderId === myId} />
-            ))}
-            <div ref={bottomRef} />
+            <MessageList messages={messages} myId={myId || ''} bottomRef={bottomRef} />
           </div>
 
           {/* Message-request status banner — only relevant when talking to admin */}

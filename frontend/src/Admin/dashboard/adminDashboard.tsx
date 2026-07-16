@@ -216,7 +216,7 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
 }
 
 // --- Client Modal -------------------------------------------------------------
-function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
+function ClientModal({ client, onClose, onMessage }: { client:any; onClose:()=>void; onMessage:()=>void }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -237,7 +237,7 @@ function ClientModal({ client, onClose }: { client:any; onClose:()=>void }) {
           </div>
         ))}
         <div style={{ display:'flex', gap:12, marginTop:24 }}>
-          <Btn onClick={onClose}>Message Client</Btn>
+          <Btn onClick={onMessage}>Message Client</Btn>
           <Btn onClick={onClose} outline>View Jobs</Btn>
         </div>
       </div>
@@ -391,6 +391,7 @@ function RegistrationsTab({ regs, onDetail, onApprove, onReject }: { regs:any[];
 
 // --- CLIENTS TAB --------------------------------------------------------------
 function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.Dispatch<React.SetStateAction<any[]>> }) {
+  const navigate = useNavigate()
   const [statusF,setStatusF]=useState('all')
   const [search, setSearch ]=useState('')
   const [viewing,setViewing]=useState<any>(null)
@@ -470,7 +471,15 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
       {filtered.length===0&&<div style={{ padding:'48px 0', textAlign:'center', color:W55, fontSize:13, fontFamily:FD }}>No clients match your filters.</div>}
       <div style={{ marginTop:12, fontSize:11, color:W28, fontFamily:FD }}>Showing <strong style={{ color:W55 }}>{filtered.length}</strong> of <strong style={{ color:W55 }}>{clients.length}</strong> clients</div>
 
-      {viewing&&<ClientModal client={viewing} onClose={()=>setViewing(null)} />}
+      {viewing&&<ClientModal client={viewing} onClose={()=>setViewing(null)}
+        onMessage={()=>{
+          const p = new URLSearchParams()
+          p.set('tab','messages')
+          if (viewing.id)    p.set('contactId', viewing.id)
+          if (viewing.name)  p.set('contactName', viewing.name)
+          if (viewing.email) p.set('contactEmail', viewing.email)
+          navigate('/admin?'+p.toString())
+        }} />}
     </div>
   )
 }
@@ -1211,7 +1220,11 @@ export default function AdminDashboard() {
       {tab==='clients'       && <ClientsTab       clients={clients} setClients={setClients} />}
       {tab==='supervisors'   && <SupervisorsTab />}
       {tab==='logins'        && <LoginsTab />}
-      {tab==='messages'      && <AdminChatTab />}
+      {tab==='messages'      && <AdminChatTab
+        initialContactId={searchParams.get('contactId')||undefined}
+        initialContactName={searchParams.get('contactName')||undefined}
+        initialContactEmail={searchParams.get('contactEmail')||undefined}
+      />}
       {tab==='reports'       && <ReportsTab regs={regs} />}
       {tab==='settings'      && <SettingsTab />}
       {detailItem && (
