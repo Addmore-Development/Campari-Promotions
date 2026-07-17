@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
@@ -32,9 +31,7 @@ function authHdr(): Record<string, string> {
 }
 
 // ── Fetch wrapper used for ALL chat requests ─────────────────────────────────
-// Forces a real network round-trip every time (no browser / intermediary
-// caching of GETs), which is what was causing admin <-> business messages to
-// silently go stale (304s served from cache instead of hitting the server).
+
 function chatFetch(url: string, init: RequestInit = {}) {
   return fetch(url, {
     ...init,
@@ -325,10 +322,7 @@ export function AdminChatTab({
     } catch {}
   }, [])
 
-  // Load all chatable users for the new-chat modal — ALSO powers the sidebar
-  // search box below, since that search needs to reach every supervisor,
-  // business & promoter in the system, not just people with an existing
-  // thread.
+
   const loadChatUsers = useCallback(async () => {
     setLoadingUsers(true)
     try {
@@ -345,10 +339,7 @@ export function AdminChatTab({
     return [] as ChatUser[]
   }, [])
 
-  // Load the full user directory once on mount (quietly, not tied to the
-  // "New Chat" modal) so the sidebar search always has the complete list of
-  // supervisors, businesses & promoters to search across, even before the
-  // admin opens the modal.
+ 
   useEffect(() => {
     loadChatUsers()
   }, [loadChatUsers])
@@ -372,8 +363,7 @@ export function AdminChatTab({
   }
 
   // ── Deep-link: opened from Clients tab "Message Client" button ────────────
-  // Waits for threads + chat users to be available, then either jumps to an
-  // existing thread with that contact or starts a fresh one.
+
   useEffect(() => {
     if (!initialContactId || deepLinkHandled.current) return
     let cancelled = false
@@ -701,8 +691,7 @@ export function AdminChatTab({
 }
 
 // ─── FLOATING CHAT WIDGET ─────────────────────────────────────────────────────
-// Used by promoter, supervisor, and business dashboards. Same WhatsApp-style
-// bubbles / ticks / wallpaper as the admin tab (all shared via MessageList).
+
 export function FloatingChat() {
   const [myId,         setMyId        ] = useState<string | null>(null)
   const [open,         setOpen        ] = useState(false)
@@ -781,6 +770,13 @@ export function FloatingChat() {
     pollRef.current = setInterval(loadMessages, 4000)
     return () => { if (pollRef.current) clearInterval(pollRef.current) }
   }, [initDone, activeUser, loadMessages])
+
+  // ── Listen for open requests from other UI, e.g. the sidebar "Messages" button ──
+  useEffect(() => {
+    const onOpenRequest = () => setOpen(true)
+    window.addEventListener('hg_open_chat', onOpenRequest)
+    return () => window.removeEventListener('hg_open_chat', onOpenRequest)
+  }, [])
 
   // ── Mark as read + scroll when chat opens ───────────────────────────────
   useEffect(() => {

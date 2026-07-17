@@ -2,8 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { purchaseOrdersService } from '../shared/services/purchaseOrdersService'
 
-// â”€â”€â”€ Palette â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const BLK  = '#020201'
+// ─── Palette ────────────────────────────────────────────────────────────────
 const BLK1 = '#030302'
 const BLK2 = '#070706'
 const BLK3 = '#0A0A08'
@@ -33,16 +32,16 @@ function hex2rgba(hex: string, a: number) {
   return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`
 }
 function fmtDate(d: string) {
-  if (!d) return 'â€”'
+  if (!d) return '—'
   try { return new Date(d).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) }
   catch { return d }
 }
 
 interface ApiJob {
-  id: string; title: string; client: string; venue: string; address: string
+  id: string; title: string; client: string; venue: string; address: string; city?: string
   date: string; startTime: string; endTime: string; hourlyRate: number
   totalSlots: number; filledSlots: number; status: string; filters?: any
-  applications?: any[]
+  applications?: any[]; purchaseOrderId?: string
 }
 
 interface Promoter {
@@ -68,7 +67,7 @@ interface Promoter {
   appId?: string
 }
 
-// â”€â”€â”€ Full Promoter Profile Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Full Promoter Profile Modal ─────────────────────────────────────────────
 function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, canSelect }: {
   promoter: Promoter
   onClose: () => void
@@ -81,7 +80,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: BLK2, border: `1px solid ${BB}`, width: '100%', maxWidth: 580, maxHeight: '92vh', overflowY: 'auto', position: 'relative', borderRadius: 4 }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GD3}, ${GL}, ${GD3})` }} />
-        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 20, lineHeight: 1 }}>âœ•</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 20, lineHeight: 1 }}>✕</button>
 
         <div style={{ padding: '36px 36px 0' }}>
           <div style={{ fontSize: 9, letterSpacing: '0.36em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD, marginBottom: 20 }}>Promoter Profile</div>
@@ -102,10 +101,10 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
               <div style={{ fontSize: 13, color: W4, fontFamily: FB, marginBottom: 10 }}>{promoter.email}</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {promoter.city && (
-                  <span style={{ fontSize: 11, color: W7, background: BB, padding: '4px 12px', borderRadius: 20, fontFamily: FB }}>ðŸ“ {promoter.city}</span>
+                  <span style={{ fontSize: 11, color: W7, background: BB, padding: '4px 12px', borderRadius: 20, fontFamily: FB }}>📍 {promoter.city}</span>
                 )}
                 {(promoter.reliabilityScore ?? 0) > 0 && (
-                  <span style={{ fontSize: 11, color: GL, background: hex2rgba(GL, 0.1), padding: '4px 12px', borderRadius: 20, fontFamily: FB }}>â­ {(promoter.reliabilityScore ?? 0).toFixed(1)} / 5</span>
+                  <span style={{ fontSize: 11, color: GL, background: hex2rgba(GL, 0.1), padding: '4px 12px', borderRadius: 20, fontFamily: FB }}>⭐ {(promoter.reliabilityScore ?? 0).toFixed(1)} / 5</span>
                 )}
               </div>
             </div>
@@ -130,7 +129,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
                 { label: 'Shoe Size',     value: promoter.shoeSize },
                 { label: 'Province',      value: promoter.province },
                 { label: 'Member Since',  value: promoter.createdAt ? new Date(promoter.createdAt).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' }) : null },
-                { label: 'Account',       value: promoter.status === 'approved' ? 'âœ… Approved' : promoter.status },
+                { label: 'Account',       value: promoter.status === 'approved' ? '✅ Approved' : promoter.status },
               ].filter(r => r.value).map(r => (
                 <div key={r.label} style={{ padding: '12px 0', borderBottom: `1px solid ${BB}`, paddingRight: 16 }}>
                   <div style={{ fontSize: 9, color: W4, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4, fontFamily: FB }}>{r.label}</div>
@@ -145,7 +144,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
               <div style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: GL, fontFamily: FD, marginBottom: 10, fontWeight: 700 }}>Documents</div>
               <a href={promoter.cvUrl} target="_blank" rel="noopener noreferrer" download
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: hex2rgba(GL, 0.08), border: `1px solid ${hex2rgba(GL, 0.3)}`, borderRadius: 3, color: GL, fontSize: 12, fontFamily: FD, fontWeight: 700, textDecoration: 'none' }}>
-                ðŸ“„ Download CV / Portfolio
+                📄 Download CV / Portfolio
               </a>
             </div>
           )}
@@ -155,7 +154,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
           {isSelected ? (
             <div style={{ display: 'flex', gap: 12 }}>
               <div style={{ flex: 1, padding: '14px', background: hex2rgba(GL, 0.08), border: `1px solid ${hex2rgba(GL, 0.4)}`, borderRadius: 3, fontSize: 13, color: GL, fontFamily: FD, textAlign: 'center', fontWeight: 700 }}>
-                âœ“ Added to selection
+                ✓ Added to selection
               </div>
               <button onClick={() => { onToggleSelect(); onClose(); }}
                 style={{ padding: '14px 20px', background: hex2rgba(CORAL, 0.1), border: `1px solid ${hex2rgba(CORAL, 0.4)}`, color: CORAL, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: 'pointer', borderRadius: 3, letterSpacing: '0.08em' }}>
@@ -164,7 +163,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
             </div>
           ) : canSelect ? (
             <button onClick={() => { onToggleSelect(); onClose(); }}
-              style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}
+              style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK1, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
               + Add to Selection
@@ -180,7 +179,7 @@ function PromoterProfileModal({ promoter, onClose, isSelected, onToggleSelect, c
   )
 }
 
-// â”€â”€â”€ Confirm Selection Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Confirm Selection Modal ──────────────────────────────────────────────────
 function ConfirmSelectionModal({ job, selected, promoters, onConfirm, onClose, confirming }: {
   job: ApiJob; selected: Set<string>; promoters: Promoter[]
   onConfirm: () => void; onClose: () => void; confirming: boolean
@@ -211,7 +210,7 @@ function ConfirmSelectionModal({ job, selected, promoters, onConfirm, onClose, c
                   <div style={{ fontSize: 13, fontWeight: 700, color: W, fontFamily: FD }}>{p.fullName}</div>
                   <div style={{ fontSize: 11, color: W4, fontFamily: FB }}>{p.city || p.email}</div>
                 </div>
-                <div style={{ fontSize: 10, color: GL, fontWeight: 700, fontFamily: FD }}>âœ“</div>
+                <div style={{ fontSize: 10, color: GL, fontWeight: 700, fontFamily: FD }}>✓</div>
               </div>
             ))}
           </div>
@@ -222,8 +221,8 @@ function ConfirmSelectionModal({ job, selected, promoters, onConfirm, onClose, c
             Go Back
           </button>
           <button onClick={onConfirm} disabled={confirming}
-            style={{ flex: 2, padding: '13px', background: confirming ? BB : `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: confirming ? W4 : BLK, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: confirming ? 'not-allowed' : 'pointer', borderRadius: 3, transition: 'all 0.2s' }}>
-            {confirming ? 'Confirmingâ€¦' : `âœ“ Confirm ${selectedPromoters.length} Promoter${selectedPromoters.length > 1 ? 's' : ''}`}
+            style={{ flex: 2, padding: '13px', background: confirming ? BB : `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: confirming ? W4 : BLK1, fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: confirming ? 'not-allowed' : 'pointer', borderRadius: 3, transition: 'all 0.2s' }}>
+            {confirming ? 'Confirming…' : `✓ Confirm ${selectedPromoters.length} Promoter${selectedPromoters.length > 1 ? 's' : ''}`}
           </button>
         </div>
       </div>
@@ -231,8 +230,47 @@ function ConfirmSelectionModal({ job, selected, promoters, onConfirm, onClose, c
   )
 }
 
-// â”€â”€â”€ Job Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function JobCard({ job, onOpen }: { job: ApiJob; onOpen: () => void }) {
+// ─── Delete Confirmation Modal ────────────────────────────────────────────────
+function DeleteJobModal({ job, onConfirm, onClose, deleting }: {
+  job: ApiJob; onConfirm: () => void; onClose: () => void; deleting: boolean
+}) {
+  const hasPromoters = job.filledSlots > 0
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10002, padding: 24 }}
+      onClick={e => e.target === e.currentTarget && !deleting && onClose()}>
+      <div style={{ background: BLK2, border: `1px solid ${hex2rgba(CORAL, 0.4)}`, width: '100%', maxWidth: 440, position: 'relative', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${CORAL},${GD3})` }} />
+        <div style={{ padding: '32px 32px 0' }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase', color: CORAL, fontWeight: 700, fontFamily: FD, marginBottom: 8 }}>Delete Job</div>
+          <h2 style={{ fontFamily: FD, fontSize: 20, fontWeight: 700, color: W, marginBottom: 12 }}>Delete "{job.title}"?</h2>
+          <p style={{ fontSize: 13, color: W4, fontFamily: FB, marginBottom: hasPromoters ? 12 : 24, lineHeight: 1.6 }}>
+            This will permanently remove the job posting. This action cannot be undone.
+          </p>
+          {hasPromoters && (
+            <div style={{ padding: '12px 14px', background: hex2rgba(CORAL, 0.08), border: `1px solid ${hex2rgba(CORAL, 0.3)}`, borderRadius: 3, fontSize: 12, color: CORAL, fontFamily: FB, marginBottom: 24, lineHeight: 1.5 }}>
+              ⚠ {job.filledSlots} promoter{job.filledSlots > 1 ? 's are' : ' is'} already confirmed on this job. Consider notifying them before deleting.
+            </div>
+          )}
+        </div>
+        <div style={{ padding: '0 32px 32px', display: 'flex', gap: 10 }}>
+          <button onClick={onClose} disabled={deleting}
+            style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${BB}`, color: W4, fontFamily: FD, fontSize: 11, fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', borderRadius: 3 }}>
+            Cancel
+          </button>
+          <button onClick={onConfirm} disabled={deleting}
+            style={{ flex: 1, padding: '12px', background: deleting ? BB : hex2rgba(CORAL, 0.15), border: `1px solid ${CORAL}`, color: CORAL, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: deleting ? 'not-allowed' : 'pointer', borderRadius: 3 }}>
+            {deleting ? 'Deleting…' : 'Delete Job'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Job Card ──────────────────────────────────────────────────────────────────
+function JobCard({ job, onOpen, onEdit, onDelete }: {
+  job: ApiJob; onOpen: () => void; onEdit: () => void; onDelete: () => void
+}) {
   const isFull      = job.filledSlots >= job.totalSlots
   const statusColor = job.status === 'OPEN' ? GL : job.status === 'FILLED' ? GD : W4
   const pct         = job.totalSlots > 0 ? Math.round((job.filledSlots / job.totalSlots) * 100) : 0
@@ -240,58 +278,80 @@ function JobCard({ job, onOpen }: { job: ApiJob; onOpen: () => void }) {
   const selectedCount   = job.applications?.filter((a: any) => a.status === 'ALLOCATED').length || 0
 
   return (
-    <div onClick={onOpen}
-      style={{ background: BLK2, border: `1px solid ${BB}`, padding: '22px 24px', cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'all 0.2s', borderRadius: 3 }}
+    <div
+      style={{ background: BLK2, border: `1px solid ${BB}`, padding: '22px 24px', position: 'relative', overflow: 'hidden', transition: 'all 0.2s', borderRadius: 3 }}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = hex2rgba(GL, 0.4); (e.currentTarget as HTMLElement).style.background = BLK3 }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = BB; (e.currentTarget as HTMLElement).style.background = BLK2 }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${GD3}, ${statusColor}, ${GD3})` }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div onClick={onOpen} style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
           <div style={{ fontFamily: FD, fontSize: 16, fontWeight: 700, color: W, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.title}</div>
-          <div style={{ fontSize: 11, color: W4, fontFamily: FB }}>ðŸ“ {job.venue || job.address?.split(',')[0]}</div>
+          <div style={{ fontSize: 11, color: W4, fontFamily: FB }}>📍 {job.venue || job.address?.split(',')[0]}</div>
         </div>
-        <span style={{ flexShrink: 0, marginLeft: 12, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: statusColor, background: hex2rgba(statusColor, 0.1), border: `1px solid ${hex2rgba(statusColor, 0.4)}`, padding: '3px 10px', borderRadius: 2, fontFamily: FD }}>
-          {job.status}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginLeft: 10 }}>
+          <button
+            onClick={e => { e.stopPropagation(); onEdit() }}
+            title="Edit job"
+            style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 2, color: W4, cursor: 'pointer', fontSize: 12, transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(GL, 0.5); e.currentTarget.style.color = GL }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = W4 }}>
+            ✎
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); onDelete() }}
+            title="Delete job"
+            style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: `1px solid ${BB}`, borderRadius: 2, color: W4, cursor: 'pointer', fontSize: 12, transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(CORAL, 0.5); e.currentTarget.style.color = CORAL }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = W4 }}>
+            🗑
+          </button>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: statusColor, background: hex2rgba(statusColor, 0.1), border: `1px solid ${hex2rgba(statusColor, 0.4)}`, padding: '3px 10px', borderRadius: 2, fontFamily: FD }}>
+            {job.status}
+          </span>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12, marginTop: 10 }}>
-        {[
-          { label: 'Rate',  value: `R${job.hourlyRate}/hr`, color: GL },
-          { label: 'Slots', value: `${job.filledSlots}/${job.totalSlots}`, color: W },
-          { label: 'Date',  value: job.date ? new Date(job.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' }) : 'â€”', color: W7 },
-          { label: 'Time',  value: `${job.startTime}â€“${job.endTime}`, color: W7 },
-        ].map(s => (
-          <div key={s.label}>
-            <div style={{ fontSize: 8, color: W2, fontFamily: FB, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>{s.label}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: s.color, fontFamily: FD }}>{s.value}</div>
+      <div onClick={onOpen} style={{ cursor: 'pointer' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12, marginTop: 10 }}>
+          {[
+            { label: 'Rate',  value: `R${job.hourlyRate}/hr`, color: GL },
+            { label: 'Slots', value: `${job.filledSlots}/${job.totalSlots}`, color: W },
+            { label: 'Date',  value: job.date ? new Date(job.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' }) : '—', color: W7 },
+            { label: 'Time',  value: `${job.startTime}–${job.endTime}`, color: W7 },
+          ].map(s => (
+            <div key={s.label}>
+              <div style={{ fontSize: 8, color: W2, fontFamily: FB, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: s.color, fontFamily: FD }}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {(interestedCount > 0 || selectedCount > 0) && (
+          <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 11, fontFamily: FB }}>
+            {interestedCount > 0 && <span style={{ color: TEAL }}>👋 {interestedCount} interested</span>}
+            {selectedCount   > 0 && <span style={{ color: GL   }}>✓ {selectedCount} selected</span>}
           </div>
-        ))}
-      </div>
+        )}
 
-      {(interestedCount > 0 || selectedCount > 0) && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 11, fontFamily: FB }}>
-          {interestedCount > 0 && <span style={{ color: TEAL }}>ðŸ‘‹ {interestedCount} interested</span>}
-          {selectedCount   > 0 && <span style={{ color: GL   }}>âœ“ {selectedCount} selected</span>}
+        <div style={{ height: 3, background: BB, borderRadius: 2, marginBottom: 12 }}>
+          <div style={{ height: '100%', borderRadius: 2, background: isFull ? GD : GL, width: `${pct}%`, transition: 'width 0.4s' }} />
         </div>
-      )}
 
-      <div style={{ height: 3, background: BB, borderRadius: 2, marginBottom: 12 }}>
-        <div style={{ height: '100%', borderRadius: 2, background: isFull ? GD : GL, width: `${pct}%`, transition: 'width 0.4s' }} />
+        <button style={{ width: '100%', padding: '10px', background: BB2, border: `1px solid ${BB}`, color: GL, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = hex2rgba(GL, 0.14); e.currentTarget.style.borderColor = hex2rgba(GL, 0.4) }}
+          onMouseLeave={e => { e.currentTarget.style.background = BB2; e.currentTarget.style.borderColor = BB }}>
+          View & Select Promoters →
+        </button>
       </div>
-
-      <button style={{ width: '100%', padding: '10px', background: BB2, border: `1px solid ${BB}`, color: GL, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s' }}
-        onMouseEnter={e => { e.currentTarget.style.background = hex2rgba(GL, 0.14); e.currentTarget.style.borderColor = hex2rgba(GL, 0.4) }}
-        onMouseLeave={e => { e.currentTarget.style.background = BB2; e.currentTarget.style.borderColor = BB }}>
-        View & Select Promoters â†’
-      </button>
     </div>
   )
 }
 
-// â”€â”€â”€ Job Detail Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () => void; onRefresh: () => void }) {
+// ─── Job Detail Panel ─────────────────────────────────────────────────────────
+function JobDetailPanel({ job, onClose, onRefresh, onEdit, onDelete }: {
+  job: ApiJob; onClose: () => void; onRefresh: () => void; onEdit: () => void; onDelete: () => void
+}) {
   const [promoters,     setPromoters]     = useState<Promoter[]>([])
   const [loading,       setLoading]       = useState(true)
   const [pendingSelect, setPendingSelect] = useState<Set<string>>(new Set())
@@ -311,7 +371,6 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
       ])
       const apps: any[]     = appsRes.ok ? await appsRes.json() : []
       const eligible: any[] = eligRes.ok  ? await eligRes.json() : []
-      const appMap     = new Map(apps.map((a: any) => [a.promoterId, a]))
       const appliedIds = new Set(apps.map((a: any) => a.promoterId))
 
       const allPromoters: Promoter[] = [
@@ -372,14 +431,14 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
       if (res.ok) {
         setConfirmedIds(new Set(pendingSelect))
         setShowConfirm(false)
-        setResultMsg(`âœ“ ${newSelections.length} promoter${newSelections.length > 1 ? 's' : ''} confirmed! They will see this job on their dashboard.`)
+        setResultMsg(`✓ ${newSelections.length} promoter${newSelections.length > 1 ? 's' : ''} confirmed! They will see this job on their dashboard.`)
         setTimeout(() => setResultMsg(''), 5000)
         await loadPromoters(); onRefresh()
       } else {
         const err = await res.json()
         setResultMsg(`Failed: ${err.error || 'Please try again'}`)
       }
-    } catch { setResultMsg('Network error â€” please try again') }
+    } catch { setResultMsg('Network error — please try again') }
     setConfirming(false)
   }
 
@@ -392,10 +451,10 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
       })
       setConfirmedIds(prev => { const s = new Set(prev); s.delete(promoter.id); return s })
       setPendingSelect(prev => { const s = new Set(prev); s.delete(promoter.id); return s })
-      setResultMsg(`âœ“ ${promoter.fullName} removed from this job.`)
+      setResultMsg(`✓ ${promoter.fullName} removed from this job.`)
       setTimeout(() => setResultMsg(''), 3000)
       await loadPromoters(); onRefresh()
-    } catch { setResultMsg('Failed to remove â€” please try again') }
+    } catch { setResultMsg('Failed to remove — please try again') }
   }
 
   const filters = job.filters || {}
@@ -413,14 +472,28 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
               <div style={{ fontSize: 9, color: GL, fontFamily: FD, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 5 }}>Job Details</div>
               <div style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 6 }}>{job.title}</div>
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 12, color: W4, fontFamily: FB }}>
-                {job.client && <span>ðŸ¢ {job.client}</span>}
-                {(job.venue || job.address) && <span>ðŸ“ {job.venue || job.address?.split(',')[0]}</span>}
-                {job.date && <span>ðŸ“… {fmtDate(job.date)}</span>}
-                <span>ðŸ• {job.startTime} â€“ {job.endTime}</span>
-                <span style={{ color: GL, fontWeight: 700 }}>R{job.hourlyRate}/hr Â· {job.totalSlots} slots</span>
+                {job.client && <span>🏢 {job.client}</span>}
+                {(job.venue || job.address) && <span>📍 {job.venue || job.address?.split(',')[0]}</span>}
+                {job.date && <span>📅 {fmtDate(job.date)}</span>}
+                <span>🕐 {job.startTime} – {job.endTime}</span>
+                <span style={{ color: GL, fontWeight: 700 }}>R{job.hourlyRate}/hr · {job.totalSlots} slots</span>
               </div>
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 20, flexShrink: 0, marginLeft: 16 }}>âœ•</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 16 }}>
+              <button onClick={onEdit}
+                style={{ padding: '6px 14px', background: 'transparent', border: `1px solid ${BB}`, color: W7, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(GL, 0.5); e.currentTarget.style.color = GL }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = W7 }}>
+                ✎ Edit
+              </button>
+              <button onClick={onDelete}
+                style={{ padding: '6px 14px', background: 'transparent', border: `1px solid ${BB}`, color: W7, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(CORAL, 0.5); e.currentTarget.style.color = CORAL }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BB; e.currentTarget.style.color = W7 }}>
+                🗑 Delete
+              </button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 20, flexShrink: 0 }}>✕</button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 16 }}>
@@ -428,12 +501,12 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
               <div style={{ height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${GD3}, ${GL})`, width: `${Math.round(pendingSelect.size / Math.max(job.totalSlots, 1) * 100)}%`, transition: 'width 0.3s' }} />
             </div>
             <span style={{ fontSize: 11, color: GL, fontFamily: FD, fontWeight: 700, flexShrink: 0 }}>
-              {confirmedIds.size} confirmed Â· {pendingSelect.size - confirmedIds.size} pending Â· {job.totalSlots} total
+              {confirmedIds.size} confirmed · {pendingSelect.size - confirmedIds.size} pending · {job.totalSlots} total
             </span>
           </div>
 
           {resultMsg && (
-            <div style={{ padding: '10px 14px', background: resultMsg.startsWith('âœ“') ? hex2rgba(TEAL, 0.1) : hex2rgba(CORAL, 0.1), border: `1px solid ${resultMsg.startsWith('âœ“') ? hex2rgba(TEAL, 0.4) : hex2rgba(CORAL, 0.4)}`, borderRadius: 3, marginBottom: 14, fontSize: 12, color: resultMsg.startsWith('âœ“') ? TEAL : CORAL, fontFamily: FD }}>
+            <div style={{ padding: '10px 14px', background: resultMsg.startsWith('✓') ? hex2rgba(TEAL, 0.1) : hex2rgba(CORAL, 0.1), border: `1px solid ${resultMsg.startsWith('✓') ? hex2rgba(TEAL, 0.4) : hex2rgba(CORAL, 0.4)}`, borderRadius: 3, marginBottom: 14, fontSize: 12, color: resultMsg.startsWith('✓') ? TEAL : CORAL, fontFamily: FD }}>
               {resultMsg}
             </div>
           )}
@@ -442,7 +515,7 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
             {(['info', 'promoters'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 style={{ flex: 1, padding: '9px', background: tab === t ? hex2rgba(GL, 0.14) : 'transparent', border: 'none', color: tab === t ? GL : W4, fontFamily: FD, fontSize: 10, fontWeight: tab === t ? 700 : 400, cursor: 'pointer', letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.18s' }}>
-                {t === 'info' ? 'ðŸ“‹  Job Info' : `ðŸ‘¥  Select Promoters ${loading ? '' : `(${promoters.length} available)`}`}
+                {t === 'info' ? '📋  Job Info' : `👥  Select Promoters ${loading ? '' : `(${promoters.length} available)`}`}
               </button>
             ))}
           </div>
@@ -454,8 +527,8 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
             <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                 {[
-                  { label: 'Client',   value: job.client  || 'â€”' },
-                  { label: 'Venue',    value: job.venue   || job.address?.split(',')[0] || 'â€”' },
+                  { label: 'Client',   value: job.client  || '—' },
+                  { label: 'Venue',    value: job.venue   || job.address?.split(',')[0] || '—' },
                   { label: 'Date',     value: fmtDate(job.date) },
                   { label: 'Start',    value: job.startTime },
                   { label: 'End',      value: job.endTime },
@@ -483,8 +556,8 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
                 </div>
               )}
               <button onClick={() => setTab('promoters')}
-                style={{ padding: '13px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}>
-                Select Promoters for This Job â†’
+                style={{ padding: '13px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK1, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3 }}>
+                Select Promoters for This Job →
               </button>
             </div>
           )}
@@ -492,14 +565,14 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
           {tab === 'promoters' && (
             <>
               <div style={{ padding: '10px 32px', borderBottom: `1px solid ${BB}`, display: 'flex', gap: 20, fontSize: 11, color: W4, fontFamily: FB, background: hex2rgba(GL, 0.02), flexWrap: 'wrap', alignItems: 'center' }}>
-                <span><span style={{ color: TEAL }}>â—</span> Interested (applied)</span>
-                <span><span style={{ color: GL }}>â—</span> Confirmed (allocated)</span>
-                <span><span style={{ color: GD }}>â—</span> Pending your confirm</span>
+                <span><span style={{ color: TEAL }}>●</span> Interested (applied)</span>
+                <span><span style={{ color: GL }}>●</span> Confirmed (allocated)</span>
+                <span><span style={{ color: GD }}>●</span> Pending your confirm</span>
                 <span style={{ marginLeft: 'auto', color: W2, fontSize: 10 }}>Click photo or name to view full profile</span>
               </div>
 
               {loading ? (
-                <div style={{ padding: 60, textAlign: 'center', color: W4, fontFamily: FD }}>Loading promotersâ€¦</div>
+                <div style={{ padding: 60, textAlign: 'center', color: W4, fontFamily: FD }}>Loading promoters…</div>
               ) : promoters.length === 0 ? (
                 <div style={{ padding: 60, textAlign: 'center', color: W4, fontFamily: FD }}>No approved promoters found yet.</div>
               ) : (
@@ -530,16 +603,16 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 14, fontWeight: 700, color: W, fontFamily: FD }}>{p.fullName}</span>
                           {isInterested && !isConfirmed && <span style={{ fontSize: 9, color: TEAL,  background: hex2rgba(TEAL, 0.1),  padding: '2px 8px', borderRadius: 2, fontFamily: FD, fontWeight: 700 }}>INTERESTED</span>}
-                          {isConfirmed  && <span style={{ fontSize: 9, color: GL,    background: hex2rgba(GL,   0.1),  padding: '2px 8px', borderRadius: 2, fontFamily: FD, fontWeight: 700 }}>âœ“ CONFIRMED</span>}
+                          {isConfirmed  && <span style={{ fontSize: 9, color: GL,    background: hex2rgba(GL,   0.1),  padding: '2px 8px', borderRadius: 2, fontFamily: FD, fontWeight: 700 }}>✓ CONFIRMED</span>}
                           {isPending    && <span style={{ fontSize: 9, color: GD,    background: hex2rgba(GD,   0.12), padding: '2px 8px', borderRadius: 2, fontFamily: FD, fontWeight: 700 }}>SELECTED</span>}
                         </div>
                         <div style={{ fontSize: 12, color: W4, fontFamily: FB }}>
-                          {p.city || 'â€”'}
-                          {(p.reliabilityScore ?? 0) > 0 && <span style={{ marginLeft: 10, color: GL }}>â­ {(p.reliabilityScore ?? 0).toFixed(1)}</span>}
+                          {p.city || '—'}
+                          {(p.reliabilityScore ?? 0) > 0 && <span style={{ marginLeft: 10, color: GL }}>⭐ {(p.reliabilityScore ?? 0).toFixed(1)}</span>}
                           {p.height && <span style={{ marginLeft: 10, color: W2 }}>{p.height}cm</span>}
                           {p.gender && <span style={{ marginLeft: 10, color: W2 }}>{p.gender}</span>}
                         </div>
-                        <div style={{ fontSize: 10, color: hex2rgba(GL, 0.45), marginTop: 2, fontFamily: FB }}>Click to view full profile â†’</div>
+                        <div style={{ fontSize: 10, color: hex2rgba(GL, 0.45), marginTop: 2, fontFamily: FB }}>Click to view full profile →</div>
                       </div>
 
                       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
@@ -557,8 +630,8 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
                         ) : (
                           <button onClick={() => togglePending(p.id)}
                             disabled={!pendingSelect.has(p.id) && pendingSelect.size >= job.totalSlots}
-                            style={{ padding: '7px 14px', background: pendingSelect.has(p.id) ? `linear-gradient(135deg, ${GD}, ${GL})` : 'transparent', border: `1px solid ${pendingSelect.has(p.id) ? GL : hex2rgba(GL, 0.4)}`, color: pendingSelect.has(p.id) ? BLK : GL, fontFamily: FD, fontSize: 9, fontWeight: 700, cursor: (!pendingSelect.has(p.id) && pendingSelect.size >= job.totalSlots) ? 'not-allowed' : 'pointer', letterSpacing: '0.1em', borderRadius: 2, transition: 'all 0.2s', opacity: (!pendingSelect.has(p.id) && pendingSelect.size >= job.totalSlots) ? 0.4 : 1 }}>
-                            {pendingSelect.has(p.id) ? 'âœ“ Selected' : '+ Select'}
+                            style={{ padding: '7px 14px', background: pendingSelect.has(p.id) ? `linear-gradient(135deg, ${GD}, ${GL})` : 'transparent', border: `1px solid ${pendingSelect.has(p.id) ? GL : hex2rgba(GL, 0.4)}`, color: pendingSelect.has(p.id) ? BLK1 : GL, fontFamily: FD, fontSize: 9, fontWeight: 700, cursor: (!pendingSelect.has(p.id) && pendingSelect.size >= job.totalSlots) ? 'not-allowed' : 'pointer', letterSpacing: '0.1em', borderRadius: 2, transition: 'all 0.2s', opacity: (!pendingSelect.has(p.id) && pendingSelect.size >= job.totalSlots) ? 0.4 : 1 }}>
+                            {pendingSelect.has(p.id) ? '✓ Selected' : '+ Select'}
                           </button>
                         )}
                       </div>
@@ -571,10 +644,10 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '14px 32px', borderTop: `1px solid ${BB}`, flexShrink: 0, background: BLK, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ padding: '14px 32px', borderTop: `1px solid ${BB}`, flexShrink: 0, background: BLK1, display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             <span style={{ fontSize: 11, color: W4, fontFamily: FB }}>
-              {confirmedIds.size} confirmed Â· {newSelections.length > 0 ? `${newSelections.length} pending confirm` : 'no new selections'} Â· {job.totalSlots} total slots
+              {confirmedIds.size} confirmed · {newSelections.length > 0 ? `${newSelections.length} pending confirm` : 'no new selections'} · {job.totalSlots} total slots
             </span>
           </div>
           <button onClick={onClose}
@@ -583,8 +656,8 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
           </button>
           {tab === 'promoters' && newSelections.length > 0 && (
             <button onClick={() => setShowConfirm(true)}
-              style={{ padding: '10px 24px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3, boxShadow: `0 2px 14px ${hex2rgba(GL, 0.35)}` }}>
-              Confirm {newSelections.length} Promoter{newSelections.length > 1 ? 's' : ''} â†’
+              style={{ padding: '10px 24px', background: `linear-gradient(135deg, ${GL}, ${GD})`, border: 'none', color: BLK1, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 3, boxShadow: `0 2px 14px ${hex2rgba(GL, 0.35)}` }}>
+              Confirm {newSelections.length} Promoter{newSelections.length > 1 ? 's' : ''} →
             </button>
           )}
         </div>
@@ -603,9 +676,75 @@ function JobDetailPanel({ job, onClose, onRefresh }: { job: ApiJob; onClose: () 
   )
 }
 
-// â”€â”€â”€ MAIN PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Job Form fields shared by New + Edit modals ─────────────────────────────
+interface JobFormState {
+  title: string; brand: string; venue: string; address: string; city: string
+  date: string; startTime: string; endTime: string
+  hourlyRate: string; totalSlots: string; purchaseOrderId: string
+}
+
+const inputStyle = { width: '100%', background: 'rgba(170,160,135,0.04)', border: `1px solid ${BB}`, padding: '11px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 3 }
+const labelStyle = { display: 'block', fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: W4, marginBottom: 7, fontFamily: FD }
+
+function JobFormFields({ form, setField }: { form: JobFormState; setField: (key: keyof JobFormState, val: string) => void }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+      <div style={{ gridColumn: '1 / -1' }}>
+        <label style={labelStyle}>Job Title</label>
+        <input style={inputStyle} placeholder="Weekend Retail Activation" value={form.title} onChange={e => setField('title', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>Brand / Campaign</label>
+        <input style={inputStyle} placeholder="Espolon Tequila" value={form.brand} onChange={e => setField('brand', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>City</label>
+        <input style={inputStyle} placeholder="Johannesburg" value={form.city} onChange={e => setField('city', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>Venue</label>
+        <input style={inputStyle} placeholder="Sandton Checkers" value={form.venue} onChange={e => setField('venue', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>Address</label>
+        <input style={inputStyle} placeholder="Street address" value={form.address} onChange={e => setField('address', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>Date</label>
+        <input type="date" style={inputStyle} value={form.date} onChange={e => setField('date', e.target.value)} />
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <label style={labelStyle}>Start</label>
+          <input type="time" style={inputStyle} value={form.startTime} onChange={e => setField('startTime', e.target.value)} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={labelStyle}>End</label>
+          <input type="time" style={inputStyle} value={form.endTime} onChange={e => setField('endTime', e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <label style={labelStyle}>Hourly Rate (R)</label>
+        <input type="number" min={0} style={inputStyle} placeholder="150" value={form.hourlyRate} onChange={e => setField('hourlyRate', e.target.value)} />
+      </div>
+      <div>
+        <label style={labelStyle}>Promoter Slots</label>
+        <input type="number" min={1} style={inputStyle} placeholder="4" value={form.totalSlots} onChange={e => setField('totalSlots', e.target.value)} />
+      </div>
+    </div>
+  )
+}
+
+function estHours(startTime: string, endTime: string) {
+  const [sh, sm] = startTime.split(':').map(Number)
+  const [eh, em] = endTime.split(':').map(Number)
+  const h = (eh + em / 60) - (sh + sm / 60)
+  return h > 0 ? h : 8
+}
+
+// ─── New Job Modal ─────────────────────────────────────────────────────────────
 function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<JobFormState>({
     title: '', brand: '', venue: '', address: '', city: '',
     date: '', startTime: '09:00', endTime: '17:00',
     hourlyRate: '', totalSlots: '1', purchaseOrderId: '',
@@ -613,24 +752,18 @@ function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
 
-  const F = (key: keyof typeof form, val: string) => setForm(p => ({ ...p, [key]: val }))
-
+  const F = (key: keyof JobFormState, val: string) => setForm(p => ({ ...p, [key]: val }))
 
   const [purchaseOrders, setPurchaseOrders] = useState<{ id: string; poNumber: string; remainingAmount: number }[]>([])
   useEffect(() => {
     purchaseOrdersService.getMyBudget()
-      .then(summary => setPurchaseOrders((summary.purchaseOrders || []).filter(po => po.status === 'active')))
+      .then(summary => setPurchaseOrders((summary.purchaseOrders || []).filter((po: any) => po.status === 'active')))
       .catch(() => setPurchaseOrders([]))
   }, [])
-  const estHours = () => {
-    const [sh, sm] = form.startTime.split(':').map(Number)
-    const [eh, em] = form.endTime.split(':').map(Number)
-    const h = (eh + em / 60) - (sh + sm / 60)
-    return h > 0 ? h : 8
-  }
+
   const rate  = parseInt(form.hourlyRate, 10) || 0
   const slots = parseInt(form.totalSlots, 10) || 1
-  const estimatedCost = Math.round(rate * slots * estHours())
+  const estimatedCost = Math.round(rate * slots * estHours(form.startTime, form.endTime))
 
   const submit = async () => {
     setError('')
@@ -653,90 +786,30 @@ function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
         method: 'POST',
         headers: authHdr() as any,
         body: JSON.stringify({
-          title: form.title,
-          client: form.brand,
-          brand: form.brand,
-          venue: form.venue,
-          address: form.address || form.venue,
-          city: form.city,
-          date: form.date,
-          startTime: form.startTime,
-          endTime: form.endTime,
-          hourlyRate: rate,
-          totalSlots: slots,
-          filters: {},
+          title: form.title, client: form.brand, brand: form.brand,
+          venue: form.venue, address: form.address || form.venue, city: form.city,
+          date: form.date, startTime: form.startTime, endTime: form.endTime,
+          hourlyRate: rate, totalSlots: slots, filters: {},
           purchaseOrderId: form.purchaseOrderId,
         }),
       })
       const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        onCreated()
-      } else {
-        setError(data.error || 'Failed to post job')
-      }
-    } catch {
-      setError('Network error')
-    }
+      if (res.ok) { onCreated() } else { setError(data.error || 'Failed to post job') }
+    } catch { setError('Network error') }
     setSaving(false)
   }
-
-  const inputStyle = { width: '100%', background: 'rgba(170,160,135,0.04)', border: `1px solid ${BB}`, padding: '11px 14px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 3 }
-  const labelStyle = { display: 'block', fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: W4, marginBottom: 7, fontFamily: FD }
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.90)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: '#030302', border: `1px solid ${BB}`, width: '100%', maxWidth: 560, maxHeight: '92vh', overflowY: 'auto', position: 'relative', borderRadius: 4 }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
-        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 18 }}>âœ•</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 18 }}>✕</button>
         <div style={{ padding: 32 }}>
           <div style={{ fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD, marginBottom: 6 }}>New Campaign</div>
           <h2 style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 20 }}>Post a Job</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Job Title</label>
-              <input style={inputStyle} placeholder="Weekend Retail Activation" value={form.title} onChange={e => F('title', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Brand / Campaign</label>
-              <input style={inputStyle} placeholder="Espolon Tequila" value={form.brand} onChange={e => F('brand', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>City</label>
-              <input style={inputStyle} placeholder="Johannesburg" value={form.city} onChange={e => F('city', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Venue</label>
-              <input style={inputStyle} placeholder="Sandton Checkers" value={form.venue} onChange={e => F('venue', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Address</label>
-              <input style={inputStyle} placeholder="Street address" value={form.address} onChange={e => F('address', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Date</label>
-              <input type="date" style={inputStyle} value={form.date} onChange={e => F('date', e.target.value)} />
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Start</label>
-                <input type="time" style={inputStyle} value={form.startTime} onChange={e => F('startTime', e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>End</label>
-                <input type="time" style={inputStyle} value={form.endTime} onChange={e => F('endTime', e.target.value)} />
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>Hourly Rate (R)</label>
-              <input type="number" min={0} style={inputStyle} placeholder="150" value={form.hourlyRate} onChange={e => F('hourlyRate', e.target.value)} />
-            </div>
-            <div>
-              <label style={labelStyle}>Promoter Slots</label>
-              <input type="number" min={1} style={inputStyle} placeholder="4" value={form.totalSlots} onChange={e => F('totalSlots', e.target.value)} />
-            </div>
-          </div>
+          <JobFormFields form={form} setField={F} />
 
           <div>
             <label style={labelStyle}>Purchase Order *</label>
@@ -753,7 +826,7 @@ function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
             )}
           </div>
 
-          <div style={{ padding: '12px 14px', background: 'rgba(201,191,166,0.08)', border: `1px solid ${BB}`, borderRadius: 3, marginBottom: 16 }}>
+          <div style={{ padding: '12px 14px', background: 'rgba(201,191,166,0.08)', border: `1px solid ${BB}`, borderRadius: 3, marginBottom: 16, marginTop: 16 }}>
             <span style={{ fontFamily: FB, fontSize: 11, color: W4 }}>Estimated cost, deducted from the selected PO: </span>
             <span style={{ fontFamily: FD, fontSize: 13, fontWeight: 700, color: GL }}>R{estimatedCost.toLocaleString('en-ZA')}</span>
           </div>
@@ -767,8 +840,8 @@ function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${BB}`, color: W4, fontFamily: FD, fontSize: 11, cursor: 'pointer', borderRadius: 3 }}>Cancel</button>
             <button onClick={submit} disabled={saving}
-              style={{ flex: 2, padding: '12px', background: saving ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: saving ? W4 : BLK, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', borderRadius: 3 }}>
-              {saving ? 'Postingâ€¦' : 'Post Job & Deduct Credit'}
+              style={{ flex: 2, padding: '12px', background: saving ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: saving ? W4 : BLK1, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', borderRadius: 3 }}>
+              {saving ? 'Posting…' : 'Post Job & Deduct Credit'}
             </button>
           </div>
         </div>
@@ -777,6 +850,98 @@ function NewJobModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   )
 }
 
+// ─── Edit Job Modal ────────────────────────────────────────────────────────────
+function EditJobModal({ job, onClose, onUpdated }: { job: ApiJob; onClose: () => void; onUpdated: () => void }) {
+  const [form, setForm] = useState<JobFormState>({
+    title: job.title || '',
+    brand: job.client || '',
+    venue: job.venue || '',
+    address: job.address || '',
+    city: job.city || '',
+    date: job.date ? job.date.slice(0, 10) : '',
+    startTime: job.startTime || '09:00',
+    endTime: job.endTime || '17:00',
+    hourlyRate: String(job.hourlyRate ?? ''),
+    totalSlots: String(job.totalSlots ?? '1'),
+    purchaseOrderId: job.purchaseOrderId || '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
+
+  const F = (key: keyof JobFormState, val: string) => setForm(p => ({ ...p, [key]: val }))
+
+  const rate  = parseInt(form.hourlyRate, 10) || 0
+  const slots = parseInt(form.totalSlots, 10) || 1
+
+  // Editing can't reduce slots below what's already filled
+  const belowFilled = slots < job.filledSlots
+
+  const submit = async () => {
+    setError('')
+    if (!form.title || !form.brand || !form.date || !rate || !slots) {
+      setError('Title, brand, date, hourly rate and slots are required.')
+      return
+    }
+    if (belowFilled) {
+      setError(`Slots can't be reduced below ${job.filledSlots} — that's how many promoters are already confirmed on this job.`)
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch(`${API}/jobs/${job.id}`, {
+        method: 'PUT',
+        headers: authHdr() as any,
+        body: JSON.stringify({
+          title: form.title, client: form.brand, brand: form.brand,
+          venue: form.venue, address: form.address || form.venue, city: form.city,
+          date: form.date, startTime: form.startTime, endTime: form.endTime,
+          hourlyRate: rate, totalSlots: slots,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) { onUpdated() } else { setError(data.error || 'Failed to update job') }
+    } catch { setError('Network error') }
+    setSaving(false)
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.90)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 24 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: '#030302', border: `1px solid ${BB}`, width: '100%', maxWidth: 560, maxHeight: '92vh', overflowY: 'auto', position: 'relative', borderRadius: 4 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${GD3},${GL},${GD3})` }} />
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 18, background: 'none', border: 'none', cursor: 'pointer', color: W4, fontSize: 18 }}>✕</button>
+        <div style={{ padding: 32 }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase', color: GL, fontWeight: 700, fontFamily: FD, marginBottom: 6 }}>Edit Campaign</div>
+          <h2 style={{ fontFamily: FD, fontSize: 22, fontWeight: 700, color: W, marginBottom: 20 }}>Edit Job</h2>
+
+          <JobFormFields form={form} setField={F} />
+
+          {job.filledSlots > 0 && (
+            <div style={{ padding: '10px 14px', background: hex2rgba(GL, 0.06), border: `1px solid ${BB}`, borderRadius: 3, fontSize: 11, color: W4, fontFamily: FB, marginBottom: 16 }}>
+              ℹ {job.filledSlots} promoter{job.filledSlots > 1 ? 's are' : ' is'} already confirmed on this job. Slots can't go below {job.filledSlots}.
+            </div>
+          )}
+
+          {error && (
+            <div style={{ padding: '10px 14px', background: 'rgba(112,106,90,0.2)', border: '1px solid rgba(112,106,90,0.5)', borderRadius: 3, fontSize: 12, color: '#F0F0F0', fontFamily: FD, marginBottom: 16 }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${BB}`, color: W4, fontFamily: FD, fontSize: 11, cursor: 'pointer', borderRadius: 3 }}>Cancel</button>
+            <button onClick={submit} disabled={saving}
+              style={{ flex: 2, padding: '12px', background: saving ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: saving ? W4 : BLK1, fontFamily: FD, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', borderRadius: 3 }}>
+              {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function BusinessJobs() {
   const [jobs,     setJobs]     = useState<ApiJob[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -784,6 +949,12 @@ export default function BusinessJobs() {
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<ApiJob | null>(null)
   const [showNewJob, setShowNewJob] = useState(false)
+  const [editingJob, setEditingJob] = useState<ApiJob | null>(null)
+  const [deletingJob, setDeletingJob] = useState<ApiJob | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [toast, setToast] = useState('')
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000) }
 
   const loadJobs = useCallback(async () => {
     setLoading(true)
@@ -796,17 +967,37 @@ export default function BusinessJobs() {
 
   useEffect(() => { loadJobs() }, [loadJobs])
 
-  // â”€â”€â”€ React to admin job broadcasts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── React to admin job broadcasts ──────────────────────────────────────────
   useEffect(() => {
     const onStorage = (e?: StorageEvent) => {
       if (e && e.key !== 'hg_job_updates' && e.key !== null) return
       loadJobs()
     }
     window.addEventListener('storage', onStorage)
-    // Also poll every 30s â€” admin and business may be in different browser sessions
     const poll = setInterval(loadJobs, 30_000)
     return () => { window.removeEventListener('storage', onStorage); clearInterval(poll) }
   }, [loadJobs])
+
+  const handleDelete = async () => {
+    if (!deletingJob) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`${API}/jobs/${deletingJob.id}`, { method: 'DELETE', headers: authHdr() as any })
+      if (res.ok) {
+        showToast(`"${deletingJob.title}" was deleted.`)
+        setDeletingJob(null)
+        setSelected(null)
+        await loadJobs()
+        window.dispatchEvent(new Event('hg_credit_updated'))
+      } else {
+        const err = await res.json().catch(() => ({}))
+        showToast(err.error || 'Failed to delete job')
+      }
+    } catch {
+      showToast('Network error — please try again')
+    }
+    setDeleting(false)
+  }
 
   const filtered = jobs.filter(j => {
     const sm = filter === 'all' || j.status === filter
@@ -826,11 +1017,18 @@ export default function BusinessJobs() {
 
   return (
     <div>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10010, padding: '12px 20px', background: BLK2, border: `1px solid ${GL}`, borderRadius: 4, fontSize: 13, color: GL, fontFamily: FD, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', maxWidth: 360 }}>
+          {toast}
+        </div>
+      )}
+
       <div className="biz-page" style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 9, letterSpacing: '0.36em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Operations Â· Jobs</div>
+        <div style={{ fontSize: 9, letterSpacing: '0.36em', textTransform: 'uppercase', color: GL, marginBottom: 8, fontWeight: 700, fontFamily: FD }}>Operations · Jobs</div>
         <h1 style={{ fontFamily: FD, fontSize: 'clamp(22px,3vw,34px)', fontWeight: 700, color: W, lineHeight: 1.1 }}>Campaign Jobs</h1>
         <p style={{ fontSize: 13, color: W4, marginTop: 6, fontFamily: FB }}>
-          Select promoters for your jobs. They'll be notified and it will appear on their dashboard.
+          Create, edit and manage your jobs. Select promoters and they'll be notified and see it on their dashboard.
         </p>
       </div>
 
@@ -859,19 +1057,19 @@ export default function BusinessJobs() {
           ))}
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
-          <input placeholder="Search jobsâ€¦" value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Search jobs…" value={search} onChange={e => setSearch(e.target.value)}
             style={{ background: BLK2, border: `1px solid ${BB}`, padding: '7px 14px', color: W, fontFamily: FB, fontSize: 11, outline: 'none', borderRadius: 2, width: 200 }}
             onFocus={e => e.currentTarget.style.borderColor = GL}
             onBlur={e => e.currentTarget.style.borderColor = BB} />
           <button onClick={() => setShowNewJob(true)}
-            style={{ padding: '8px 16px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2 }}>
+            style={{ padding: '8px 16px', background: `linear-gradient(135deg,${GL},${GD})`, border: 'none', color: BLK1, fontFamily: FD, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2 }}>
             + Post a Job
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ padding: '60px 0', textAlign: 'center', color: W4, fontFamily: FD }}>Loading jobsâ€¦</div>
+        <div style={{ padding: '60px 0', textAlign: 'center', color: W4, fontFamily: FD }}>Loading jobs…</div>
       ) : filtered.length === 0 ? (
         <div style={{ padding: '60px 20px', textAlign: 'center', border: `1px dashed ${BB}`, borderRadius: 3 }}>
           <p style={{ fontFamily: FD, fontSize: 20, color: W4, marginBottom: 8 }}>No jobs found</p>
@@ -882,7 +1080,13 @@ export default function BusinessJobs() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
           {filtered.map(job => (
-            <JobCard key={job.id} job={job} onOpen={() => setSelected(job)} />
+            <JobCard
+              key={job.id}
+              job={job}
+              onOpen={() => setSelected(job)}
+              onEdit={() => setEditingJob(job)}
+              onDelete={() => setDeletingJob(job)}
+            />
           ))}
         </div>
       )}
@@ -892,11 +1096,34 @@ export default function BusinessJobs() {
       </div>
 
       {selected && (
-        <JobDetailPanel job={selected} onClose={() => { setSelected(null); loadJobs() }} onRefresh={loadJobs} />
+        <JobDetailPanel
+          job={selected}
+          onClose={() => { setSelected(null); loadJobs() }}
+          onRefresh={loadJobs}
+          onEdit={() => { setEditingJob(selected); setSelected(null) }}
+          onDelete={() => { setDeletingJob(selected); setSelected(null) }}
+        />
       )}
 
       {showNewJob && (
         <NewJobModal onClose={() => setShowNewJob(false)} onCreated={() => { setShowNewJob(false); loadJobs() }} />
+      )}
+
+      {editingJob && (
+        <EditJobModal
+          job={editingJob}
+          onClose={() => setEditingJob(null)}
+          onUpdated={() => { showToast(`"${editingJob.title}" was updated.`); setEditingJob(null); loadJobs() }}
+        />
+      )}
+
+      {deletingJob && (
+        <DeleteJobModal
+          job={deletingJob}
+          deleting={deleting}
+          onClose={() => setDeletingJob(null)}
+          onConfirm={handleDelete}
+        />
       )}
     </div>
   )
