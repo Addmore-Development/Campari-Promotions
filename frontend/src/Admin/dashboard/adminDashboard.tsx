@@ -313,7 +313,7 @@ function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose
 }
 
 // --- Client Modal -------------------------------------------------------------
-function ClientModal({ client, onClose, onMessage }: { client:any; onClose:()=>void; onMessage:()=>void }) {
+function ClientModal({ client, onClose, onMessage, onViewJobs }: { client:any; onClose:()=>void; onMessage:()=>void; onViewJobs:()=>void }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -335,7 +335,7 @@ function ClientModal({ client, onClose, onMessage }: { client:any; onClose:()=>v
         ))}
         <div style={{ display:'flex', gap:12, marginTop:24 }}>
           <Btn onClick={onMessage}>Message Client</Btn>
-          <Btn onClick={onClose} outline>View Jobs</Btn>
+          <Btn onClick={onViewJobs} outline>View Jobs</Btn>
         </div>
       </div>
     </div>
@@ -558,6 +558,12 @@ function ClientsTab({ clients, setClients }: { clients:any[]; setClients:React.D
           if (viewing.name)  p.set('contactName', viewing.name)
           if (viewing.email) p.set('contactEmail', viewing.email)
           navigate('/admin?'+p.toString())
+        }}
+        onViewJobs={()=>{
+          const p = new URLSearchParams()
+          if (viewing.id)   p.set('clientId', viewing.id)
+          if (viewing.name) p.set('client', viewing.name)
+          navigate('/admin/jobs?'+p.toString())
         }} />}
     </div>
   )

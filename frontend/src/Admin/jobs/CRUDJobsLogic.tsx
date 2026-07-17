@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '../AdminLayout';
 import { injectAdminMobileStyles } from '../adminMobileStyles';
 import { purchaseOrdersService } from '../../shared/services/purchaseOrdersService';
@@ -324,6 +325,22 @@ const JobsPageContent: React.FC = () => {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderOpt[]>([]);
   const [poNotice, setPoNotice] = useState('');
 
+  // ── Client filter — populated when arriving from a client's "View Jobs"
+  // button (ClientModal in AdminDashboard.tsx), which passes ?client=NAME
+  // and/or ?clientId=ID in the URL.
+  const [searchParams] = useSearchParams();
+  const [clientFilter, setClientFilter] = useState<{id?:string; name?:string} | null>(null);
+
+  useEffect(() => {
+    const clientParam   = searchParams.get('client');
+    const clientIdParam = searchParams.get('clientId');
+    if (clientParam || clientIdParam) {
+      setClientFilter({ id: clientIdParam || undefined, name: clientParam || undefined });
+      if (clientParam) setSearch(clientParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => { injectAdminMobileStyles(); }, []);
 
   // ── Broadcast jobs to localStorage so promoter/business dashboards react ────
@@ -552,7 +569,12 @@ const JobsPageContent: React.FC = () => {
     catch { setError('Failed to delete job.'); }
   };
 
-  const filtered = jobs.filter(j=>(statusF==='all'||j.status===statusF)&&(!search||j.title.toLowerCase().includes(search.toLowerCase())||j.client.toLowerCase().includes(search.toLowerCase())));
+  const filtered = jobs.filter(j => {
+    const matchesStatus = statusF==='all'||j.status===statusF;
+    const matchesClientFilter = !clientFilter || (clientFilter.id ? j.clientId===clientFilter.id : j.client===clientFilter.name);
+    const matchesSearch = !search||j.title.toLowerCase().includes(search.toLowerCase())||j.client.toLowerCase().includes(search.toLowerCase());
+    return matchesStatus && matchesClientFilter && matchesSearch;
+  });
   const statusColor = (s: string) => s==='OPEN'?GL:s==='FILLED'?G:s==='IN_PROGRESS'?TEAL:s==='CANCELLED'?CORAL:WD;
   const displayAddress = (job: Job) => {
     const parts=[job.streetNumber&&job.streetName?`${job.streetNumber} ${job.streetName}`:job.streetName||'',job.suburb,job.city,job.postalCode].filter(Boolean);
@@ -607,6 +629,18 @@ const JobsPageContent: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Active client filter banner — shown when arriving via a client's "View Jobs" button */}
+      {clientFilter && (
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:'rgba(201,191,166,0.08)', border:`1px solid ${BB}`, borderRadius:3, marginBottom:16, flexWrap:'wrap' }}>
+          <span style={{ fontSize:12, color:WM }}>Showing jobs for <strong style={{ color:GL }}>{clientFilter.name || 'this client'}</strong></span>
+          <button
+            onClick={() => { setClientFilter(null); setSearch(''); }}
+            style={{ marginLeft:'auto', fontSize:11, color:GL, background:'none', border:'none', cursor:'pointer', fontWeight:700 }}>
+            Clear filter ✕
+          </button>
+        </div>
+      )}
 
       {/* Table */}
       <div className="hg-table-wrap" style={{ background:D2,border:`1px solid ${BB}`,borderRadius:2,overflow:'hidden' }}>
