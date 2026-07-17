@@ -200,6 +200,11 @@ export default function BusinessDashboard() {
     }
   }, [refreshProfile])
 
+  // ─── Load jobs — API is the single source of truth. The old localStorage
+  // merge (hg_admin_jobs) has been removed: it was matching any cached job
+  // with no clientId onto every business, which leaked unrelated test/junk
+  // jobs onto dashboards. Now that the backend filters strictly by clientId,
+  // this client-side merge is unnecessary and unsafe. ─────────────────────
   const loadJobs = useCallback(async () => {
     try {
       const [jobsRes, appsRes] = await Promise.all([
@@ -207,23 +212,11 @@ export default function BusinessDashboard() {
         fetch(`${API}/applications`, { headers: authHdr() as any }),
       ])
       const apiJobs = jobsRes.ok ? await jobsRes.json() : []
-      // Merge admin-created jobs from localStorage
-      try {
-        const sessionStr = localStorage.getItem('hg_session')
-        const session = sessionStr ? JSON.parse(sessionStr) : null
-        const myClientId = session?.userId || session?.id
-        const stored: any[] = JSON.parse(localStorage.getItem('hg_admin_jobs') || '[]')
-        const apiIds = new Set(apiJobs.map((j: any) => j.id))
-        // Only show this business's jobs or all if no match
-        const extraJobs = stored.filter((j: any) => !apiIds.has(j.id) && (!myClientId || j.clientId === myClientId || !j.clientId))
-        setJobs([...apiJobs, ...extraJobs])
-      } catch {
-        setJobs(apiJobs)
-      }
+      setJobs(apiJobs)
       if (appsRes.ok) setApplications(await appsRes.json())
     } catch {}
     setLoading(false)
-  }, [API])
+  }, [])
 
   useEffect(() => { loadJobs() }, [loadJobs])
 

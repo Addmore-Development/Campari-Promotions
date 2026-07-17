@@ -154,8 +154,9 @@ export const getUnreadCount = async (req: AuthRequest, res: Response): Promise<v
 export const getAdminUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const admin = await prisma.user.findFirst({
-      where:  { role: 'ADMIN' },
-      select: { id: true, fullName: true, role: true },
+      where:   { role: 'ADMIN' },
+      orderBy: { createdAt: 'asc' }, // always pick the same admin, deterministically
+      select:  { id: true, fullName: true, role: true },
     });
     if (!admin) { res.status(404).json({ error: 'No admin found' }); return; }
     res.json(admin);
@@ -164,14 +165,7 @@ export const getAdminUser = async (req: AuthRequest, res: Response): Promise<voi
   }
 };
 
-// ── GET chatable users — ROLE AWARE ───────────────────────────────────────────
-// ADMIN      → ALL promoters + ALL businesses + ALL supervisors (no filter needed)
-// BUSINESS   → admin + promoters who have ANY shift on ANY of their jobs
-//              + supervisors assigned to ANY of their jobs
-// PROMOTER   → admin + businesses whose jobs they have ANY shift on
-//              + supervisors assigned to the jobs they have a shift on
-// SUPERVISOR → admin + promoters with a shift on a job they supervise
-//              + businesses (clients) of the jobs they supervise
+
 export const getChatableUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;

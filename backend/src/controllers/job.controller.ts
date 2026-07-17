@@ -38,52 +38,16 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // ── BUSINESS: show only their jobs ───────────────────────────────────────
+    // ── BUSINESS: show only their jobs — strict clientId match only.
+  
     if (userRole === 'BUSINESS') {
-      const bizUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { fullName: true, email: true },
-      });
-
-      // Build every possible OR condition to catch jobs regardless of how they were linked
-      const orConditions: any[] = [];
-
-      // 1. clientId matches this user's ID (most reliable — set when admin picks from dropdown)
-      orConditions.push({ clientId: userId });
-
-      // 2. client field is an exact match to fullName
-      if (bizUser?.fullName) {
-        orConditions.push({ client: { equals: bizUser.fullName, mode: 'insensitive' as const } });
-        orConditions.push({ brand:  { equals: bizUser.fullName, mode: 'insensitive' as const } });
-      }
-
-      // 3. client field contains fullName (partial — covers truncated display values)
-      if (bizUser?.fullName) {
-        orConditions.push({ client: { contains: bizUser.fullName, mode: 'insensitive' as const } });
-        orConditions.push({ brand:  { contains: bizUser.fullName, mode: 'insensitive' as const } });
-      }
-
-      // 4. client field contains the user's ID string directly
-      orConditions.push({ client: { contains: userId!, mode: 'insensitive' as const } });
-
-      // 5. client field contains a portion of their name (in case fullName has extra spaces/chars)
-      if (bizUser?.fullName) {
-        const nameParts = bizUser.fullName.trim().split(/\s+/).filter(p => p.length > 3);
-        for (const part of nameParts) {
-          orConditions.push({ client: { contains: part, mode: 'insensitive' as const } });
-        }
-      }
-
-      const statusWhere: any = {};
+      const where: any = { clientId: userId };
       if (status && status !== 'all') {
-        statusWhere.status = (status as string).toUpperCase();
+        where.status = (status as string).toUpperCase();
       }
 
       const jobs = await prisma.job.findMany({
-        where: {
-          ...statusWhere,
-          OR: orConditions,
-        },
+        where,
         include: {
           supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
           applications: {
@@ -106,7 +70,7 @@ export const getAllJobs = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // ── SUPERVISOR: see every campaign/job across all clients (read-only —
+    // ── SUPERVISOR: see every campaign/job across all clients
     //    no hourly rate, mirrors the admin view minus financials) ───────────
     if (userRole === 'SUPERVISOR') {
       const where: any = {};
@@ -228,9 +192,7 @@ export const getMyJobs = async (req: AuthRequest, res: Response): Promise<void> 
 
 /**
  * GET /api/jobs/supervisor
- * Dedicated endpoint for supervisor users — returns every job/activation
- * they've been assigned to oversee, so they can pull shifts, file the
- * activation report, and chat with the promoters/client on that job.
+
  */
 export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -264,11 +226,7 @@ export const getSupervisorJobs = async (req: AuthRequest, res: Response): Promis
 
 /**
  * GET /api/jobs/supervisor/insights
- * Real-time performance & budget snapshot, per business, for every campaign
- * this supervisor oversees: money in (PO budget) vs money out (committed/
- * spent), the promoters they work with, and simple "what's working / what
- * isn't" signals so the supervisor can advise the business on how to improve.
- * Polled by the frontend on an interval to approximate real-time.
+
  */
 export const getSupervisorBusinessInsights = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -290,7 +248,7 @@ export const getSupervisorBusinessInsights = async (req: AuthRequest, res: Respo
     });
 
     // Group jobs by business (Client). Fall back to the free-text client
-    // name for jobs created before clientId linking existed.
+
     const byBusiness = new Map<string, any>();
     for (const j of jobs) {
       const key = j.clientId || `name:${j.client}`;
@@ -388,7 +346,7 @@ export const getSupervisorBusinessInsights = async (req: AuthRequest, res: Respo
 };
 
 // Estimate shift length in hours from "HH:MM" strings, for credit cost calc.
-// Falls back to a sane 8-hour default if the times are missing/invalid.
+
 function estimateHours(startTime?: string, endTime?: string): number {
   if (!startTime || !endTime) return 8;
   const [sh, sm] = startTime.split(':').map(Number);
@@ -433,8 +391,7 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
     }
 
     // ── Business credit check + deduction ──────────────────────────────────
-    // Businesses fund their own job postings from a prepaid credit balance;
-    // admin-created jobs (on behalf of a client, tracked via PO/CE) are unaffected.
+  
     let jobCost = 0;
     if (req.user!.role === 'BUSINESS') {
       const rate  = parseInt(hourlyRate) || 0;
@@ -490,8 +447,7 @@ export const createJob = async (req: AuthRequest, res: Response): Promise<void> 
     }
 
     if (jobCost > 0) {
-      // Atomic conditional decrement — only succeeds if balance covers the cost,
-      // preventing a race between the balance check and the deduction.
+     
       const deducted = await prisma.user.updateMany({
         where: { id: req.user!.id, creditBalance: { gte: jobCost } },
         data:  { creditBalance: { decrement: jobCost } },
@@ -641,47 +597,15 @@ export const deleteJob = async (req: AuthRequest, res: Response): Promise<void> 
 };
 
 /**
- * GET /api/jobs/business
- * Dedicated endpoint for business users — guaranteed to return their jobs.
- * Tries every possible matching strategy so nothing slips through.
+ * GET /api/jobs/busines
  */
 export const getBusinessJobs = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
     if (!userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
-    const bizUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { fullName: true, email: true },
-    });
-
-    // Build comprehensive OR conditions
-    const orConditions: any[] = [
-      // Most reliable: explicit clientId link
-      { clientId: userId },
-      // Exact name match
-      ...(bizUser?.fullName ? [
-        { client: { equals: bizUser.fullName, mode: 'insensitive' as const } },
-        { brand:  { equals: bizUser.fullName, mode: 'insensitive' as const } },
-        // Contains match (covers truncation)
-        { client: { contains: bizUser.fullName, mode: 'insensitive' as const } },
-        { brand:  { contains: bizUser.fullName, mode: 'insensitive' as const } },
-      ] : []),
-      // User ID stored directly in client field
-      { client: { contains: userId, mode: 'insensitive' as const } },
-    ];
-
-    // Also match on individual significant name parts (e.g. "Vantage" from "Vantage Point Solutions")
-    if (bizUser?.fullName) {
-      const parts = bizUser.fullName.trim().split(/\s+/).filter(p => p.length > 3);
-      for (const part of parts) {
-        orConditions.push({ client: { contains: part, mode: 'insensitive' as const } });
-        orConditions.push({ brand:  { contains: part, mode: 'insensitive' as const } });
-      }
-    }
-
     const jobs = await prisma.job.findMany({
-      where: { OR: orConditions },
+      where: { clientId: userId },
       include: {
         supervisor: { select: { id: true, fullName: true, email: true, phone: true } },
         applications: {
