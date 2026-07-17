@@ -3,7 +3,7 @@
 //
 // Exports:
 //   AdminChatTab  — full-page chat for admin dashboard Messages tab
-//   FloatingChat  — floating bubble for promoter & business dashboards
+//   FloatingChat  — floating bubble for promoter, supervisor & business dashboards
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
@@ -28,6 +28,9 @@ const FB  = "'DM Sans', system-ui, sans-serif"
 const READ_BLUE = '#5AA9E6'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+
+// Role filters used across the Admin chat tab (thread list + new-chat modal)
+type RoleFilter = 'all' | 'supervisor' | 'business' | 'promoter'
 
 // Always read token fresh so it's never stale
 function authHdr(): Record<string, string> {
@@ -60,11 +63,23 @@ function dayLabel(iso: string): string {
   return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
 }
 
+// Distinct accent color per role — used for avatar rings, role labels & badges
 function roleColor(role: string) {
   const r = role?.toLowerCase()
-  if (r === 'promoter') return G3
-  if (r === 'admin')    return GL
+  if (r === 'promoter')   return G3
+  if (r === 'business')   return GL
+  if (r === 'supervisor') return G2
+  if (r === 'admin')      return GL
   return GL
+}
+
+function roleLabel(role: string) {
+  const r = (role || '').toLowerCase()
+  if (r === 'supervisor') return 'Supervisor'
+  if (r === 'business')   return 'Business'
+  if (r === 'promoter')   return 'Promoter'
+  if (r === 'admin')      return 'Admin'
+  return role || 'User'
 }
 
 // Inject the small bit of CSS needed for bubble tails + wallpaper pattern —
@@ -219,7 +234,20 @@ function Bubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
 }
 
 // ─── Render a message list with date dividers ──────────────────────────────────
-function MessageList({ messages, myId, bottomRef }: { messages: Message[]; myId: string; bottomRef: React.RefObject<HTMLDivElement> }) {
+// NOTE: bottomRef is typed as RefObject<HTMLDivElement | null> to match what
+// useRef<HTMLDivElement>(null) actually produces under the current React
+// types — this is what was causing the red squiggly / type error in your
+// editor (Image 1 & 2): "Type 'RefObject<HTMLDivElement | null>' is not
+// assignable to type 'RefObject<HTMLDivElement>'".
+function MessageList({
+  messages,
+  myId,
+  bottomRef,
+}: {
+  messages: Message[]
+  myId: string
+  bottomRef: React.RefObject<HTMLDivElement | null>
+}) {
   let lastDay = ''
   return (
     <>
@@ -255,11 +283,11 @@ export function AdminChatTab({
   const [messages,     setMessages    ] = useState<Message[]>([])
   const [draft,        setDraft       ] = useState('')
   const [search,       setSearch      ] = useState('')
-  const [filterRole,   setFilterRole  ] = useState<'all'|'promoter'|'business'>('all')
+  const [filterRole,   setFilterRole  ] = useState<RoleFilter>('all')
   const [chatUsers,    setChatUsers   ] = useState<ChatUser[]>([])
   const [showNew,      setShowNew     ] = useState(false)
   const [newSearch,    setNewSearch   ] = useState('')
-  const [newFilter,    setNewFilter   ] = useState<'all'|'promoter'|'business'>('all')
+  const [newFilter,    setNewFilter   ] = useState<RoleFilter>('all')
   const [sending,      setSending     ] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
@@ -294,7 +322,10 @@ export function AdminChatTab({
     } catch {}
   }, [])
 
-  // Load all chatable users for the new-chat modal
+  // Load all chatable users for the new-chat modal — ALSO powers the sidebar
+  // search box below, since that search needs to reach every supervisor,
+  // business & promoter in the system, not just people with an existing
+  // thread.
   const loadChatUsers = useCallback(async () => {
     setLoadingUsers(true)
     try {
@@ -308,6 +339,14 @@ export function AdminChatTab({
     setLoadingUsers(false)
     return [] as ChatUser[]
   }, [])
+
+  // Load the full user directory once on mount (quietly, not tied to the
+  // "New Chat" modal) so the sidebar search always has the complete list of
+  // supervisors, businesses & promoters to search across, even before the
+  // admin opens the modal.
+  useEffect(() => {
+    loadChatUsers()
+  }, [loadChatUsers])
 
   // ── Instagram-DM-style message requests from supervisors ──────────────────
   const loadPendingRequests = useCallback(async () => {
@@ -437,6 +476,22 @@ export function AdminChatTab({
     .filter(t => filterRole === 'all' || t.otherRole === filterRole)
     .filter(t => !search || t.otherName.toLowerCase().includes(search.toLowerCase()))
 
+  // ── Unified sidebar search ──────────────────────────────────────────────
+  // The search box above the thread list used to only match existing
+  // threads. That meant admin couldn't find a supervisor / business /
+  // promoter who hadn't messaged yet. Now, whenever there's a query, we also
+  // surface matching users from the full directory who don't already have a
+  // thread — clicking one opens a fresh conversation with them, same as the
+  // "+ New Chat" modal.
+  const existingOtherIds = new Set(threads.map(t => t.otherId))
+
+  const searchMatchedUsers = search.trim()
+    ? chatUsers
+        .filter(u => !existingOtherIds.has(u.id))
+        .filter(u => filterRole === 'all' || (u.role || '').toLowerCase() === filterRole)
+        .filter(u => u.fullName.toLowerCase().includes(search.trim().toLowerCase()))
+    : []
+
   const filteredUsers = chatUsers.filter(u => {
     const roleMatch   = newFilter === 'all' || (u.role || '').toLowerCase() === newFilter
     const searchMatch = !newSearch || u.fullName.toLowerCase().includes(newSearch.toLowerCase())
@@ -448,6 +503,8 @@ export function AdminChatTab({
     color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 3, width: '100%',
     boxSizing: 'border-box' as const,
   }
+
+  const ROLE_TABS: RoleFilter[] = ['all', 'supervisor', 'business', 'promoter']
 
   return (
     <div style={{ padding: '40px 48px' }}>
@@ -467,7 +524,7 @@ export function AdminChatTab({
               )}
             </h1>
             <p style={{ fontSize: 13, color: W55, marginTop: 4, fontFamily: FD }}>
-              Real-time chat with promoters and business clients.
+              Real-time chat with supervisors, business clients, and promoters.
             </p>
           </div>
           <button onClick={openNewChat}
@@ -493,7 +550,7 @@ export function AdminChatTab({
                       <Avatar name={r.requester?.fullName || 'User'} role={(r.requester?.role || 'user').toLowerCase()} />
                       <div>
                         <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.requester?.fullName}</div>
-                        <div style={{ fontSize: 9, color: W55, fontFamily: FD, textTransform: 'capitalize' }}>{(r.requester?.role || '').toLowerCase()}</div>
+                        <div style={{ fontSize: 9, color: W55, fontFamily: FD, textTransform: 'capitalize' }}>{roleLabel(r.requester?.role)}</div>
                       </div>
                     </div>
                     <p style={{ fontSize: 10.5, color: W28, marginBottom: 8, fontFamily: FD }}>wants to send you a message</p>
@@ -513,24 +570,26 @@ export function AdminChatTab({
             </div>
           )}
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0 }}>
-            <input placeholder="Search conversations…" value={search} onChange={e => setSearch(e.target.value)}
+            <input placeholder="Search all supervisors, businesses & promoters…" value={search} onChange={e => setSearch(e.target.value)}
               style={{ ...inp, marginBottom: 10, fontSize: 12, borderRadius: 20 }}
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB} />
             <div style={{ display: 'flex', gap: 4 }}>
-              {(['all','promoter','business'] as const).map(r => (
+              {ROLE_TABS.map(r => (
                 <button key={r} onClick={() => setFilterRole(r)}
                   style={{ flex: 1, padding: '5px', border: `1px solid ${filterRole===r?GL:BB}`, background: filterRole===r?'rgba(201,191,166,0.14)':'transparent', color: filterRole===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: filterRole===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 20 }}>
-                  {r}
+                  {r === 'all' ? 'All' : roleLabel(r)}
                 </button>
               ))}
             </div>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            {filteredThreads.length === 0 && (
+            {filteredThreads.length === 0 && searchMatchedUsers.length === 0 && (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: W28, fontSize: 12, fontFamily: FD }}>
-                No conversations yet. Click + New Chat to start.
+                {search.trim()
+                  ? 'No matching conversations or users found.'
+                  : 'No conversations yet. Click + New Chat to start.'}
               </div>
             )}
             {filteredThreads.map(t => (
@@ -546,7 +605,7 @@ export function AdminChatTab({
                         {t.otherName}
                         {t.unread > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: GL, display: 'inline-block' }} />}
                       </div>
-                      <div style={{ fontSize: 9, color: roleColor(t.otherRole), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{t.otherRole}</div>
+                      <div style={{ fontSize: 9, color: roleColor(t.otherRole), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{roleLabel(t.otherRole)}</div>
                     </div>
                   </div>
                   <span style={{ fontSize: 9, color: W28, fontFamily: FD, flexShrink: 0 }}>{formatTime(t.lastTime)}</span>
@@ -561,6 +620,29 @@ export function AdminChatTab({
                 </div>
               </div>
             ))}
+
+            {/* Users matched by search who don't have a thread yet — spans
+                supervisors, businesses & promoters from the full directory. */}
+            {searchMatchedUsers.length > 0 && (
+              <>
+                <div style={{ padding: '10px 16px 6px', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: W28, fontFamily: FD, fontWeight: 700 }}>
+                  Start New Conversation
+                </div>
+                {searchMatchedUsers.map(u => (
+                  <div key={u.id} onClick={() => startChat(u)}
+                    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: `1px solid ${BB}`, display: 'flex', alignItems: 'center', gap: 10, transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = BB2}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <Avatar name={u.fullName} role={u.role} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{u.fullName}</div>
+                      <div style={{ fontSize: 9, color: roleColor(u.role), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{roleLabel(u.role)}</div>
+                    </div>
+                    <span style={{ fontSize: 9, color: GL, fontFamily: FD, whiteSpace: 'nowrap', flexShrink: 0 }}>+ New</span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
 
@@ -580,7 +662,7 @@ export function AdminChatTab({
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: W, fontFamily: FD }}>{activeThread.otherName}</div>
                   <div style={{ fontSize: 10, color: roleColor(activeThread.otherRole), letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: FD }}>
-                    {activeThread.otherRole}
+                    {roleLabel(activeThread.otherRole)}
                   </div>
                 </div>
               </div>
@@ -631,10 +713,10 @@ export function AdminChatTab({
 
             {/* Role filter */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
-              {(['all','promoter','business'] as const).map(r => (
+              {ROLE_TABS.map(r => (
                 <button key={r} onClick={() => setNewFilter(r)}
                   style={{ flex: 1, padding: '6px', border: `1px solid ${newFilter===r?GL:BB}`, background: newFilter===r?'rgba(201,191,166,0.14)':'transparent', color: newFilter===r?GL:W55, fontFamily: FD, fontSize: 9, fontWeight: newFilter===r?700:400, letterSpacing: '0.1em', textTransform: 'capitalize', cursor: 'pointer', borderRadius: 3 }}>
-                  {r === 'all' ? 'All Users' : r === 'promoter' ? 'Promoters' : 'Businesses'}
+                  {r === 'all' ? 'All Users' : r === 'promoter' ? 'Promoters' : r === 'business' ? 'Businesses' : 'Supervisors'}
                 </button>
               ))}
             </div>
@@ -661,7 +743,7 @@ export function AdminChatTab({
                   <Avatar name={u.fullName} role={u.role} size={38} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: W, fontFamily: FD }}>{u.fullName}</div>
-                    <div style={{ fontSize: 9, color: roleColor(u.role), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{u.role}</div>
+                    <div style={{ fontSize: 9, color: roleColor(u.role), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{roleLabel(u.role)}</div>
                   </div>
                   {u.status === 'approved' && <span style={{ fontSize: 9, color: GL, fontFamily: FD }}>✓</span>}
                 </div>
@@ -675,6 +757,8 @@ export function AdminChatTab({
 }
 
 // ─── FLOATING CHAT WIDGET ─────────────────────────────────────────────────────
+// Used by promoter, supervisor, and business dashboards. Same WhatsApp-style
+// bubbles / ticks / wallpaper as the admin tab (all shared via MessageList).
 export function FloatingChat() {
   const [myId,         setMyId        ] = useState<string | null>(null)
   const [open,         setOpen        ] = useState(false)
@@ -858,7 +942,7 @@ export function FloatingChat() {
                   {activeUser?.fullName || 'Support'}
                 </div>
                 <div style={{ fontSize: 9, color: GL, fontFamily: FD, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  {activeUser?.role || 'admin'}
+                  {roleLabel(activeUser?.role || 'admin')}
                 </div>
               </div>
             </div>
@@ -901,7 +985,7 @@ export function FloatingChat() {
                     <Avatar name={u.fullName} role={u.role} size={34} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{u.fullName}</div>
-                      <div style={{ fontSize: 9, color: roleColor(u.role), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{u.role}</div>
+                      <div style={{ fontSize: 9, color: roleColor(u.role), letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: FD }}>{roleLabel(u.role)}</div>
                     </div>
                     {activeUser?.id === u.id && <span style={{ fontSize: 10, color: GL }}>✓</span>}
                   </div>
