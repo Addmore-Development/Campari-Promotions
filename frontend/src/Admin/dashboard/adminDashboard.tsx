@@ -73,6 +73,15 @@ function bizToClient(u: any, source: 'api'|'local'): any {
   return { id:u.id, name:u.companyName||u.fullName||u.name||'Unknown', contact:u.contactName||u.fullName||u.name||'N/A', email:u.email||'', phone:u.phone||'Not provided', industry:u.industry||'Other', city:u.bizAddress||u.city||'Not specified', website:u.website||'', regNumber:u.regNumber||u.address||'', vatNumber:u.vatNumber||'', registeredDate:u.createdAt?String(u.createdAt).slice(0,10):u.submittedAt?String(u.submittedAt).slice(0,10):new Date().toISOString().slice(0,10), activeSince:u.createdAt?String(u.createdAt).slice(0,7):u.submittedAt?String(u.submittedAt).slice(0,7):new Date().toISOString().slice(0,7), jobsRun:0, totalHours:0, status, budget:'R 0', description:`${u.industry||'Business'} client registered via platform.`, source }
 }
 
+// ── Resolves relative /uploads/... document paths against the backend origin
+// (not the frontend origin), since uploaded files are served by Express.
+const BACKEND_ORIGIN = API_URL.replace(/\/api\/?$/, '')
+function resolveFileUrl(path?: string | null): string | null {
+  if (!path) return null
+  if (/^https?:\/\//i.test(path)) return path
+  return `${BACKEND_ORIGIN}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
 // --- Mock data ----------------------------------------------------------------
 const MOCK_LOGINS = [
   { id:'L001', name:'Ayanda Dlamini', email:'ayanda@email.com', role:'promoter', time:'2026-03-11T08:02:00', ip:'196.25.1.4'  },
@@ -185,30 +194,118 @@ function StatCard({ label, value, sub, color, onClick }: { label:string; value:a
   )
 }
 
-// --- Detail Modal (for registrations) ----------------------------------------
+// --- Detail Modal (for registrations) — shows every submitted field + docs ----
 function DetailModal({ item, onClose, onApprove, onReject }: { item:any; onClose:()=>void; onApprove:()=>void; onReject:()=>void }) {
-  const isPromoter = item.role==='promoter'
-  const pending    = isPending(item.status)
-  const accent     = isPromoter?G3:GL
-  const d          = item._raw||{}
-  const infoRows   = isPromoter
-    ? [{label:'Email',value:d.email||item.email},{label:'Phone',value:d.phone||item.phone||'N/A'},{label:'City',value:d.city||item.city||'N/A'},{label:'Applied',value:item.date}]
-    : [{label:'Email',value:d.email||item.email},{label:'Phone',value:d.phone||item.phone||'N/A'},{label:'Company',value:d.fullName||item.name},{label:'Industry',value:d.industry||'N/A'},{label:'Applied',value:item.date}]
+  const isPromoter   = item.role==='promoter'
+  const isBusiness   = item.role==='business'
+  const isSupervisor = item.role==='supervisor'
+  const pending      = isPending(item.status)
+  const accent       = isPromoter?G3:isSupervisor?G2:GL
+  const d            = item._raw||{}
+
+  // ── Core contact/identity fields — shown for everyone ──
+  const infoRows: { label:string; value:any }[] = [
+    { label:'Email',   value:d.email||item.email },
+    { label:'Phone',   value:d.phone||item.phone||'N/A' },
+    { label:'City',    value:d.city||item.city||'N/A' },
+  ]
+  if (d.province) infoRows.push({ label:'Province', value:d.province })
+  if (d.streetNumber || d.streetName || d.suburb || d.postalCode) {
+    infoRows.push({ label:'Address', value:[d.streetNumber,d.streetName,d.suburb,d.postalCode].filter(Boolean).join(', ') })
+  } else if (d.address) {
+    infoRows.push({ label:'Address', value:d.address })
+  }
+
+  // ── Promoter-specific submitted fields ──
+  if (isPromoter) {
+    if (d.idNumber)     infoRows.push({ label:'ID Number',       value:d.idNumber })
+    if (d.gender)       infoRows.push({ label:'Gender',          value:d.gender })
+    if (d.height)       infoRows.push({ label:'Height (cm)',     value:d.height })
+    if (d.clothingSize) infoRows.push({ label:'Clothing Size',   value:d.clothingSize })
+    if (d.shoeSize)     infoRows.push({ label:'Shoe Size',       value:d.shoeSize })
+    if (d.industry)     infoRows.push({ label:'Industry/Experience', value:d.industry })
+    if (d.bankName)     infoRows.push({ label:'Bank Name',       value:d.bankName })
+    if (d.accountNumber)infoRows.push({ label:'Account Number',  value:d.accountNumber })
+    if (d.branchCode)   infoRows.push({ label:'Branch Code',     value:d.branchCode })
+    if (d.reliabilityScore != null) infoRows.push({ label:'Reliability Score', value:d.reliabilityScore })
+    infoRows.push({ label:'POPIA Consent Given', value:d.consentPopia ? 'Yes' : 'No' })
+  }
+
+  // ── Business-specific submitted fields ──
+  if (isBusiness) {
+    infoRows.push({ label:'Company', value:d.fullName||item.name })
+    if (d.contactName) infoRows.push({ label:'Contact Person', value:d.contactName })
+    if (d.industry)    infoRows.push({ label:'Industry',       value:d.industry })
+    if (d.vatNumber)   infoRows.push({ label:'VAT Number',     value:d.vatNumber })
+    if (d.website)     infoRows.push({ label:'Website',        value:d.website })
+  }
+
+  // ── Supervisor-specific submitted fields ──
+  if (isSupervisor) {
+    if (d.workField)          infoRows.push({ label:'Field Supervised', value:d.workField })
+    if (d.business?.fullName) infoRows.push({ label:'Assigned Business', value:d.business.fullName })
+  }
+
+  infoRows.push({ label:'Applied', value:item.date })
+  if (d.rejectionReason) infoRows.push({ label:'Rejection Reason', value:d.rejectionReason })
+
+  // ── Uploaded documents — every possible doc field across all roles ──
+  const documents = [
+    { label:'Headshot',              url:resolveFileUrl(d.headshotUrl) },
+    { label:'Full Body Photo',       url:resolveFileUrl(d.fullBodyPhotoUrl) },
+    { label:'Profile Photo',         url:resolveFileUrl(d.profilePhotoUrl) },
+    { label:'CV',                    url:resolveFileUrl(d.cvUrl) },
+    { label:'CIPC Registration Doc', url:resolveFileUrl(d.cipcDocUrl) },
+    { label:'Tax Pin',               url:resolveFileUrl(d.taxPinUrl) },
+    { label:'Business Bank Proof',   url:resolveFileUrl(d.bizBankProofUrl) },
+  ].filter(doc => doc.url)
+
+  const isImage = (url: string) => /\.(png|jpe?g|webp|gif)$/i.test(url)
+
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:24 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:480, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
+      <div style={{ background:D2, border:`1px solid ${BB}`, padding:'40px', width:'100%', maxWidth:560, position:'relative', maxHeight:'90vh', overflowY:'auto', borderRadius:4 }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${accent},${G5})` }} />
         <button onClick={onClose} style={{ position:'absolute', top:16, right:20, background:'none', border:'none', cursor:'pointer', color:W28, fontSize:18 }}>✕</button>
-        <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>{isPromoter?'Promoter':'Business'} Application</div>
+        <div style={{ fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:GL, marginBottom:8, fontWeight:700, fontFamily:FD }}>
+          {isPromoter?'Promoter':isSupervisor?'Supervisor':'Business'} Application
+        </div>
         <div style={{ fontFamily:FD, fontSize:22, fontWeight:700, color:W, marginBottom:8 }}>{item.name}</div>
         <div style={{ marginBottom:20 }}><Badge label={item.status} color={statusColor(item.status)} bg={statusBg(item.status)} border={statusBorder(item.status)} /></div>
+
+        {/* ── All submitted fields ── */}
         {infoRows.map((r:any)=>(
-          <div key={r.label} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:`1px solid ${BB}` }}>
-            <span style={{ fontSize:12, color:W55, fontFamily:FD }}>{r.label}</span>
-            <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD }}>{r.value}</span>
+          <div key={r.label} style={{ display:'flex', justifyContent:'space-between', gap:16, padding:'10px 0', borderBottom:`1px solid ${BB}` }}>
+            <span style={{ fontSize:12, color:W55, fontFamily:FD, flexShrink:0 }}>{r.label}</span>
+            <span style={{ fontSize:12, color:W85, fontWeight:700, fontFamily:FD, textAlign:'right' }}>{r.value ?? '—'}</span>
           </div>
         ))}
+
+        {/* ── Uploaded documents ── */}
+        <div style={{ marginTop:24 }}>
+          <div style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, marginBottom:12, fontWeight:700, fontFamily:FD }}>
+            Uploaded Documents {documents.length === 0 && <span style={{ color:W28, fontWeight:400, textTransform:'none', letterSpacing:'normal' }}>— none submitted</span>}
+          </div>
+          {documents.length > 0 && (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(120px,1fr))', gap:10 }}>
+              {documents.map(doc => (
+                <a key={doc.label} href={doc.url!} target="_blank" rel="noopener noreferrer"
+                  style={{ display:'block', textDecoration:'none', border:`1px solid ${BB}`, borderRadius:4, overflow:'hidden', background:BB2 }}>
+                  {isImage(doc.url!) ? (
+                    <div style={{ width:'100%', height:88, background:`center/cover no-repeat url(${doc.url})`, backgroundColor:D3 }} />
+                  ) : (
+                    <div style={{ width:'100%', height:88, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26, color:GL, background:D3 }}>📄</div>
+                  )}
+                  <div style={{ padding:'6px 8px', fontSize:10, color:W55, fontFamily:FD, textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                    {doc.label}
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+
         {pending&&<div style={{ display:'flex', gap:12, marginTop:24 }}><Btn onClick={onApprove} color={C_ACTIVE}>Approve</Btn><Btn onClick={onReject} color={G2} outline>Reject</Btn></div>}
       </div>
     </div>
@@ -246,13 +343,12 @@ function ClientModal({ client, onClose, onMessage }: { client:any; onClose:()=>v
 }
 
 // --- DASHBOARD TAB ------------------------------------------------------------
-function DashboardTab({ regs, clients, msgs, time, onRoute, pendingChatRequests }: { regs:any[]; clients:any[]; msgs:any[]; time:Date; onRoute:(id:string)=>void; pendingChatRequests?:any[] }) {
+function DashboardTab({ regs, clients, msgs, time, onRoute }: { regs:any[]; clients:any[]; msgs:any[]; time:Date; onRoute:(id:string)=>void }) {
   const h = time.getHours()
   const greeting = h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night'
   const unread = msgs.filter(m=>!m.read).length
   const activeJobs = getActiveJobs(getAllJobsWithAdminJobs())
   const liveActivity = buildLiveActivity(regs)
-  const pendingRequestCount = pendingChatRequests?.length || 0
   const stats = [
     { label:'Active Promoters',  value:regs.filter(r=>r.role==='promoter'&&r.status==='approved').length, color:G3, sub:'registered',            id:'registrations' },
     { label:'Active Jobs',       value:activeJobs.length,                                                 color:GL, sub:'live on jobs board',    id:'jobs'          },
@@ -279,23 +375,6 @@ function DashboardTab({ regs, clients, msgs, time, onRoute, pendingChatRequests 
           <div style={{ fontSize:11, color:W55, marginTop:4, fontFamily:FD }}>{time.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})}</div>
         </div>
       </div>
-      {pendingRequestCount > 0 && (
-        <div onClick={()=>onRoute('messages')} role="button"
-          style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap',
-            background:'rgba(201,191,166,0.10)', border:`1px solid ${hex2rgba(GL,0.4)}`, borderRadius:6,
-            padding:'14px 20px', marginBottom:24, cursor:'pointer' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ fontSize:15 }}>💬</span>
-            <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>New Message Requests</span>
-            <span style={{ fontSize:12, color:W55, fontFamily:FD }}>
-              {pendingRequestCount} supervisor{pendingRequestCount!==1?'s are':' is'} waiting for you to accept their first message
-            </span>
-          </div>
-          <span style={{ padding:'6px 14px', borderRadius:4, border:`1px solid ${hex2rgba(GL,0.5)}`, background:hex2rgba(GL,0.14), color:GL, fontFamily:FD, fontWeight:700, fontSize:11 }}>
-            Review →
-          </span>
-        </div>
-      )}
       <div className="hg-stat-grid hg-stat-grid-5 hg-dash-stats" style={{ background:BB, marginBottom:28 }}>
         {stats.map((s,i)=><StatCard key={i} label={s.label} value={s.value} sub={s.sub} color={s.color} onClick={()=>onRoute(s.id)} />)}
       </div>
@@ -554,7 +633,6 @@ function LoginsTab() {
 }
 
 // --- REPORTS TAB -------------------------------------------------------------
-// -- Real download helpers -----------------------------------------------------
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a   = document.createElement('a')
@@ -563,7 +641,6 @@ function triggerDownload(blob: Blob, filename: string) {
   a.style.display='none'
   document.body.appendChild(a)
   a.click()
-  // Small delay before cleanup so mobile browsers have time to register the tap
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url) }, 1000)
 }
 
@@ -573,7 +650,6 @@ function downloadCSV(rows: string[][], filename: string) {
 }
 
 function downloadPDF(htmlContent: string, filename: string) {
-  // Build a printable HTML file and download it, then auto-print
   const fullHtml=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filename}</title><style>body{font-family:Georgia,serif;padding:32px;color:#111;font-size:13px}h1{font-size:24px;margin-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#ECECEC;padding:8px 12px;text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase}td{padding:8px 12px;border-bottom:1px solid #D9D9D9}@media print{body{padding:16px}}</style></head><body>${htmlContent}</body></html>`
   triggerDownload(new Blob([fullHtml],{type:'text/html;charset=utf-8;'}),filename+'.html')
 }
@@ -621,7 +697,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const flash=(msg:string)=>{setNotice(msg);setTimeout(()=>setNotice(''),4000)}
   const activeJobs=getActiveJobs(getAllJobsWithAdminJobs())
 
-  // -- Data builders ----------------------------------------------------------
   const payrollHeaders=['ID','Promoter','Email','Bank','Job','Date','Hours','Rate','Gross','Deductions','Net','Status']
   const payrollRows=PAYROLL_MOCK.map(r=>[r.id,r.promoter,r.email,r.bank,r.job,r.date,r.hours,r.rate,gross(r),r.deductions,net(r),r.status])
 
@@ -646,7 +721,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
     return {headers,rows}
   }
 
-  // -- Purchase Orders Register ----------------------------------------------
   const poHeaders = ['PO Number','Client','Amount (R)','Committed (R)','Remaining (R)','% Committed','Status','Period Start','Period End']
   const poRows = pos.map(p => [
     p.poNumber, p.client?.name || '—', p.amount, p.committedAmount,
@@ -655,7 +729,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
     p.periodEnd ? new Date(p.periodEnd).toLocaleDateString('en-ZA') : '—',
   ])
 
-  // -- Commitment Entries (CE) Ledger — flattened from all POs ----------------
   const ceHeaders = ['CE Number','PO Number','Client','Job','Amount (R)','Status','Notes']
   const ceRows = pos.flatMap(p =>
     (p.commitments || []).map(ce => [
@@ -664,7 +737,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
     ])
   )
 
-  // -- Business Financial Summary — rollup per client across all their POs ----
   const bizSummaryMap = new Map<string, { name:string; poCount:number; total:number; committed:number; remaining:number }>()
   pos.forEach(p => {
     const key = p.client?.id || p.client?.name || 'unknown'
@@ -689,7 +761,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
   const inp:React.CSSProperties={ width:'100%', background:BB2, border:`1px solid ${BB}`, padding:'11px 14px', fontFamily:FD, fontSize:14, color:W, outline:'none', borderRadius:3, boxSizing:'border-box' as any }
   const lbl:React.CSSProperties={ fontSize:9, fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase' as any, color:W55, display:'block', marginBottom:8, fontFamily:FD }
 
-  // Each card has: title, desc, color, and an array of { label, action }
   const cards=[
     {
       title:'Full Payroll Register', desc:'All promoter payouts with bank details, hours, rates, and net pay.', color:G3,
@@ -766,7 +837,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
 
       {notice&&<div style={{ padding:'12px 16px', background:hex2rgba(GL,0.10), border:`1px solid ${hex2rgba(GL,0.45)}`, borderRadius:4, marginBottom:20, fontSize:13, color:GL, fontFamily:FD, fontWeight:700 }}>{notice}</div>}
 
-      {/* Export cards — 3 columns, 3 buttons each */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:28 }}>
         {cards.map((card,i)=>(
           <div key={i}
@@ -790,7 +860,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
         ))}
       </div>
 
-      {/* Payout Calculator */}
       <div style={{ background:D2, border:`1px solid ${BB}`, borderRadius:4, padding:'24px', marginBottom:24 }}>
         <div style={{ fontSize:10, letterSpacing:'0.28em', textTransform:'uppercase', color:GL, marginBottom:20, fontWeight:700, fontFamily:FD }}>Promoter Payout Calculator</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:16, marginBottom:16, alignItems:'flex-end' }}>
@@ -818,7 +887,6 @@ function ReportsTab({ regs }: { regs:any[] }) {
         </div>
       </div>
 
-      {/* Summary table */}
       <div style={{ background:D2, border:`1px solid ${BB}`, borderRadius:4 }}>
         <div style={{ padding:'14px 20px', borderBottom:`1px solid ${BB}`, fontSize:9, letterSpacing:'0.25em', textTransform:'uppercase', color:GL, fontWeight:700, fontFamily:FD }}>Platform Summary</div>
         <table style={{ width:'100%', borderCollapse:'collapse' }}>
@@ -1098,27 +1166,9 @@ export default function AdminDashboard() {
   const [clients,    setClients] = useState<any[]>(INITIAL_MOCK_CLIENTS)
   const [msgs,       setMsgs   ] = useState<any[]>(INIT_MESSAGES)
   const [detailItem, setDetail ] = useState<any>(null)
-  const [pendingChatRequests, setPendingChatRequests] = useState<any[]>([])
 
   useEffect(() => { injectAdminMobileStyles() }, [])
   useEffect(() => { const t=setInterval(()=>setTime(new Date()),1000); return ()=>clearInterval(t) }, [])
-
-  // ── Supervisor / promoter / business message requests — fetched immediately
-  //    on login (not lazily when the Messages tab is opened), and polled so a
-  //    request sent while the admin is already in the dashboard shows up fast.
-  useEffect(() => {
-    const token = localStorage.getItem('hg_token')
-    if (!token) return
-    const loadPendingChatRequests = () => {
-      fetch(`${API_URL}/chat/requests`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : [])
-        .then((data: any[]) => setPendingChatRequests(Array.isArray(data) ? data : []))
-        .catch(() => {})
-    }
-    loadPendingChatRequests()
-    const poll = setInterval(loadPendingChatRequests, 15000)
-    return () => clearInterval(poll)
-  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('hg_token')
@@ -1131,7 +1181,7 @@ export default function AdminDashboard() {
           id:u.id,
           name:u.fullName || u.contactName || 'Unknown',
           email:u.email,
-          role:u.role?.toLowerCase()==='business'?'business':'promoter',
+          role:u.role?.toLowerCase()==='business'?'business':u.role?.toLowerCase()==='supervisor'?'supervisor':'promoter',
           date:u.createdAt?String(u.createdAt).slice(0,10):new Date().toISOString().slice(0,10),
           status:normalizeStatus(u.status||'pending_review'),
           city:u.city||'Not specified',
@@ -1215,7 +1265,7 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      {tab==='dashboard'     && <DashboardTab     regs={regs} clients={clients} msgs={msgs} time={time} onRoute={handleRoute} pendingChatRequests={pendingChatRequests} />}
+      {tab==='dashboard'     && <DashboardTab     regs={regs} clients={clients} msgs={msgs} time={time} onRoute={handleRoute} />}
       {tab==='registrations' && <RegistrationsTab regs={regs} onDetail={setDetail} onApprove={id=>updateStatus(id,'approved')} onReject={id=>updateStatus(id,'rejected')} />}
       {tab==='clients'       && <ClientsTab       clients={clients} setClients={setClients} />}
       {tab==='supervisors'   && <SupervisorsTab />}

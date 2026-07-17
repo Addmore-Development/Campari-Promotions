@@ -78,9 +78,7 @@ export default function BudgetTracking() {
   useEffect(() => { injectAdminMobileStyles() }, [])
 
   // ── Always pull the freshest list of approved businesses ───────────────────
-  // This is what feeds the "New Purchase Order" client dropdown and the
-  // Business Budgets overview below, so a newly-approved business shows up
-  // here immediately without needing a manual refresh.
+  
   const loadClients = async () => {
     try { setClients(await apiFetch<ClientOpt[]>('/admin/clients')) } catch { /* non-fatal */ }
   }
@@ -90,8 +88,7 @@ export default function BudgetTracking() {
     ;(async () => {
       try { setJobs((await apiFetch<any[]>('/jobs')).map(j => ({ id: j.id, title: j.title }))) } catch { /* non-fatal */ }
     })()
-    // Re-check for newly-approved businesses periodically, and whenever the
-    // admin comes back to this tab (e.g. after approving someone elsewhere).
+    // Re-check for newly-approved businesses periodically
     const onFocus = () => loadClients()
     window.addEventListener('focus', onFocus)
     const interval = setInterval(loadClients, 30000)
@@ -111,8 +108,7 @@ export default function BudgetTracking() {
   useEffect(() => { loadPOs() }, [])
 
   // ── Aggregate every approved business (client), even ones with no PO yet ───
-  // so they show up in a "Business Budgets" list with their totals (R0 until
-  // a PO is created for them).
+ 
   const businessSummaries = useMemo(() => {
     const byClientId = new Map<string, { id: string; name: string; poCount: number; total: number; committed: number; remaining: number }>()
     clients.forEach(c => byClientId.set(c.id, { id: c.id, name: c.name, poCount: 0, total: 0, committed: 0, remaining: 0 }))

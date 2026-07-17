@@ -3,7 +3,6 @@ import { prisma } from '../config';
 import { AuthRequest } from '../middleware/auth';
 import { auditLog } from '../utils/auditLogger';
 
-
 export const getDashboardStats = async (_req: Request, res: Response): Promise<void> => {
   try {
     const [
@@ -45,6 +44,9 @@ export const getDashboardStats = async (_req: Request, res: Response): Promise<v
 };
 
 
+// Returns EVERY field a promoter/business/supervisor submitted at registration
+// (plus all uploaded document URLs), so the admin's registration detail modal
+// can display the complete application without a follow-up request.
 export const getPendingRegistrations = async (_req: Request, res: Response): Promise<void> => {
   try {
     // Return ALL promoters, businesses, and supervisors — not just pending —
@@ -54,10 +56,27 @@ export const getPendingRegistrations = async (_req: Request, res: Response): Pro
         role: { in: ['PROMOTER', 'BUSINESS', 'SUPERVISOR'] },
       },
       select: {
-        id: true, fullName: true, email: true, phone: true, city: true,
-        role: true, status: true, onboardingStatus: true,
+        id: true, fullName: true, email: true, phone: true, city: true, province: true,
+        address: true, streetNumber: true, streetName: true, suburb: true, postalCode: true,
+        role: true, status: true, onboardingStatus: true, rejectionReason: true,
+
+        // Documents — every uploadable doc across all roles
         headshotUrl: true, fullBodyPhotoUrl: true, profilePhotoUrl: true, cvUrl: true,
-        consentPopia: true, createdAt: true, industry: true, contactName: true,
+        cipcDocUrl: true, taxPinUrl: true, bizBankProofUrl: true,
+
+        consentPopia: true, createdAt: true,
+
+        // Promoter-specific
+        idNumber: true, gender: true, height: true, clothingSize: true, shoeSize: true,
+        bankName: true, accountNumber: true, branchCode: true, industry: true,
+        reliabilityScore: true,
+
+        // Business-specific
+        contactName: true, vatNumber: true, website: true,
+
+        // Supervisor-specific
+        workField: true, businessId: true,
+        business: { select: { id: true, fullName: true, email: true } },
       },
       orderBy: { createdAt: 'desc' },
     });

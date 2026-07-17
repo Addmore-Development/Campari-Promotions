@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// ChatSystem.tsx — API-backed real-time chat, role-aware, WhatsApp-style UI
-//
-// Exports:
-//   AdminChatTab  — full-page chat for admin dashboard Messages tab
-//   FloatingChat  — floating bubble for promoter, supervisor & business dashboards
-// ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
@@ -36,6 +29,22 @@ type RoleFilter = 'all' | 'supervisor' | 'business' | 'promoter'
 function authHdr(): Record<string, string> {
   const t = localStorage.getItem('hg_token')
   return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
+// ── Fetch wrapper used for ALL chat requests ─────────────────────────────────
+// Forces a real network round-trip every time (no browser / intermediary
+// caching of GETs), which is what was causing admin <-> business messages to
+// silently go stale (304s served from cache instead of hitting the server).
+function chatFetch(url: string, init: RequestInit = {}) {
+  return fetch(url, {
+    ...init,
+    cache: 'no-store',
+    headers: {
+      ...(init.headers || {}),
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+  })
 }
 
 function formatTime(iso: string): string {
@@ -234,11 +243,6 @@ function Bubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
 }
 
 // ─── Render a message list with date dividers ──────────────────────────────────
-// NOTE: bottomRef is typed as RefObject<HTMLDivElement | null> to match what
-// useRef<HTMLDivElement>(null) actually produces under the current React
-// types — this is what was causing the red squiggly / type error in your
-// editor (Image 1 & 2): "Type 'RefObject<HTMLDivElement | null>' is not
-// assignable to type 'RefObject<HTMLDivElement>'".
 function MessageList({
   messages,
   myId,
@@ -290,7 +294,6 @@ export function AdminChatTab({
   const [newFilter,    setNewFilter   ] = useState<'all'|'promoter'|'business'|'supervisor'>('all')
   const [sending,      setSending     ] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(false)
-  const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const pollRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const deepLinkHandled = useRef(false)
@@ -299,7 +302,7 @@ export function AdminChatTab({
 
   // Load own ID once
   useEffect(() => {
-    fetch(`${API}/auth/me`, { headers: authHdr() })
+    chatFetch(`${API}/auth/me`, { headers: authHdr() })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.id) setMyId(d.id) })
       .catch(() => {})
@@ -307,14 +310,14 @@ export function AdminChatTab({
 
   const loadThreads = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/chat/threads`, { headers: authHdr() })
+      const res = await chatFetch(`${API}/chat/threads`, { headers: authHdr() })
       if (res.ok) setThreads(await res.json())
     } catch {}
   }, [])
 
   const loadMessages = useCallback(async (otherId: string) => {
     try {
-      const res = await fetch(`${API}/chat/messages/${otherId}`, { headers: authHdr() })
+      const res = await chatFetch(`${API}/chat/messages/${otherId}`, { headers: authHdr() })
       if (res.ok) {
         setMessages(await res.json())
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
@@ -329,7 +332,7 @@ export function AdminChatTab({
   const loadChatUsers = useCallback(async () => {
     setLoadingUsers(true)
     try {
-      const res = await fetch(`${API}/chat/users`, { headers: authHdr() })
+      const res = await chatFetch(`${API}/chat/users`, { headers: authHdr() })
       if (res.ok) {
         const users: ChatUser[] = await res.json()
         setChatUsers(users)
@@ -350,40 +353,16 @@ export function AdminChatTab({
     loadChatUsers()
   }, [loadChatUsers])
 
-  // ── Instagram-DM-style message requests from supervisors ──────────────────
-  const loadPendingRequests = useCallback(async () => {
-    try {
-      const res = await fetch(`${API}/chat/requests`, { headers: authHdr() })
-      if (res.ok) setPendingRequests(await res.json())
-    } catch {}
-  }, [])
-
-  const respondToRequest = async (requesterId: string, accept: boolean) => {
-    try {
-      const res = await fetch(`${API}/chat/requests/${requesterId}/respond`, {
-        method: 'POST',
-        headers: { ...authHdr(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accept }),
-      })
-      if (res.ok) {
-        setPendingRequests(prev => prev.filter(r => r.requesterId !== requesterId))
-        loadThreads()
-      }
-    } catch {}
-  }
-
   // Poll for new threads + messages every 4 s
   useEffect(() => {
     loadThreads()
-    loadPendingRequests()
     const ref = setInterval(() => {
       loadThreads()
-      loadPendingRequests()
       if (activeThread) loadMessages(activeThread.otherId)
     }, 4000)
     pollRef.current = ref
     return () => clearInterval(ref)
-  }, [loadThreads, loadMessages, loadPendingRequests, activeThread])
+  }, [loadThreads, loadMessages, activeThread])
 
   const selectThread = async (t: Thread) => {
     setActiveThread(t)
@@ -431,7 +410,7 @@ export function AdminChatTab({
     if (!draft.trim() || !activeThread || sending) return
     setSending(true)
     try {
-      const res = await fetch(`${API}/chat/send`, {
+      const res = await chatFetch(`${API}/chat/send`, {
         method:  'POST',
         headers: { ...authHdr(), 'Content-Type': 'application/json' },
         body:    JSON.stringify({ receiverId: activeThread.otherId, text: draft.trim() }),
@@ -479,12 +458,6 @@ export function AdminChatTab({
     .filter(t => !search || t.otherName.toLowerCase().includes(search.toLowerCase()))
 
   // ── Unified sidebar search ──────────────────────────────────────────────
-  // The search box above the thread list used to only match existing
-  // threads. That meant admin couldn't find a supervisor / business /
-  // promoter who hadn't messaged yet. Now, whenever there's a query, we also
-  // surface matching users from the full directory who don't already have a
-  // thread — clicking one opens a fresh conversation with them, same as the
-  // "+ New Chat" modal.
   const existingOtherIds = new Set(threads.map(t => t.otherId))
 
   const searchMatchedUsers = search.trim()
@@ -540,37 +513,6 @@ export function AdminChatTab({
 
         {/* ── Thread list ── */}
         <div style={{ background: D2, borderRight: `1px solid ${BB}`, display: 'flex', flexDirection: 'column' }}>
-          {pendingRequests.length > 0 && (
-            <div style={{ padding: '12px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0, background: 'rgba(201,191,166,0.06)' }}>
-              <div style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: GL, fontWeight: 700, marginBottom: 8, fontFamily: FD }}>
-                Message Requests ({pendingRequests.length})
-              </div>
-              <div style={{ display: 'grid', gap: 8 }}>
-                {pendingRequests.map((r: any) => (
-                  <div key={r.id} style={{ background: BB2, border: `1px solid ${BB}`, borderRadius: 4, padding: '8px 10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <Avatar name={r.requester?.fullName || 'User'} role={(r.requester?.role || 'user').toLowerCase()} />
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: W, fontFamily: FD }}>{r.requester?.fullName}</div>
-                        <div style={{ fontSize: 9, color: W55, fontFamily: FD, textTransform: 'capitalize' }}>{roleLabel(r.requester?.role)}</div>
-                      </div>
-                    </div>
-                    <p style={{ fontSize: 10.5, color: W28, marginBottom: 8, fontFamily: FD }}>wants to send you a message</p>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => respondToRequest(r.requesterId, true)}
-                        style={{ flex: 1, padding: '5px 0', background: `linear-gradient(135deg,${GL},${G})`, border: 'none', color: B, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
-                        Accept
-                      </button>
-                      <button onClick={() => respondToRequest(r.requesterId, false)}
-                        style={{ flex: 1, padding: '5px 0', background: 'transparent', border: `1px solid ${BB}`, color: W55, fontFamily: FD, fontSize: 10, fontWeight: 700, cursor: 'pointer', borderRadius: 3 }}>
-                        Decline
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BB}`, flexShrink: 0 }}>
             <input placeholder="Search all supervisors, businesses & promoters…" value={search} onChange={e => setSearch(e.target.value)}
               style={{ ...inp, marginBottom: 10, fontSize: 12, borderRadius: 20 }}
@@ -774,8 +716,6 @@ export function FloatingChat() {
   const [pickerSearch, setPickerSearch] = useState('')
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [initDone,     setInitDone    ] = useState(false)
-  const [requestStatus, setRequestStatus] = useState<'none' | 'pending' | 'accepted' | 'declined' | 'n/a'>('n/a')
-  const [gateError,    setGateError   ] = useState<string | null>(null)
   const bottomRef  = useRef<HTMLDivElement>(null)
   const pollRef    = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -786,8 +726,8 @@ export function FloatingChat() {
     const init = async () => {
       try {
         const [meRes, adminRes] = await Promise.all([
-          fetch(`${API}/auth/me`,    { headers: authHdr() }),
-          fetch(`${API}/chat/admin`, { headers: authHdr() }),
+          chatFetch(`${API}/auth/me`,    { headers: authHdr() }),
+          chatFetch(`${API}/chat/admin`, { headers: authHdr() }),
         ])
         if (meRes.ok) {
           const me = await meRes.json()
@@ -812,7 +752,7 @@ export function FloatingChat() {
     if (loadingUsers) return
     setLoadingUsers(true)
     try {
-      const res = await fetch(`${API}/chat/users`, { headers: authHdr() })
+      const res = await chatFetch(`${API}/chat/users`, { headers: authHdr() })
       if (res.ok) setChatUsers(await res.json())
     } catch {}
     setLoadingUsers(false)
@@ -822,7 +762,7 @@ export function FloatingChat() {
   const loadMessages = useCallback(async () => {
     if (!activeUser) return
     try {
-      const res = await fetch(`${API}/chat/messages/${activeUser.id}`, { headers: authHdr() })
+      const res = await chatFetch(`${API}/chat/messages/${activeUser.id}`, { headers: authHdr() })
       if (res.ok) {
         const msgs: Message[] = await res.json()
         setMessages(msgs)
@@ -833,26 +773,6 @@ export function FloatingChat() {
       }
     } catch {}
   }, [activeUser, open])
-
-  // ── When chatting with admin, track our own message-request status so we
-  //    can show "waiting for approval" instead of silently failing sends ───
-  const loadRequestStatus = useCallback(async () => {
-    if (!activeUser || activeUser.role !== 'admin') { setRequestStatus('n/a'); return }
-    try {
-      const res = await fetch(`${API}/chat/requests/mine`, { headers: authHdr() })
-      if (res.ok) {
-        const data = await res.json()
-        setRequestStatus(data.status || 'none')
-      }
-    } catch {}
-  }, [activeUser])
-
-  useEffect(() => {
-    loadRequestStatus()
-    if (activeUser?.role !== 'admin') return
-    const ref = setInterval(loadRequestStatus, 6000)
-    return () => clearInterval(ref)
-  }, [activeUser, loadRequestStatus])
 
   // ── Poll every 4 s once we have an active user ───────────────────────────
   useEffect(() => {
@@ -873,9 +793,8 @@ export function FloatingChat() {
   const send = async () => {
     if (!draft.trim() || !activeUser || sending) return
     setSending(true)
-    setGateError(null)
     try {
-      const res = await fetch(`${API}/chat/send`, {
+      const res = await chatFetch(`${API}/chat/send`, {
         method:  'POST',
         headers: { ...authHdr(), 'Content-Type': 'application/json' },
         body:    JSON.stringify({ receiverId: activeUser.id, text: draft.trim() }),
@@ -883,27 +802,14 @@ export function FloatingChat() {
       if (res.ok) {
         setDraft('')
         await loadMessages()
-        if (activeUser.role === 'admin') loadRequestStatus()
       } else {
         const e = await res.json().catch(() => ({}))
-        if (e.requestGated) {
-          setGateError(e.error || 'Your message request is awaiting admin approval.')
-          loadRequestStatus()
-        } else {
-          console.error('[FloatingChat] send failed:', e)
-        }
+        console.error('[FloatingChat] send failed:', e)
       }
     } catch (err) {
       console.error('[FloatingChat] send error:', err)
     }
     setSending(false)
-  }
-
-  const resendRequest = async () => {
-    try {
-      const res = await fetch(`${API}/chat/requests/resend`, { method: 'POST', headers: authHdr() })
-      if (res.ok) { setGateError(null); loadRequestStatus() }
-    } catch {}
   }
 
   const openPicker = () => {
@@ -915,7 +821,6 @@ export function FloatingChat() {
   const switchUser = (u: ChatUser) => {
     setActiveUser(u)
     setMessages([])
-    setGateError(null)
     setShowPicker(false)
     setPickerSearch('')
   }
@@ -1007,45 +912,20 @@ export function FloatingChat() {
             <MessageList messages={messages} myId={myId || ''} bottomRef={bottomRef} />
           </div>
 
-          {/* Message-request status banner — only relevant when talking to admin */}
-          {activeUser?.role === 'admin' && requestStatus === 'pending' && (
-            <div style={{ padding: '8px 14px', background: 'rgba(201,191,166,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: GL, fontFamily: FD, flexShrink: 0 }}>
-              Message request sent — waiting for admin to accept. You can send one message until then.
-            </div>
-          )}
-          {activeUser?.role === 'admin' && requestStatus === 'declined' && (
-            <div style={{ padding: '8px 14px', background: 'rgba(200,90,90,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: '#D98A8A', fontFamily: FD, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexShrink: 0 }}>
-              <span>Your message request was declined.</span>
-              <button onClick={resendRequest} style={{ background: 'none', border: `1px solid #D98A8A`, color: '#D98A8A', borderRadius: 3, padding: '3px 10px', fontSize: 10, cursor: 'pointer', fontFamily: FD, whiteSpace: 'nowrap' }}>
-                Send new request
-              </button>
-            </div>
-          )}
-          {gateError && requestStatus !== 'declined' && (
-            <div style={{ padding: '8px 14px', background: 'rgba(201,191,166,0.08)', borderTop: `1px solid ${BB}`, fontSize: 10.5, color: GL, fontFamily: FD, flexShrink: 0 }}>
-              {gateError}
-            </div>
-          )}
-
           {/* Input */}
           <div style={{ padding: '10px 14px', borderTop: `1px solid ${BB}`, display: 'flex', gap: 8, flexShrink: 0, background: D3 }}>
             <input
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-              placeholder={
-                activeUser?.role === 'admin' && requestStatus === 'pending' ? 'Waiting for admin to accept…' :
-                activeUser?.role === 'admin' && requestStatus === 'declined' ? 'Request declined' :
-                `Message ${activeUser?.fullName || 'Support'}…`
-              }
-              disabled={activeUser?.role === 'admin' && requestStatus === 'declined'}
+              placeholder={`Message ${activeUser?.fullName || 'Support'}…`}
               style={{ flex: 1, background: BB2, border: `1px solid ${BB}`, padding: '9px 12px', color: W, fontFamily: FB, fontSize: 13, outline: 'none', borderRadius: 20, boxSizing: 'border-box' as const }}
               onFocus={e => e.currentTarget.style.borderColor = GL}
               onBlur={e => e.currentTarget.style.borderColor = BB}
             />
             <button
               onClick={send}
-              disabled={!draft.trim() || sending || (activeUser?.role === 'admin' && requestStatus === 'declined')}
+              disabled={!draft.trim() || sending}
               style={{ width: 38, height: 38, borderRadius: '50%', background: draft.trim()&&!sending?`linear-gradient(135deg,${GL},${G})`:BB, border: 'none', cursor: draft.trim()&&!sending?'pointer':'default', color: draft.trim()&&!sending?B:W28, fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}>
               {sending ? '…' : '↑'}
             </button>
